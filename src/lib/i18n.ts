@@ -113,4 +113,4 @@ export function t(key: StringKey): string {
   return bg[key] as string
 }
 
-export const motto = 'Опо, знай рода си, за да си горд! Човек без роднини е сам.'
+export const motto = 'Опознай рода си, за да си горд! Човек без роднини е сам.'

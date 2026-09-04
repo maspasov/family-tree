@@ -126,6 +126,6 @@ family-tree/
 
 ## Motto (from the original 1987 chart)
 
-> „Опо, знай рода си, за да си горд! Човек без роднини е сам."
+> „Опознай рода си, за да си горд! Човек без роднини е сам."
 > (*Know your family, so you can be proud! A person without relatives is
 > alone.*)
