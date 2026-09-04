@@ -17,12 +17,12 @@ Web приложение: **React + Vite + TypeScript**, диаграма с
 ## 1. Локална разработка
 
 ```bash
-npm install
+yarn install
 cp .env.example .env.local     # после попълнете стойностите от Firebase (стъпка 2)
-npm run dev                     # http://localhost:5173
+yarn dev                        # http://localhost:5173
 ```
 
-`npm run build` прави продукционен билд в `dist/`; `npm run preview` го сервира локално.
+`yarn build` прави продукционен билд в `dist/`; `yarn preview` го сервира локално.
 
 > Забележка за диаграмата: `d3-org-chart` е дърво с **един родител на възел**.
 > Затова `parentId` сочи към **един** роднина по кръвна линия (по подразбиране
@@ -67,7 +67,7 @@ npm run dev                     # http://localhost:5173
   съдържанието на `firestore.rules` → **Publish**.
 - **През CLI:**
   ```bash
-  npm i -g firebase-tools
+  yarn global add firebase-tools
   firebase login
   firebase use --add            # изберете проекта
   firebase deploy --only firestore:rules

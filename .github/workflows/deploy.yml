@@ -24,9 +24,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: yarn
 
-      - run: npm ci
+      - run: yarn install --frozen-lockfile
 
       - name: Compute base path
         id: base
@@ -47,7 +47,7 @@ jobs:
           VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
-        run: npm run build
+        run: yarn build
 
       - name: SPA fallback (copy index.html -> 404.html)
         run: cp dist/index.html dist/404.html
