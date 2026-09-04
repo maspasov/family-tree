@@ -63,14 +63,19 @@ export interface PersonsApi {
   importPeople: (rows: Array<Partial<Person>>) => Promise<number>
 }
 
-export function usePersons(): PersonsApi {
+/**
+ * @param enabled Only subscribe once the caller knows the signed-in account is
+ *   allowed in (see `LoginGate`) — Firestore rules would reject the read
+ *   anyway, but there's no point even trying before that's known.
+ */
+export function usePersons(enabled: boolean): PersonsApi {
   const { user } = useAuth()
   const [people, setPeople] = useState<Person[]>([])
   const [loading, setLoading] = useState(firebaseConfigured)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!firebaseConfigured) return
+    if (!firebaseConfigured || !enabled) return
     const col = collection(db, paths.persons)
     return onSnapshot(
       col,
@@ -84,7 +89,7 @@ export function usePersons(): PersonsApi {
         setLoading(false)
       },
     )
-  }, [])
+  }, [enabled])
 
   const byId = useMemo(() => new Map(people.map((p) => [p.id, p])), [people])
 

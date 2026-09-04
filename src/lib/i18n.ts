@@ -15,6 +15,14 @@ export const bg = {
   notEditorHint:
     'Този акаунт няма права за редакция. Свържете се със стопанина на дървото, за да ви добави.',
 
+  // access gate (shown before the tree; only invited accounts get past it)
+  gateBody:
+    'Достъпът е ограничен само за поканени членове на семейството. Влезте с Google, за да продължите.',
+  restrictedTitle: 'Нямате достъп',
+  restrictedBody: (email: string) =>
+    `Акаунтът „${email}“ не е поканен за това родословно дърво. Ако смятате, че трябва да имате достъп, свържете се със стопанина на дървото.`,
+  tryAnotherAccount: 'Изход (опитайте с друг акаунт)',
+
   // toolbar
   search: 'Търсене на човек…',
   fit: 'Побиране в екрана',

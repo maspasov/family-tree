@@ -1,12 +1,14 @@
 rules_version = '2';
 
-// Security model for „Родословно дърво“:
-//   * anyone may READ the tree (public genealogy site);
-//   * only Google accounts whose (verified) e-mail is listed in
-//     config/app.editors may CREATE / UPDATE / DELETE people.
+// Security model for „Родословно дърво“ (invite-only):
+//   * the site is NOT public — only Google accounts whose (verified) e-mail is
+//     listed in config/app.editors may READ *or* write the tree at all;
+//   * config/app itself stays publicly readable so the client (and these
+//     rules) can look up who's on the list, but no one can write to it from
+//     the app — edit the array from the Firebase console only.
 //
-// Bootstrap: before anyone can edit you must create the document
-//   config/app  ->  { editors: ["you@gmail.com"] }
+// Bootstrap: before anyone can use the app you must create the document
+//   config/app  ->  { editors: ["you@gmail.com", "someone.else@gmail.com"] }
 // in the Firebase console (Firestore Database -> Start collection "config",
 // document id "app", field "editors" = array of strings).
 
@@ -31,7 +33,7 @@ service cloud.firestore {
     }
 
     match /persons/{personId} {
-      allow read: if true;
+      allow read: if isEditor();
 
       allow create: if isEditor()
         && request.resource.data.name is string

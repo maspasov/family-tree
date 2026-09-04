@@ -17,6 +17,7 @@ import { PersonPanel } from './components/PersonPanel'
 import { PersonForm } from './components/PersonForm'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { ImportDialog } from './components/ImportDialog'
+import { LoginGate } from './components/LoginGate'
 
 type Editing =
   | { kind: 'add'; parentId: string | null }
@@ -40,7 +41,7 @@ function downloadJson(people: Person[]) {
 export default function App() {
   const { isEditor } = useAuth()
   const { people, byId, loading, error, addPerson, updatePerson, deletePerson, importPeople } =
-    usePersons()
+    usePersons(isEditor)
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<Editing>(null)
@@ -115,118 +116,120 @@ export default function App() {
       : { ...EMPTY_DRAFT, parentId: editing?.kind === 'add' ? editing.parentId : null }
 
   return (
-    <div className="ft-app">
-      <Toolbar
-        people={people}
-        layout={layout}
-        onLayoutChange={setLayout}
-        onFocusPerson={focusPerson}
-        onFit={() => chartRef.current?.fit()}
-        onExpandAll={() => chartRef.current?.expandAll()}
-        onCollapseAll={() => chartRef.current?.collapseAll()}
-        onZoomIn={() => chartRef.current?.zoomIn()}
-        onZoomOut={() => chartRef.current?.zoomOut()}
-        onExportPng={() => chartRef.current?.exportPng()}
-        onExportJson={() => downloadJson(people)}
-        onImport={() => setShowImport(true)}
-        onAddRoot={() =>
-          setEditing({
-            kind: 'add',
-            parentId: selected ? selected.id : null,
-          })
-        }
-      />
-
-      {(error || actionError) && (
-        <div className="ft-errorbar" role="alert">
-          {t('errorPrefix')}: {actionError || error}
-          <button type="button" onClick={() => setActionError(null)}>
-            ✕
-          </button>
-        </div>
-      )}
-
-      <main className="ft-main">
-        {loading ? (
-          <div className="ft-fullmsg">
-            <p>{t('loading')}</p>
-          </div>
-        ) : people.length === 0 ? (
-          <div className="ft-fullmsg">
-            <h1>{t('emptyTreeTitle')}</h1>
-            <p>{t('emptyTreeBody')}</p>
-            {isEditor && (
-              <div className="ft-fullmsg__btns">
-                <button
-                  type="button"
-                  className="ft-btn ft-btn--primary"
-                  onClick={() => setEditing({ kind: 'add', parentId: null })}
-                >
-                  {t('addRoot')}
-                </button>
-                <button type="button" className="ft-btn" onClick={() => setShowImport(true)}>
-                  {t('importJson')}
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <FamilyChart
-            ref={chartRef}
-            people={people}
-            layout={layout}
-            onSelect={setSelectedId}
-          />
-        )}
-
-        {selected && (
-          <PersonPanel
-            person={selected}
-            people={people}
-            canEdit={isEditor}
-            onClose={() => setSelectedId(null)}
-            onSelect={focusPerson}
-            onEdit={(p) => setEditing({ kind: 'edit', person: p })}
-            onAddChild={(p) => setEditing({ kind: 'add', parentId: p.id })}
-            onDelete={(p) => setDeleteTarget(p)}
-          />
-        )}
-      </main>
-
-      <footer className="ft-footer">{motto}</footer>
-
-      {editing && (
-        <PersonForm
-          mode={editing.kind === 'edit' ? 'edit' : 'add'}
-          initial={formInitial}
+    <LoginGate>
+      <div className="ft-app">
+        <Toolbar
           people={people}
-          selfId={editing.kind === 'edit' ? editing.person.id : undefined}
-          busy={busy}
-          onSubmit={submitForm}
-          onCancel={() => setEditing(null)}
+          layout={layout}
+          onLayoutChange={setLayout}
+          onFocusPerson={focusPerson}
+          onFit={() => chartRef.current?.fit()}
+          onExpandAll={() => chartRef.current?.expandAll()}
+          onCollapseAll={() => chartRef.current?.collapseAll()}
+          onZoomIn={() => chartRef.current?.zoomIn()}
+          onZoomOut={() => chartRef.current?.zoomOut()}
+          onExportPng={() => chartRef.current?.exportPng()}
+          onExportJson={() => downloadJson(people)}
+          onImport={() => setShowImport(true)}
+          onAddRoot={() =>
+            setEditing({
+              kind: 'add',
+              parentId: selected ? selected.id : null,
+            })
+          }
         />
-      )}
 
-      {deleteTarget && (
-        <ConfirmDialog
-          title={t('deleteTitle')}
-          message={bg.deleteConfirm(fullName(deleteTarget))}
-          confirmLabel={t('confirmYes')}
-          danger
-          busy={busy}
-          blockedMessage={deleteBlocked}
-          onConfirm={confirmDelete}
-          onCancel={() => setDeleteTarget(null)}
-        />
-      )}
+        {(error || actionError) && (
+          <div className="ft-errorbar" role="alert">
+            {t('errorPrefix')}: {actionError || error}
+            <button type="button" onClick={() => setActionError(null)}>
+              ✕
+            </button>
+          </div>
+        )}
 
-      {showImport && (
-        <ImportDialog
-          onImport={importPeople}
-          onClose={() => setShowImport(false)}
-        />
-      )}
-    </div>
+        <main className="ft-main">
+          {loading ? (
+            <div className="ft-fullmsg">
+              <p>{t('loading')}</p>
+            </div>
+          ) : people.length === 0 ? (
+            <div className="ft-fullmsg">
+              <h1>{t('emptyTreeTitle')}</h1>
+              <p>{t('emptyTreeBody')}</p>
+              {isEditor && (
+                <div className="ft-fullmsg__btns">
+                  <button
+                    type="button"
+                    className="ft-btn ft-btn--primary"
+                    onClick={() => setEditing({ kind: 'add', parentId: null })}
+                  >
+                    {t('addRoot')}
+                  </button>
+                  <button type="button" className="ft-btn" onClick={() => setShowImport(true)}>
+                    {t('importJson')}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <FamilyChart
+              ref={chartRef}
+              people={people}
+              layout={layout}
+              onSelect={setSelectedId}
+            />
+          )}
+
+          {selected && (
+            <PersonPanel
+              person={selected}
+              people={people}
+              canEdit={isEditor}
+              onClose={() => setSelectedId(null)}
+              onSelect={focusPerson}
+              onEdit={(p) => setEditing({ kind: 'edit', person: p })}
+              onAddChild={(p) => setEditing({ kind: 'add', parentId: p.id })}
+              onDelete={(p) => setDeleteTarget(p)}
+            />
+          )}
+        </main>
+
+        <footer className="ft-footer">{motto}</footer>
+
+        {editing && (
+          <PersonForm
+            mode={editing.kind === 'edit' ? 'edit' : 'add'}
+            initial={formInitial}
+            people={people}
+            selfId={editing.kind === 'edit' ? editing.person.id : undefined}
+            busy={busy}
+            onSubmit={submitForm}
+            onCancel={() => setEditing(null)}
+          />
+        )}
+
+        {deleteTarget && (
+          <ConfirmDialog
+            title={t('deleteTitle')}
+            message={bg.deleteConfirm(fullName(deleteTarget))}
+            confirmLabel={t('confirmYes')}
+            danger
+            busy={busy}
+            blockedMessage={deleteBlocked}
+            onConfirm={confirmDelete}
+            onCancel={() => setDeleteTarget(null)}
+          />
+        )}
+
+        {showImport && (
+          <ImportDialog
+            onImport={importPeople}
+            onClose={() => setShowImport(false)}
+          />
+        )}
+      </div>
+    </LoginGate>
   )
 }
 
