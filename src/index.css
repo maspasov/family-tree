@@ -1,0 +1,70 @@
+:root {
+  /* „Родословно дърво“ — warm heirloom-document palette. */
+  --paper: #faf8f3;
+  --paper-2: #f3efe3;
+  --ink: #2b2622;
+  --ink-soft: #6a6157;
+  --line: #ddd3c2;
+  --line-strong: #c8bca4;
+  --accent: #6b4f2a; /* sepia brown */
+  --accent-soft: #8a6d3b;
+  --male: #3f6d8e;
+  --female: #9c5b6b;
+  --unknown: #7d7466;
+  --ok: #3f7d4f;
+  --danger: #a13a2f;
+  --shadow: 0 1px 2px rgba(43, 38, 34, 0.08), 0 8px 24px rgba(43, 38, 34, 0.1);
+
+  --sans: 'PT Sans', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --serif: 'PT Serif', 'Times New Roman', Georgia, serif;
+
+  color-scheme: light;
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--paper);
+}
+
+#root {
+  min-height: 100svh;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--serif);
+  color: var(--ink);
+  font-weight: 700;
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--ink);
+}
+
+a {
+  color: var(--accent);
+}

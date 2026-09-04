@@ -1,0 +1,56 @@
+rules_version = '2';
+
+// Security model for „Родословно дърво“:
+//   * anyone may READ the tree (public genealogy site);
+//   * only Google accounts whose (verified) e-mail is listed in
+//     config/app.editors may CREATE / UPDATE / DELETE people.
+//
+// Bootstrap: before anyone can edit you must create the document
+//   config/app  ->  { editors: ["you@gmail.com"] }
+// in the Firebase console (Firestore Database -> Start collection "config",
+// document id "app", field "editors" = array of strings).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function editors() {
+      return get(/databases/$(database)/documents/config/app).data.editors;
+    }
+
+    function isEditor() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && exists(/databases/$(database)/documents/config/app)
+        && request.auth.token.email.lower() in editors();
+    }
+
+    // Public, read-only. Change the editors list from the console, not the app.
+    match /config/app {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /persons/{personId} {
+      allow read: if true;
+
+      allow create: if isEditor()
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() < 120
+        && (request.resource.data.parentId == null
+            || request.resource.data.parentId is string);
+
+      allow update: if isEditor()
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() < 120;
+
+      allow delete: if isEditor();
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
