@@ -1,4 +1,14 @@
-import { useEffect, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import { t } from '../lib/i18n'
 
 interface Props {
@@ -11,37 +21,25 @@ interface Props {
 }
 
 export function Modal({ title, onClose, children, footer, wide }: Props) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
-    <div className="ft-modal__backdrop" onClick={onClose}>
-      <div
-        className={`ft-modal ${wide ? 'ft-modal--wide' : ''}`}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <header className="ft-modal__head">
-          <h2>{title}</h2>
-          <button
-            type="button"
-            className="ft-iconbtn"
-            aria-label={t('close')}
-            onClick={onClose}
-          >
-            ✕
-          </button>
-        </header>
-        <div className="ft-modal__body">{children}</div>
-        {footer ? <footer className="ft-modal__foot">{footer}</footer> : null}
-      </div>
-    </div>
+    <Dialog
+      open
+      onClose={onClose}
+      fullScreen={fullScreen}
+      fullWidth
+      maxWidth={wide ? 'md' : 'xs'}
+    >
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+        {title}
+        <IconButton aria-label={t('close')} onClick={onClose} size="small">
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent dividers>{children}</DialogContent>
+      {footer ? <DialogActions>{footer}</DialogActions> : null}
+    </Dialog>
   )
 }

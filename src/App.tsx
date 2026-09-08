@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import './App.css'
+import { Alert, Box, Button, CircularProgress, Stack, Typography } from '@mui/material'
 import { firebaseConfigured } from './lib/firebase'
 import { bg, motto, t } from './lib/i18n'
 import { useAuth } from './auth/AuthContext'
@@ -62,9 +63,7 @@ export default function App() {
   const deleteBlocked = useMemo(() => {
     if (!deleteTarget) return null
     const n = descendantIds(people, deleteTarget.id).size
-    return n > 0
-      ? `„${fullName(deleteTarget)}“ има ${n} потомък/ци в дървото. Първо преместете или изтрийте тях.`
-      : null
+    return n > 0 ? bg.deleteBlockedHasChildren(fullName(deleteTarget), n) : null
   }, [deleteTarget, people])
 
   async function submitForm(draft: PersonDraft) {
@@ -103,10 +102,12 @@ export default function App() {
 
   if (!firebaseConfigured) {
     return (
-      <div className="ft-fullmsg">
-        <h1>{t('configMissingTitle')}</h1>
-        <p>{t('configMissingBody')}</p>
-      </div>
+      <Box sx={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3, textAlign: 'center' }}>
+        <Stack spacing={1.5} sx={{ alignItems: 'center', maxWidth: 420 }}>
+          <Typography variant="h4">{t('configMissingTitle')}</Typography>
+          <Typography color="text.secondary">{t('configMissingBody')}</Typography>
+        </Stack>
+      </Box>
     )
   }
 
@@ -117,7 +118,7 @@ export default function App() {
 
   return (
     <LoginGate>
-      <div className="ft-app">
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100svh', overflow: 'hidden' }}>
         <Toolbar
           people={people}
           layout={layout}
@@ -140,38 +141,43 @@ export default function App() {
         />
 
         {(error || actionError) && (
-          <div className="ft-errorbar" role="alert">
+          <Alert
+            severity="error"
+            onClose={() => setActionError(null)}
+            sx={{ borderRadius: 0 }}
+          >
             {t('errorPrefix')}: {actionError || error}
-            <button type="button" onClick={() => setActionError(null)}>
-              ✕
-            </button>
-          </div>
+          </Alert>
         )}
 
-        <main className="ft-main">
+        <Box component="main" className="ft-main">
           {loading ? (
-            <div className="ft-fullmsg">
-              <p>{t('loading')}</p>
-            </div>
+            <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Stack spacing={2} sx={{ alignItems: 'center' }}>
+                <CircularProgress />
+                <Typography color="text.secondary">{t('loading')}</Typography>
+              </Stack>
+            </Box>
           ) : people.length === 0 ? (
-            <div className="ft-fullmsg">
-              <h1>{t('emptyTreeTitle')}</h1>
-              <p>{t('emptyTreeBody')}</p>
-              {isEditor && (
-                <div className="ft-fullmsg__btns">
-                  <button
-                    type="button"
-                    className="ft-btn ft-btn--primary"
-                    onClick={() => setEditing({ kind: 'add', parentId: null })}
-                  >
-                    {t('addRoot')}
-                  </button>
-                  <button type="button" className="ft-btn" onClick={() => setShowImport(true)}>
-                    {t('importJson')}
-                  </button>
-                </div>
-              )}
-            </div>
+            <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
+              <Stack spacing={2} sx={{ alignItems: 'center', maxWidth: 420, textAlign: 'center' }}>
+                <Typography variant="h4">{t('emptyTreeTitle')}</Typography>
+                <Typography color="text.secondary">{t('emptyTreeBody')}</Typography>
+                {isEditor && (
+                  <Stack direction="row" spacing={1.5}>
+                    <Button
+                      variant="contained"
+                      onClick={() => setEditing({ kind: 'add', parentId: null })}
+                    >
+                      {t('addRoot')}
+                    </Button>
+                    <Button variant="outlined" onClick={() => setShowImport(true)}>
+                      {t('importJson')}
+                    </Button>
+                  </Stack>
+                )}
+              </Stack>
+            </Box>
           ) : (
             <FamilyChart
               ref={chartRef}
@@ -193,9 +199,24 @@ export default function App() {
               onDelete={(p) => setDeleteTarget(p)}
             />
           )}
-        </main>
+        </Box>
 
-        <footer className="ft-footer">{motto}</footer>
+        <Box
+          component="footer"
+          sx={{
+            py: 1,
+            px: 2,
+            textAlign: 'center',
+            fontStyle: 'italic',
+            fontSize: 13,
+            color: 'text.secondary',
+            bgcolor: 'background.paper',
+            borderTop: 1,
+            borderColor: 'divider',
+          }}
+        >
+          {motto}
+        </Box>
 
         {editing && (
           <PersonForm
@@ -228,7 +249,7 @@ export default function App() {
             onClose={() => setShowImport(false)}
           />
         )}
-      </div>
+      </Box>
     </LoginGate>
   )
 }

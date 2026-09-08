@@ -1,4 +1,12 @@
 import { useMemo, useState, type FormEvent } from 'react'
+import {
+  Checkbox,
+  FormControlLabel,
+  MenuItem,
+  Stack,
+  TextField,
+  Button,
+} from '@mui/material'
 import { Modal } from './Modal'
 import { t } from '../lib/i18n'
 import {
@@ -85,142 +93,129 @@ export function PersonForm({
       onClose={onCancel}
       footer={
         <>
-          <button type="button" className="ft-btn" onClick={onCancel} disabled={busy}>
+          <Button onClick={onCancel} disabled={busy}>
             {t('cancel')}
-          </button>
-          <button
-            type="submit"
-            form="ft-person-form"
-            className="ft-btn ft-btn--primary"
-            disabled={busy}
-          >
+          </Button>
+          <Button type="submit" form="ft-person-form" variant="contained" disabled={busy}>
             {busy ? t('saving') : t('save')}
-          </button>
+          </Button>
         </>
       }
     >
-      <form id="ft-person-form" className="ft-form" onSubmit={submit}>
-        <label className="ft-field">
-          <span>{t('fName')} *</span>
-          <input
-            value={draft.name}
-            onChange={(e) => set('name', e.target.value)}
-            autoFocus
-            required
-          />
-          {showErr('name') && <em className="ft-err">{showErr('name')}</em>}
-        </label>
+      <Stack component="form" id="ft-person-form" spacing={2} onSubmit={submit}>
+        <TextField
+          label={t('fName')}
+          required
+          value={draft.name}
+          onChange={(e) => set('name', e.target.value)}
+          autoFocus
+          error={Boolean(showErr('name'))}
+          helperText={showErr('name')}
+        />
 
-        <label className="ft-field">
-          <span>{t('fSurname')}</span>
-          <input
-            value={draft.surname ?? ''}
-            onChange={(e) => set('surname', e.target.value)}
-          />
-        </label>
+        <TextField
+          label={t('fSurname')}
+          value={draft.surname ?? ''}
+          onChange={(e) => set('surname', e.target.value)}
+        />
 
-        <label className="ft-field">
-          <span>{t('fParent')}</span>
-          <select
-            value={draft.parentId ?? ''}
-            onChange={(e) => set('parentId', e.target.value || null)}
+        <TextField
+          select
+          label={t('fParent')}
+          value={draft.parentId ?? ''}
+          onChange={(e) => set('parentId', e.target.value || null)}
+          error={Boolean(showErr('parentId'))}
+          helperText={showErr('parentId')}
+        >
+          <MenuItem value="">{t('noParent')}</MenuItem>
+          {parentOptions.map((p) => (
+            <MenuItem key={p.id} value={p.id}>
+              {fullName(p)}
+            </MenuItem>
+          ))}
+        </TextField>
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <TextField
+            select
+            fullWidth
+            label={t('fGender')}
+            value={draft.gender}
+            onChange={(e) => set('gender', e.target.value as Gender)}
           >
-            <option value="">{t('noParent')}</option>
-            {parentOptions.map((p) => (
-              <option key={p.id} value={p.id}>
-                {fullName(p)}
-              </option>
+            {GENDERS.map((g) => (
+              <MenuItem key={g.value} value={g.value}>
+                {g.label}
+              </MenuItem>
             ))}
-          </select>
-          {showErr('parentId') && <em className="ft-err">{showErr('parentId')}</em>}
-        </label>
+          </TextField>
+          <TextField
+            fullWidth
+            type="number"
+            inputMode="numeric"
+            label={t('fChildOrder')}
+            value={draft.childOrder ?? ''}
+            onChange={(e) =>
+              set(
+                'childOrder',
+                e.target.value === '' ? undefined : Number(e.target.value),
+              )
+            }
+          />
+        </Stack>
 
-        <div className="ft-field ft-field--row">
-          <label>
-            <span>{t('fGender')}</span>
-            <select
-              value={draft.gender}
-              onChange={(e) => set('gender', e.target.value as Gender)}
-            >
-              {GENDERS.map((g) => (
-                <option key={g.value} value={g.value}>
-                  {g.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>{t('fChildOrder')}</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              value={draft.childOrder ?? ''}
-              onChange={(e) =>
-                set(
-                  'childOrder',
-                  e.target.value === '' ? undefined : Number(e.target.value),
-                )
-              }
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <TextField
+            fullWidth
+            label={t('fBirthYear')}
+            value={draft.birthYear ?? ''}
+            onChange={(e) => set('birthYear', e.target.value)}
+            placeholder="1901"
+            error={Boolean(showErr('birthYear'))}
+            helperText={showErr('birthYear')}
+          />
+          <TextField
+            fullWidth
+            label={t('fDeathYear')}
+            value={draft.deathYear ?? ''}
+            onChange={(e) => set('deathYear', e.target.value)}
+            placeholder="1970"
+            error={Boolean(showErr('deathYear'))}
+            helperText={showErr('deathYear')}
+          />
+        </Stack>
+
+        <TextField
+          label={t('fBirthPlace')}
+          value={draft.birthPlace ?? ''}
+          onChange={(e) => set('birthPlace', e.target.value)}
+          placeholder="с. Враняк, Врачанско"
+        />
+
+        <TextField
+          label={t('fSpouse')}
+          value={draft.spouse ?? ''}
+          onChange={(e) => set('spouse', e.target.value)}
+        />
+
+        <TextField
+          label={t('fNote')}
+          multiline
+          minRows={3}
+          value={draft.note ?? ''}
+          onChange={(e) => set('note', e.target.value)}
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={draft.verified !== false}
+              onChange={(e) => set('verified', e.target.checked)}
             />
-          </label>
-        </div>
-
-        <div className="ft-field ft-field--row">
-          <label>
-            <span>{t('fBirthYear')}</span>
-            <input
-              value={draft.birthYear ?? ''}
-              onChange={(e) => set('birthYear', e.target.value)}
-              placeholder="1901"
-            />
-            {showErr('birthYear') && <em className="ft-err">{showErr('birthYear')}</em>}
-          </label>
-          <label>
-            <span>{t('fDeathYear')}</span>
-            <input
-              value={draft.deathYear ?? ''}
-              onChange={(e) => set('deathYear', e.target.value)}
-              placeholder="1970"
-            />
-            {showErr('deathYear') && <em className="ft-err">{showErr('deathYear')}</em>}
-          </label>
-        </div>
-
-        <label className="ft-field">
-          <span>{t('fBirthPlace')}</span>
-          <input
-            value={draft.birthPlace ?? ''}
-            onChange={(e) => set('birthPlace', e.target.value)}
-            placeholder="с. Враняк, Врачанско"
-          />
-        </label>
-
-        <label className="ft-field">
-          <span>{t('fSpouse')}</span>
-          <input
-            value={draft.spouse ?? ''}
-            onChange={(e) => set('spouse', e.target.value)}
-          />
-        </label>
-
-        <label className="ft-field">
-          <span>{t('fNote')}</span>
-          <textarea
-            rows={3}
-            value={draft.note ?? ''}
-            onChange={(e) => set('note', e.target.value)}
-          />
-        </label>
-
-        <label className="ft-field ft-field--check">
-          <input
-            type="checkbox"
-            checked={draft.verified !== false}
-            onChange={(e) => set('verified', e.target.checked)}
-          />
-          <span>{t('fVerified')}</span>
-        </label>
-      </form>
+          }
+          label={t('fVerified')}
+        />
+      </Stack>
     </Modal>
   )
 }

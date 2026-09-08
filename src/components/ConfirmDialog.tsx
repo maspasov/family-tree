@@ -1,3 +1,4 @@
+import { Button, Typography } from '@mui/material'
 import { Modal } from './Modal'
 import { t } from '../lib/i18n'
 
@@ -29,27 +30,25 @@ export function ConfirmDialog({
       onClose={onCancel}
       footer={
         blockedMessage ? (
-          <button type="button" className="ft-btn" onClick={onCancel}>
-            {t('close')}
-          </button>
+          <Button onClick={onCancel}>{t('close')}</Button>
         ) : (
           <>
-            <button type="button" className="ft-btn" onClick={onCancel} disabled={busy}>
+            <Button onClick={onCancel} disabled={busy}>
               {t('cancel')}
-            </button>
-            <button
-              type="button"
-              className={`ft-btn ${danger ? 'ft-btn--danger' : 'ft-btn--primary'}`}
+            </Button>
+            <Button
+              variant="contained"
+              color={danger ? 'error' : 'primary'}
               onClick={onConfirm}
               disabled={busy}
             >
               {busy ? t('saving') : confirmLabel ?? t('confirmYes')}
-            </button>
+            </Button>
           </>
         )
       }
     >
-      <p>{blockedMessage ?? message}</p>
+      <Typography>{blockedMessage ?? message}</Typography>
     </Modal>
   )
 }

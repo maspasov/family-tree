@@ -192,8 +192,12 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
         chart.setUpToTheRootHighlighted(id).setCentered(id).render()
       },
       clearFocus: () => chartRef.current?.clearHighlighting(),
-      exportPng: () =>
-        chartRef.current?.exportImg({ full: true, scale: 2, backgroundColor: '#faf8f3' }),
+      exportPng: () => {
+        const bg = getComputedStyle(document.documentElement)
+          .getPropertyValue('--chart-bg')
+          .trim()
+        chartRef.current?.exportImg({ full: true, scale: 2, backgroundColor: bg || '#f6f4ee' })
+      },
     }))
 
     return <div ref={containerRef} className="ft-chart" />

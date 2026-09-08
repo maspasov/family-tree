@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
 import { Modal } from './Modal'
 import { bg, t } from '../lib/i18n'
 import type { Person } from '../model/person'
@@ -45,38 +46,44 @@ export function ImportDialog({ onImport, onClose }: Props) {
       wide
       footer={
         <>
-          <button type="button" className="ft-btn" onClick={onClose} disabled={busy}>
+          <Button onClick={onClose} disabled={busy}>
             {t('cancel')}
-          </button>
-          <button
-            type="button"
-            className="ft-btn ft-btn--primary"
+          </Button>
+          <Button
+            variant="contained"
             onClick={run}
             disabled={busy || !text.trim()}
           >
             {busy ? t('saving') : t('importRun')}
-          </button>
+          </Button>
         </>
       }
     >
-      <p className="ft-hint">{t('importHint')}</p>
-      <button
-        type="button"
-        className="ft-btn"
-        onClick={() => setText(JSON.stringify(seedPeople, null, 2))}
-      >
-        {t('importLoadSeed')}
-      </button>
-      <textarea
-        className="ft-import__area"
-        rows={16}
-        spellCheck={false}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder='[{ "id": "...", "name": "Иван", "parentId": "tano" }]'
-      />
-      {msg && <p className="ft-ok">{msg}</p>}
-      {err && <p className="ft-err">{err}</p>}
+      <Stack spacing={1.5}>
+        <Typography variant="body2" color="text.secondary">
+          {t('importHint')}
+        </Typography>
+        <Button
+          variant="outlined"
+          size="small"
+          sx={{ alignSelf: 'flex-start' }}
+          onClick={() => setText(JSON.stringify(seedPeople, null, 2))}
+        >
+          {t('importLoadSeed')}
+        </Button>
+        <TextField
+          multiline
+          minRows={16}
+          maxRows={24}
+          spellCheck={false}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder='[{ "id": "...", "name": "Иван", "parentId": "tano" }]'
+          slotProps={{ htmlInput: { style: { fontFamily: 'ui-monospace, Consolas, monospace', fontSize: 12 } } }}
+        />
+        {msg && <Alert severity="success">{msg}</Alert>}
+        {err && <Alert severity="error">{err}</Alert>}
+      </Stack>
     </Modal>
   )
 }

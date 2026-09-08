@@ -1,207 +1,47 @@
-.ft-app {
-  display: flex;
-  flex-direction: column;
-  height: 100svh;
-  overflow: hidden;
+/*
+ * Everything else moved to MUI components/theme. What's left here styles the
+ * org-chart node cards, which d3-org-chart renders as raw HTML strings
+ * outside React, so they can't use theme.ts / sx props directly.
+ */
+:root {
+  --chart-bg: #f6f4ee;
+  --chart-grid-dot: rgba(47, 82, 51, 0.1);
+  --card-bg: #ffffff;
+  --card-bg-synthetic: #edeae0;
+  --card-border: #dce2d6;
+  --card-shadow: 0 1px 2px rgba(33, 42, 32, 0.12);
+  --ink: #212a20;
+  --ink-soft: #6f7a6c;
+  --male: #3f6d8e;
+  --female: #9c5b6b;
+  --unknown: #7d7466;
+  --flag-bg: #e8c06a;
+  --flag-ink: #5a3d0a;
+  --sans: 'PT Sans', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --serif: 'PT Serif', 'Times New Roman', Georgia, serif;
 }
 
-/* ---------- Toolbar ---------- */
-.ft-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 18px;
-  padding: 10px 16px;
-  background: var(--paper-2);
-  border-bottom: 1px solid var(--line-strong);
-  box-shadow: var(--shadow);
-  z-index: 5;
+:root[data-theme='dark'] {
+  --chart-bg: #131a13;
+  --chart-grid-dot: rgba(111, 168, 118, 0.12);
+  --card-bg: #1b241a;
+  --card-bg-synthetic: #202b1f;
+  --card-border: #33402f;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --ink: #e7ede3;
+  --ink-soft: #9faf9a;
+  --male: #7fabd1;
+  --female: #cb8fa0;
+  --unknown: #a89e8e;
 }
 
-.ft-toolbar__brand {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-.ft-toolbar__brand strong {
-  font-family: var(--serif);
-  font-size: 18px;
-}
-.ft-toolbar__sub {
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-
-.ft-toolbar__search {
-  position: relative;
-  flex: 1 1 220px;
-  max-width: 320px;
-}
-.ft-toolbar__search input {
-  width: 100%;
-  padding: 7px 10px;
-  border: 1px solid var(--line-strong);
-  border-radius: 6px;
-  background: var(--paper);
-}
-.ft-toolbar__results {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  margin: 0;
-  padding: 4px;
-  list-style: none;
-  background: var(--paper);
-  border: 1px solid var(--line-strong);
-  border-radius: 6px;
-  box-shadow: var(--shadow);
-  z-index: 20;
-  max-height: 320px;
-  overflow: auto;
-}
-.ft-toolbar__results button {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 7px 9px;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  cursor: pointer;
-}
-.ft-toolbar__results button:hover {
-  background: var(--paper-2);
-}
-
-.ft-toolbar__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
-}
-.ft-toolbar__auth {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-left: 10px;
-  border-left: 1px solid var(--line-strong);
-}
-.ft-toolbar__who {
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
-  line-height: 1.25;
-  max-width: 180px;
-}
-.ft-toolbar__note {
-  flex-basis: 100%;
-  font-size: 12px;
-  color: var(--danger);
-}
-.ft-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid var(--line-strong);
-}
-
-/* ---------- Buttons ---------- */
-.ft-btn {
-  padding: 6px 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: 6px;
-  background: var(--paper);
-  color: var(--ink);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.12s, border-color 0.12s;
-}
-.ft-btn:hover {
-  background: var(--paper-2);
-  border-color: var(--accent-soft);
-}
-.ft-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.ft-btn--primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-.ft-btn--primary:hover {
-  background: var(--accent-soft);
-  border-color: var(--accent-soft);
-}
-.ft-btn--danger {
-  color: var(--danger);
-  border-color: var(--danger);
-}
-.ft-btn--danger:hover {
-  background: rgba(161, 58, 47, 0.08);
-}
-
-.ft-btngroup {
-  display: inline-flex;
-}
-.ft-btngroup .ft-iconbtn {
-  border-radius: 0;
-  border-right-width: 0;
-}
-.ft-btngroup .ft-iconbtn:first-child {
-  border-radius: 6px 0 0 6px;
-}
-.ft-btngroup .ft-iconbtn:last-child {
-  border-radius: 0 6px 6px 0;
-  border-right-width: 1px;
-}
-
-.ft-iconbtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  height: 32px;
-  padding: 0 8px;
-  border: 1px solid var(--line-strong);
-  border-radius: 6px;
-  background: var(--paper);
-  color: var(--ink);
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
-}
-.ft-iconbtn:hover {
-  background: var(--paper-2);
-}
-
-.ft-badge {
-  align-self: flex-start;
-  margin-top: 2px;
-  padding: 0 6px;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border-radius: 999px;
-  background: var(--line);
-  color: var(--ink-soft);
-}
-.ft-badge--ok {
-  background: rgba(63, 125, 79, 0.16);
-  color: var(--ok);
-}
-
-/* ---------- Main / chart ---------- */
 .ft-main {
   position: relative;
   flex: 1;
   min-height: 0;
   background:
-    radial-gradient(circle at 1px 1px, rgba(107, 79, 42, 0.09) 1px, transparent 0)
-    0 0 / 22px 22px,
-    var(--paper);
+    radial-gradient(circle at 1px 1px, var(--chart-grid-dot) 1px, transparent 0) 0 0 / 22px 22px,
+    var(--chart-bg);
 }
 .ft-chart {
   position: absolute;
@@ -219,12 +59,13 @@
   width: 100%;
   height: 100%;
   padding: 8px 12px;
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--card-border);
   border-top: 4px solid var(--unknown);
   border-radius: 8px;
-  background: #fffdf8;
-  box-shadow: 0 1px 2px rgba(43, 38, 34, 0.12);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
   font-family: var(--sans);
+  color: var(--ink);
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -244,7 +85,7 @@
   justify-content: center;
   font-family: var(--serif);
   color: var(--ink-soft);
-  background: var(--paper-2);
+  background: var(--card-bg-synthetic);
   border-style: dashed;
   border-top-width: 1px;
 }
@@ -276,8 +117,8 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #e8c06a;
-  color: #5a3d0a;
+  background: var(--flag-bg);
+  color: var(--flag-ink);
   font-size: 11px;
   font-weight: 700;
   display: flex;
@@ -292,331 +133,11 @@
   height: 18px;
   padding: 0 4px;
   border-radius: 999px;
-  background: var(--paper-2);
-  border: 1px solid var(--line-strong);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   color: var(--ink-soft);
   font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* ---------- Side panel ---------- */
-.ft-panel {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  bottom: 12px;
-  width: min(340px, calc(100% - 24px));
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: var(--paper);
-  border: 1px solid var(--line-strong);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  overflow: auto;
-  z-index: 4;
-}
-.ft-panel__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-}
-.ft-panel__head h2 {
-  font-size: 20px;
-}
-.ft-panel__warn {
-  margin: 0;
-  padding: 8px 10px;
-  background: rgba(232, 192, 106, 0.2);
-  border: 1px solid #e8c06a;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #5a3d0a;
-}
-.ft-panel__facts {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2px 0;
-  margin: 0;
-}
-.ft-panel__facts dt {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--ink-soft);
-  margin-top: 8px;
-}
-.ft-panel__facts dd {
-  margin: 0;
-  font-size: 14px;
-}
-.ft-panel__note {
-  white-space: pre-wrap;
-}
-.ft-panel__kids h3 {
-  font-size: 14px;
-  margin-bottom: 4px;
-}
-.ft-panel__kids ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.ft-panel__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
-}
-.ft-panel__audit {
-  font-size: 11px;
-  color: var(--ink-soft);
-}
-
-.ft-link {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  color: var(--accent);
-  cursor: pointer;
-  text-align: left;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-.ft-muted {
-  color: var(--ink-soft);
-}
-
-/* ---------- Modal / form ---------- */
-.ft-modal__backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(43, 38, 34, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  z-index: 50;
-}
-.ft-modal {
-  width: min(460px, 100%);
-  max-height: calc(100svh - 40px);
-  display: flex;
-  flex-direction: column;
-  background: var(--paper);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.ft-modal--wide {
-  width: min(680px, 100%);
-}
-.ft-modal__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--line);
-}
-.ft-modal__head h2 {
-  font-size: 18px;
-}
-.ft-modal__body {
-  padding: 16px;
-  overflow: auto;
-}
-.ft-modal__foot {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 16px;
-  border-top: 1px solid var(--line);
-}
-
-.ft-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.ft-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.ft-field > span,
-.ft-field label > span {
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-.ft-field input,
-.ft-field select,
-.ft-field textarea {
-  padding: 8px 10px;
-  border: 1px solid var(--line-strong);
-  border-radius: 6px;
-  background: var(--paper);
-  width: 100%;
-}
-.ft-field--row {
-  flex-direction: row;
-  gap: 12px;
-}
-.ft-field--row label {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.ft-field--check {
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-}
-.ft-field--check input {
-  width: auto;
-}
-.ft-err {
-  color: var(--danger);
-  font-size: 12px;
-  font-style: normal;
-}
-.ft-ok {
-  color: var(--ok);
-  font-size: 13px;
-}
-.ft-hint {
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin-bottom: 10px;
-}
-.ft-import__area {
-  width: 100%;
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px solid var(--line-strong);
-  border-radius: 6px;
-  font-family: ui-monospace, Consolas, monospace;
-  font-size: 12px;
-  resize: vertical;
-}
-
-/* ---------- Full-screen messages / errors ---------- */
-.ft-fullmsg {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  text-align: center;
-  padding: 24px;
-}
-.ft-fullmsg h1 {
-  font-size: 28px;
-}
-.ft-fullmsg p {
-  max-width: 420px;
-  color: var(--ink-soft);
-}
-.ft-fullmsg__btns {
-  display: flex;
-  gap: 10px;
-}
-
-/* ---------- Access gate (sign-in / restricted screens) ---------- */
-.ft-gate {
-  min-height: 100svh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background:
-    radial-gradient(circle at 1px 1px, rgba(107, 79, 42, 0.09) 1px, transparent 0)
-    0 0 / 22px 22px,
-    var(--paper);
-}
-.ft-gate__card {
-  width: min(420px, 100%);
-  text-align: center;
-  padding: 32px 28px;
-  background: var(--paper);
-  border: 1px solid var(--line-strong);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-}
-.ft-gate__card h1 {
-  font-size: 26px;
-  margin-bottom: 6px;
-}
-.ft-gate__sub {
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin-bottom: 18px;
-}
-.ft-gate__body {
-  font-size: 14px;
-  color: var(--ink);
-  margin-bottom: 20px;
-}
-.ft-gate__btn {
-  width: 100%;
-  padding: 10px 16px;
-  font-size: 15px;
-}
-.ft-gate__motto {
-  margin-top: 22px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-.ft-errorbar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  background: rgba(161, 58, 47, 0.12);
-  color: var(--danger);
-  font-size: 13px;
-}
-.ft-errorbar button {
-  margin-left: auto;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-
-.ft-footer {
-  padding: 8px 16px;
-  text-align: center;
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 13px;
-  color: var(--ink-soft);
-  background: var(--paper-2);
-  border-top: 1px solid var(--line-strong);
-}
-
-@media (max-width: 720px) {
-  .ft-toolbar__actions {
-    margin-left: 0;
-  }
-  .ft-panel {
-    top: auto;
-    left: 12px;
-    height: 55%;
-  }
 }
