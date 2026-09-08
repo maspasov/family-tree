@@ -258,6 +258,12 @@
   box-shadow: var(--card-shadow);
   padding: 6px 10px;
   opacity: 1;
+  /* Leaflet's own .leaflet-tooltip sets white-space: nowrap by default, which
+     forces a long "N people at this address" name list onto one unbroken
+     line that spills out past this box (worse the more names there are) —
+     override it so the list wraps inside .ft-pin-tip's max-width instead. */
+  white-space: normal;
+  max-width: 240px;
 }
 .leaflet-tooltip.ft-pin-tip-wrap::before {
   border-top-color: var(--card-border);
