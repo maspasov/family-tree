@@ -13,6 +13,23 @@ export const messages = {
   notEditorHint:
     'Този акаунт няма права за редакция. Свържете се със стопанина на дървото, за да ви добави.',
 
+  // roles admin page
+  rolesMenuLabel: 'Роли',
+  rolesTitle: 'Роли и достъп',
+  rolesIntro:
+    'Управлявайте кой има достъп до дървото. Редакторите могат да преглеждат и редактират; наблюдателите — само да преглеждат.',
+  rolesEditors: 'Редактори',
+  rolesViewers: 'Наблюдатели',
+  rolesEmptyEditors: 'Няма редактори.',
+  rolesEmptyViewers: 'Няма наблюдатели.',
+  rolesAddPlaceholder: 'имейл@example.com',
+  rolesAddButton: 'Добави',
+  rolesRemove: 'Премахни',
+  rolesInvalidEmail: 'Невалиден имейл адрес.',
+  rolesDuplicate: 'Този имейл вече е в списъка.',
+  rolesLastEditorError: 'Трябва да остане поне един редактор.',
+  rolesSelfRemoveConfirm: 'Ще премахнете себе си от редакторите. Продължавате ли?',
+
   // access gate (shown before the tree; only invited accounts get past it)
   gateBody:
     'Достъпът е ограничен само за поканени членове на семейството. Влезте с Google, за да продължите.',

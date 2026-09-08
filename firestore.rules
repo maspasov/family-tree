@@ -43,10 +43,17 @@ service cloud.firestore {
       return isEditor() || isViewer();
     }
 
-    // Public, read-only. Change the editors/viewers lists from the console, not the app.
+    // Public read. Any editor may update the editors/viewers arrays (the
+    // in-app "Роли" admin page) — nothing else on this doc, and the editors
+    // list can never be emptied out via a client write (that would lock
+    // everyone out). Creating/deleting the doc itself stays console-only.
     match /config/app {
       allow read: if true;
-      allow write: if false;
+      allow update: if isEditor()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['editors', 'viewers'])
+        && request.resource.data.editors is list
+        && request.resource.data.editors.size() > 0
+        && (!('viewers' in request.resource.data) || request.resource.data.viewers is list);
     }
 
     match /persons/{personId} {

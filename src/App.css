@@ -106,6 +106,12 @@
   font-size: 12px;
   color: var(--female);
 }
+.ft-card__spouse--link {
+  cursor: pointer;
+}
+.ft-card__spouse--link:hover {
+  text-decoration: underline;
+}
 .ft-card__place {
   font-size: 11px;
   color: var(--ink-soft);

@@ -448,12 +448,6 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
         />
 
         <TextField
-          label={t('fSpouse')}
-          value={draft.spouse ?? ''}
-          onChange={(e) => set('spouse', e.target.value)}
-        />
-
-        <TextField
           label={t('fNote')}
           multiline
           minRows={3}

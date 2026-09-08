@@ -14,6 +14,23 @@ export const messages: typeof bgMessages = {
   notEditorHint:
     'Dieses Konto hat keine Bearbeitungsrechte. Wenden Sie sich an den Verwalter des Stammbaums, um hinzugefügt zu werden.',
 
+  // roles admin page
+  rolesMenuLabel: 'Rollen',
+  rolesTitle: 'Rollen & Zugriff',
+  rolesIntro:
+    'Verwalten Sie, wer Zugriff auf den Stammbaum hat. Bearbeiter können ansehen und bearbeiten; Betrachter nur ansehen.',
+  rolesEditors: 'Bearbeiter',
+  rolesViewers: 'Betrachter',
+  rolesEmptyEditors: 'Keine Bearbeiter.',
+  rolesEmptyViewers: 'Keine Betrachter.',
+  rolesAddPlaceholder: 'email@example.com',
+  rolesAddButton: 'Hinzufügen',
+  rolesRemove: 'Entfernen',
+  rolesInvalidEmail: 'Ungültige E-Mail-Adresse.',
+  rolesDuplicate: 'Diese E-Mail ist bereits auf der Liste.',
+  rolesLastEditorError: 'Mindestens ein Bearbeiter muss verbleiben.',
+  rolesSelfRemoveConfirm: 'Sie entfernen sich selbst von den Bearbeitern. Fortfahren?',
+
   // access gate (shown before the tree; only invited accounts get past it)
   gateBody:
     'Der Zugang ist nur für eingeladene Familienmitglieder möglich. Melden Sie sich mit Google an, um fortzufahren.',

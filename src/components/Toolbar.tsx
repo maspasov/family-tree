@@ -36,6 +36,7 @@ import LightModeIcon from '@mui/icons-material/LightMode'
 import LoginIcon from '@mui/icons-material/Login'
 import LogoutIcon from '@mui/icons-material/Logout'
 import MapIcon from '@mui/icons-material/Map'
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary'
@@ -49,6 +50,7 @@ import { t, useLocale, LOCALE_NAMES, type Locale } from '../lib/i18n'
 import { fullName, lifespan, type Person } from '../model/person'
 import { useAuth } from '../auth/AuthContext'
 import { useColorMode } from '../theme/ColorModeContext'
+import { RolesDialog } from './RolesDialog'
 import type { ChartLayout } from './FamilyChart'
 
 export type ViewMode = 'tree' | 'map' | 'calendar' | 'archive'
@@ -82,6 +84,7 @@ export function Toolbar(props: Props) {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
   const [actionsAnchor, setActionsAnchor] = useState<HTMLElement | null>(null)
   const [langAnchor, setLangAnchor] = useState<HTMLElement | null>(null)
+  const [showRoles, setShowRoles] = useState(false)
 
   const results = useMemo(() => {
     const q = query.trim().toLocaleLowerCase('bg')
@@ -297,6 +300,15 @@ export function Toolbar(props: Props) {
             <LanguageIcon />
           </IconButton>
         </Tooltip>
+
+        {isEditor && (
+          <Tooltip title={t('rolesMenuLabel')}>
+            <IconButton onClick={() => setShowRoles(true)}>
+              <ManageAccountsIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+        {showRoles && <RolesDialog onClose={() => setShowRoles(false)} />}
         <Menu anchorEl={langAnchor} open={Boolean(langAnchor)} onClose={() => setLangAnchor(null)}>
           {(Object.keys(LOCALE_NAMES) as Locale[]).map((l) => (
             <MenuItem

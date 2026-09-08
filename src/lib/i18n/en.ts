@@ -14,6 +14,23 @@ export const messages: typeof bgMessages = {
   notEditorHint:
     "This account doesn't have edit access. Contact the tree's owner to be added.",
 
+  // roles admin page
+  rolesMenuLabel: 'Roles',
+  rolesTitle: 'Roles & access',
+  rolesIntro:
+    'Manage who can access the tree. Editors can view and edit; viewers can only view.',
+  rolesEditors: 'Editors',
+  rolesViewers: 'Viewers',
+  rolesEmptyEditors: 'No editors.',
+  rolesEmptyViewers: 'No viewers.',
+  rolesAddPlaceholder: 'email@example.com',
+  rolesAddButton: 'Add',
+  rolesRemove: 'Remove',
+  rolesInvalidEmail: 'Invalid email address.',
+  rolesDuplicate: 'This email is already on the list.',
+  rolesLastEditorError: 'At least one editor must remain.',
+  rolesSelfRemoveConfirm: "You're about to remove yourself from editors. Continue?",
+
   // access gate (shown before the tree; only invited accounts get past it)
   gateBody:
     'Access is limited to invited family members. Sign in with Google to continue.',

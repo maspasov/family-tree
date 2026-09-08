@@ -217,11 +217,25 @@ export interface ChartDatum {
   _childCount?: number
 }
 
+/** True when `p` is a wife/husband whose spouse still exists — see `toChartData`. */
+export function isMergedSpouse(p: Person, byId: Map<string, Person>): boolean {
+  return (
+    (p.relation?.type === 'wife' || p.relation?.type === 'husband') &&
+    Boolean(p.relation.toId && byId.has(p.relation.toId))
+  )
+}
+
 export function toChartData(people: Person[]): ChartDatum[] {
   const byId = new Map(people.map((p) => [p.id, p]))
-  const roots = people.filter((p) => !p.parentId || !byId.has(p.parentId))
+  // A wife/husband merges visually into their spouse's own card (see
+  // FamilyChart's nodeHtml) instead of getting a separate chart node — as
+  // long as that spouse still exists; otherwise fall back to a normal
+  // standalone node so they aren't silently dropped from the tree.
+  const nodePeople = people.filter((p) => !isMergedSpouse(p, byId))
+  const nodeById = new Map(nodePeople.map((p) => [p.id, p]))
+  const roots = nodePeople.filter((p) => !p.parentId || !nodeById.has(p.parentId))
 
-  const sorted = [...people].sort(
+  const sorted = [...nodePeople].sort(
     (a, b) =>
       (a.childOrder ?? 1e9) - (b.childOrder ?? 1e9) ||
       fullName(a).localeCompare(fullName(b), 'bg'),
@@ -230,7 +244,7 @@ export function toChartData(people: Person[]): ChartDatum[] {
   if (roots.length === 1) {
     return sorted.map((p) => ({
       id: p.id,
-      parentId: p.parentId && byId.has(p.parentId) ? p.parentId : null,
+      parentId: p.parentId && nodeById.has(p.parentId) ? p.parentId : null,
       person: p,
     }))
   }
@@ -242,7 +256,7 @@ export function toChartData(people: Person[]): ChartDatum[] {
     ...sorted.map((p) => ({
       id: p.id,
       parentId:
-        p.parentId && byId.has(p.parentId) && !rootIds.has(p.id)
+        p.parentId && nodeById.has(p.parentId) && !rootIds.has(p.id)
           ? p.parentId
           : SYNTHETIC_ROOT_ID,
       person: p,

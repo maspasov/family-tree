@@ -53,7 +53,11 @@ interface Props {
   canEdit: boolean
 }
 
-function nodeHtml(node: OrgChartNode<ChartDatum>, canEdit: boolean): string {
+function nodeHtml(
+  node: OrgChartNode<ChartDatum>,
+  canEdit: boolean,
+  spouseByAnchorId: Map<string, Person>,
+): string {
   const datum = node.data
   if (datum._synthetic || !datum.person) {
     return `<div class="ft-card ft-card--synthetic">${escapeHtml(t('synthRootLabel'))}</div>`
@@ -61,7 +65,16 @@ function nodeHtml(node: OrgChartNode<ChartDatum>, canEdit: boolean): string {
   const p = datum.person
   const name = escapeHtml(fullName(p) || t('noName'))
   const years = escapeHtml(lifespan(p))
-  const spouse = p.spouse ? escapeHtml(p.spouse) : ''
+  // A wife/husband merges into this card instead of getting their own chart
+  // node (see toChartData's isMergedSpouse) — clickable through to her own
+  // panel. Falls back to the plain free-text `spouse` field when there's no
+  // linked Person for this anchor.
+  const linkedSpouse = spouseByAnchorId.get(p.id)
+  const spouseHtml = linkedSpouse
+    ? `<div class="ft-card__spouse ft-card__spouse--link" data-select-person="${escapeHtml(linkedSpouse.id)}">⚭ ${escapeHtml(fullName(linkedSpouse) || t('noName'))}</div>`
+    : p.spouse
+      ? `<div class="ft-card__spouse">⚭ ${escapeHtml(p.spouse)}</div>`
+      : ''
   const place = p.birthPlace ? escapeHtml(p.birthPlace) : ''
   const genderClass =
     p.gender === 'm' ? 'ft-card--m' : p.gender === 'f' ? 'ft-card--f' : 'ft-card--u'
@@ -101,7 +114,7 @@ function nodeHtml(node: OrgChartNode<ChartDatum>, canEdit: boolean): string {
       ${flag}
       <div class="ft-card__name">${name}</div>
       ${years ? `<div class="ft-card__meta">${years}</div>` : ''}
-      ${spouse ? `<div class="ft-card__spouse">⚭ ${spouse}</div>` : ''}
+      ${spouseHtml}
       ${place ? `<div class="ft-card__place">${place}</div>` : ''}
       ${quickLinksHtml}
       ${kidsBadge}
@@ -122,6 +135,8 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
     const layoutRef = useRef<ChartLayout>(layout)
     const onQuickLinkRef = useRef(onQuickLink)
     onQuickLinkRef.current = onQuickLink
+    const onSelectRef = useRef(onSelect)
+    onSelectRef.current = onSelect
 
     // Build the array d3-org-chart consumes, reusing cached object identities.
     function buildData(): ChartDatum[] {
@@ -170,6 +185,12 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
         el.innerHTML = ''
         return
       }
+      const spouseByAnchorId = new Map<string, Person>()
+      for (const p of people) {
+        if ((p.relation?.type === 'wife' || p.relation?.type === 'husband') && p.relation.toId) {
+          spouseByAnchorId.set(p.relation.toId, p)
+        }
+      }
       chart
         .container(el)
         .data(data)
@@ -186,7 +207,7 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
         .layout(layout)
         .initialExpandLevel(4)
         .scaleExtent([0.08, 2.5])
-        .nodeContent((d: OrgChartNode<ChartDatum>) => nodeHtml(d, canEdit))
+        .nodeContent((d: OrgChartNode<ChartDatum>) => nodeHtml(d, canEdit, spouseByAnchorId))
         .onNodeClick((node: OrgChartNode<ChartDatum>) => {
           const datum = node.data
           onSelect(datum && !datum._synthetic ? datum.id : null)
@@ -210,12 +231,22 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
       const el = containerRef.current
       if (!el) return
       function handleQuickLinkClick(e: MouseEvent) {
-        const target = (e.target as HTMLElement).closest<HTMLElement>('[data-quicklink]')
-        if (!target) return
-        e.stopPropagation()
-        const type = target.dataset.quicklink as QuickLinkType
-        const personId = target.dataset.personId
-        if (personId) onQuickLinkRef.current?.(type, personId)
+        const quicklinkTarget = (e.target as HTMLElement).closest<HTMLElement>('[data-quicklink]')
+        if (quicklinkTarget) {
+          e.stopPropagation()
+          const type = quicklinkTarget.dataset.quicklink as QuickLinkType
+          const personId = quicklinkTarget.dataset.personId
+          if (personId) onQuickLinkRef.current?.(type, personId)
+          return
+        }
+        // The linked-spouse name merged into a card (see nodeHtml) opens that
+        // person's own panel directly, instead of the card's own.
+        const selectTarget = (e.target as HTMLElement).closest<HTMLElement>('[data-select-person]')
+        if (selectTarget) {
+          e.stopPropagation()
+          const personId = selectTarget.dataset.selectPerson
+          if (personId) onSelectRef.current?.(personId)
+        }
       }
       el.addEventListener('click', handleQuickLinkClick, { capture: true })
       return () => el.removeEventListener('click', handleQuickLinkClick, { capture: true })
