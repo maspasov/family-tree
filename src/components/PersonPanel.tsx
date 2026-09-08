@@ -1,17 +1,24 @@
+import { useRef, useState } from 'react'
 import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   Divider,
   Drawer,
   IconButton,
   Stack,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material'
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import CloseIcon from '@mui/icons-material/Close'
-import { t } from '../lib/i18n'
+import { Lightbox } from './Lightbox'
+import { t, RELATION_LABELS } from '../lib/i18n'
+import { usePersonPhotos } from '../data/usePersonPhotos'
+import { compressImageToDataUrl } from '../lib/imageCompress'
 import { childrenOf, fullName, lifespan, type Person } from '../model/person'
 
 interface Props {
@@ -33,6 +40,128 @@ function Fact({ label, children }: { label: string; children: React.ReactNode })
       </Typography>
       <Typography variant="body2">{children}</Typography>
     </Box>
+  )
+}
+
+function PhotoStrip({ personId, canEdit }: { personId: string; canEdit: boolean }) {
+  const { photos, addPhoto, deletePhoto } = usePersonPhotos(personId)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const dataUrl = await compressImageToDataUrl(file)
+      await addPhoto(dataUrl)
+    } catch (err) {
+      setUploadError((err as Error).message)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  if (photos.length === 0 && !canEdit) return null
+
+  const lightboxItems = photos.map((p) => ({ src: p.dataUrl }))
+
+  return (
+    <Stack spacing={0.5}>
+      <Typography variant="overline" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+        {t('photos')}
+      </Typography>
+      <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 0.5 }}>
+        {photos.map((photo, i) => (
+          <Box key={photo.id} sx={{ position: 'relative', flexShrink: 0 }}>
+            <Box
+              component="img"
+              src={photo.dataUrl}
+              loading="lazy"
+              onClick={() => setLightboxIndex(i)}
+              sx={{
+                width: 64,
+                height: 64,
+                objectFit: 'cover',
+                borderRadius: 1.5,
+                border: 1,
+                borderColor: 'divider',
+                cursor: 'pointer',
+              }}
+            />
+            {canEdit && (
+              <IconButton
+                aria-label={t('removePhoto')}
+                size="small"
+                onClick={() => deletePhoto(photo.id)}
+                sx={{
+                  position: 'absolute',
+                  top: -6,
+                  right: -6,
+                  width: 20,
+                  height: 20,
+                  bgcolor: 'background.paper',
+                  border: 1,
+                  borderColor: 'divider',
+                  '&:hover': { bgcolor: 'error.main', color: 'error.contrastText' },
+                }}
+              >
+                <CloseIcon sx={{ fontSize: 12 }} />
+              </IconButton>
+            )}
+          </Box>
+        ))}
+        {canEdit && (
+          <Tooltip title={t('addPhoto')}>
+            <Box
+              component="button"
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              sx={{
+                width: 64,
+                height: 64,
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 1.5,
+                border: 1,
+                borderStyle: 'dashed',
+                borderColor: 'divider',
+                bgcolor: 'transparent',
+                color: 'text.secondary',
+                cursor: 'pointer',
+              }}
+            >
+              {uploading ? <CircularProgress size={20} /> : <AddAPhotoIcon fontSize="small" />}
+            </Box>
+          </Tooltip>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={handleFile}
+        />
+      </Stack>
+      {uploadError && (
+        <Typography variant="caption" color="error">
+          {uploadError}
+        </Typography>
+      )}
+      <Lightbox
+        items={lightboxItems}
+        index={lightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+        onNavigate={setLightboxIndex}
+      />
+    </Stack>
   )
 }
 
@@ -99,6 +228,8 @@ export function PersonPanel({
           </IconButton>
         </Stack>
 
+        <PhotoStrip key={person.id} personId={person.id} canEdit={canEdit} />
+
         {person.verified === false && (
           <Chip
             size="small"
@@ -114,6 +245,7 @@ export function PersonPanel({
             <Fact label={`${t('born')} / ${t('died')}`}>{years}</Fact>
           )}
           {person.birthPlace && <Fact label={t('birthPlace')}>{person.birthPlace}</Fact>}
+          {person.address && <Fact label={t('address')}>{person.address}</Fact>}
           {person.spouse && <Fact label={t('spouse')}>{person.spouse}</Fact>}
           {parent && (
             <Fact label={t('parent')}>
@@ -125,6 +257,15 @@ export function PersonPanel({
               >
                 {fullName(parent)}
               </Button>
+            </Fact>
+          )}
+          {person.motherName && <Fact label={t('mother')}>{person.motherName}</Fact>}
+          {person.fatherName && <Fact label={t('father')}>{person.fatherName}</Fact>}
+          {person.relation && (
+            <Fact label={t('relation')}>
+              {(person.relation.type === 'other' && person.relation.customLabel) ||
+                RELATION_LABELS[person.relation.type]}{' '}
+              на {person.relation.toName}
             </Fact>
           )}
           {person.note && (

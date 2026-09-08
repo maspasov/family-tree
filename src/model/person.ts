@@ -8,15 +8,55 @@
  */
 export type Gender = 'm' | 'f' | 'unknown'
 
+/**
+ * Only `'child'` and `'father'` actually reshape the tree (see `Person.relation`
+ * below) — every other value is a descriptive label shown on the person's
+ * panel, never touching `parentId`. Deliberately not attempting to place
+ * "aunt"/"cousin"/etc. structurally: this tree is a strict single-parent
+ * hierarchy (that's why `d3-org-chart` was chosen), and those relations don't
+ * have a clean single-edge representation the way child/father do.
+ */
+export type RelationType =
+  | 'child'
+  | 'father'
+  | 'mother'
+  | 'grandfather'
+  | 'grandmother'
+  | 'aunt'
+  | 'uncle'
+  | 'cousin'
+  | 'other'
+
 export interface Person {
   /** Firestore document id. */
   id: string
   /** Given name(s), Cyrillic. Required. */
   name: string
+  /** Patronymic (bащино име), Cyrillic. Optional — many rows on the source chart omit it. */
+  patronymic?: string
   /** Family name, Cyrillic. Optional (many rows on the source chart omit it). */
   surname?: string
   /** Lineage parent's id, or null for the single root of the tree. */
   parentId: string | null
+  /**
+   * Mother/father's name as free text — informational only, independent of
+   * `parentId` (the structural bloodline link used for the tree hierarchy,
+   * by convention the father). Lets either parent be recorded even when they
+   * aren't themselves a node in this tree.
+   */
+  motherName?: string
+  fatherName?: string
+  /**
+   * Optional descriptive family relation, shown on the panel as e.g. „Леля на
+   * Мартин Спасов“. `toName` is denormalized so the label still reads
+   * correctly even if `toId`'s person is later renamed or deleted. `null`
+   * (not `undefined`) explicitly clears it — same convention as `geo`.
+   * Only `type: 'child'` (sets this person's own `parentId`) and `'father'`
+   * (reassigns the *anchor's* `parentId` to this person, handled in
+   * `App.tsx`'s submit flow) affect tree structure; every other type is
+   * label-only.
+   */
+  relation?: { type: RelationType; toId: string; toName: string; customLabel?: string } | null
   /** Spouse, free text e.g. „Елена (по баща Петрова)“. */
   spouse?: string
   gender: Gender
@@ -25,6 +65,17 @@ export interface Person {
   deathYear?: string
   /** Village / town, e.g. „с. Враняк, Врачанско“. */
   birthPlace?: string
+  /** Current address, free text — geocoded into `geo` for the map view. */
+  address?: string
+  /**
+   * Geocoded from `address`. `undefined` = never geocoded; `null` = explicitly
+   * cleared by the user. Use `null` (not `undefined`) to clear an existing pin —
+   * `cleanDraft` in `usePersons.ts` drops `undefined`/`''` keys entirely (so the
+   * old value would silently survive in Firestore), but writes `null` through.
+   */
+  geo?: { lat: number; lng: number } | null
+  /** `MM-DD`, e.g. `05-17`. Optional/additive to `birthYear` — unlocks a recurring calendar-view/.ics birthday event. */
+  birthMonthDay?: string
   /** Any free-form note (occupation, nickname „дедо Тано“, source remarks). */
   note?: string
   /** Order among siblings; lower shows first. Defaults to a large number. */
@@ -46,20 +97,27 @@ export type PersonDraft = Omit<
 
 export const EMPTY_DRAFT: PersonDraft = {
   name: '',
+  patronymic: '',
   surname: '',
   parentId: null,
+  motherName: '',
+  fatherName: '',
+  relation: undefined,
   spouse: '',
   gender: 'unknown',
   birthYear: '',
   deathYear: '',
   birthPlace: '',
+  address: '',
+  geo: undefined,
+  birthMonthDay: '',
   note: '',
   childOrder: undefined,
   verified: true,
 }
 
-export function fullName(p: Pick<Person, 'name' | 'surname'>): string {
-  return [p.name, p.surname].filter(Boolean).join(' ').trim()
+export function fullName(p: Pick<Person, 'name' | 'patronymic' | 'surname'>): string {
+  return [p.name, p.patronymic, p.surname].filter(Boolean).join(' ').trim()
 }
 
 /** „1860 – 1920“, „р. 1901“, „† 1970“, or "" when nothing is known. */
@@ -91,6 +149,16 @@ export function validateDraft(
     const v = (draft[key] ?? '').trim()
     if (v && !/^[~?]?\d{3,4}\??$/.test(v)) {
       errors[key] = 'Използвайте година, напр. 1901, ~1860 или 1901?.'
+    }
+  }
+  const bmd = (draft.birthMonthDay ?? '').trim()
+  if (bmd) {
+    const m = /^(\d{2})-(\d{2})$/.exec(bmd)
+    const month = m ? Number(m[1]) : NaN
+    const day = m ? Number(m[2]) : NaN
+    const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    if (!m || month < 1 || month > 12 || day < 1 || day > daysInMonth[month - 1]) {
+      errors.birthMonthDay = 'Използвайте формат ММ-ДД, напр. 05-17.'
     }
   }
   return { ok: Object.keys(errors).length === 0, errors }

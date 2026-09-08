@@ -17,6 +17,7 @@
   --unknown: #7d7466;
   --flag-bg: #e8c06a;
   --flag-ink: #5a3d0a;
+  --pin-group-bg: #2f5233;
   --sans: 'PT Sans', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --serif: 'PT Serif', 'Times New Roman', Georgia, serif;
 }
@@ -33,6 +34,7 @@
   --male: #7fabd1;
   --female: #cb8fa0;
   --unknown: #a89e8e;
+  --pin-group-bg: #6fa876;
 }
 
 .ft-main {
@@ -125,6 +127,27 @@
   align-items: center;
   justify-content: center;
 }
+.ft-card__quicklinks {
+  display: flex;
+  gap: 4px;
+  margin-top: auto;
+  padding-right: 24px; /* stay clear of the kids-count badge in the opposite corner */
+}
+.ft-card__quicklink {
+  border: 0;
+  background: transparent;
+  padding: 0 2px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.85;
+}
+.ft-card__quicklink:hover {
+  opacity: 1;
+  background: var(--chart-grid-dot);
+}
+
 .ft-card__kids {
   position: absolute;
   bottom: 6px;
@@ -140,4 +163,145 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* ---------- Map view (Leaflet) ---------- */
+.ft-map {
+  position: absolute;
+  inset: 0;
+  background: var(--chart-bg);
+}
+
+.ft-pin {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+}
+.ft-pin--m {
+  background: var(--male);
+}
+.ft-pin--f {
+  background: var(--female);
+}
+.ft-pin--u {
+  background: var(--unknown);
+}
+.ft-pin--group {
+  background: var(--pin-group-bg);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--sans);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ft-pin-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--sans);
+}
+.ft-pin-popup__item {
+  border: 0;
+  background: transparent;
+  padding: 3px 0;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+.ft-pin-popup__item:hover {
+  text-decoration: underline;
+}
+
+.leaflet-tooltip.ft-pin-tip-wrap {
+  background: var(--card-bg);
+  color: var(--ink);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  padding: 6px 10px;
+  opacity: 1;
+}
+.leaflet-tooltip.ft-pin-tip-wrap::before {
+  border-top-color: var(--card-border);
+}
+.ft-pin-tip {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-family: var(--sans);
+  max-width: 220px;
+}
+.ft-pin-tip strong {
+  font-family: var(--serif);
+  font-size: 13px;
+  color: var(--ink);
+}
+.ft-pin-tip span {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+/* ---------- Calendar view (FullCalendar) ---------- */
+.ft-calendar {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  padding: 16px;
+  box-sizing: border-box;
+  background: var(--chart-bg);
+  font-family: var(--sans);
+
+  --fc-border-color: var(--card-border);
+  --fc-page-bg-color: var(--card-bg);
+  --fc-neutral-bg-color: var(--chart-bg);
+  --fc-neutral-text-color: var(--ink-soft);
+  --fc-today-bg-color: rgba(47, 82, 51, 0.08);
+  --fc-event-bg-color: var(--pin-group-bg);
+  --fc-event-border-color: var(--pin-group-bg);
+  --fc-event-text-color: #ffffff;
+  --fc-button-bg-color: var(--card-bg);
+  --fc-button-border-color: var(--card-border);
+  --fc-button-text-color: var(--ink);
+  --fc-button-hover-bg-color: var(--chart-bg);
+  --fc-button-hover-border-color: var(--pin-group-bg);
+  --fc-button-active-bg-color: var(--pin-group-bg);
+  --fc-button-active-border-color: var(--pin-group-bg);
+}
+.ft-calendar .fc {
+  color: var(--ink);
+}
+.ft-calendar .fc-toolbar-title {
+  font-family: var(--serif);
+  color: var(--ink);
+}
+.ft-calendar .fc-button {
+  text-transform: none;
+  box-shadow: none !important;
+}
+
+:root[data-theme='dark'] .ft-calendar {
+  --fc-today-bg-color: rgba(111, 168, 118, 0.14);
+}
+
+/* Leaflet's own chrome (zoom control, attribution) is plain light-themed HTML —
+   re-theme it to match the app's dark mode instead of staying stuck light. */
+:root[data-theme='dark'] .leaflet-control-zoom a,
+:root[data-theme='dark'] .leaflet-control-attribution {
+  background: var(--card-bg);
+  color: var(--ink);
+}
+:root[data-theme='dark'] .leaflet-control-zoom a {
+  border-color: var(--card-border) !important;
+}
+:root[data-theme='dark'] .leaflet-popup-content-wrapper,
+:root[data-theme='dark'] .leaflet-popup-tip {
+  background: var(--card-bg);
+  color: var(--ink);
 }

@@ -50,6 +50,21 @@ service cloud.firestore {
       allow delete: if isEditor();
     }
 
+    // One photo per document (not an array field on `persons/{id}`) because a
+    // Firestore document caps at 1 MiB total — an array would force every
+    // photo for one person to share that single budget instead of each
+    // getting its own.
+    match /persons/{personId}/photos/{photoId} {
+      allow read: if isEditor();
+
+      allow create: if isEditor()
+        && request.resource.data.dataUrl is string
+        && request.resource.data.dataUrl.size() > 0
+        && request.resource.data.dataUrl.size() < 900000;
+
+      allow delete: if isEditor();
+    }
+
     // Everything else is closed.
     match /{document=**} {
       allow read, write: if false;

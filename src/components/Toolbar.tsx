@@ -17,12 +17,16 @@ import {
   Stack,
   TextField,
   Toolbar as MuiToolbar,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material'
+import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import AddIcon from '@mui/icons-material/Add'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import DataObjectIcon from '@mui/icons-material/DataObject'
@@ -30,7 +34,10 @@ import ImageIcon from '@mui/icons-material/Image'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import LoginIcon from '@mui/icons-material/Login'
 import LogoutIcon from '@mui/icons-material/Logout'
+import MapIcon from '@mui/icons-material/Map'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary'
 import SwapVertIcon from '@mui/icons-material/SwapVert'
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess'
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
@@ -43,10 +50,14 @@ import { useAuth } from '../auth/AuthContext'
 import { useColorMode } from '../theme/ColorModeContext'
 import type { ChartLayout } from './FamilyChart'
 
+export type ViewMode = 'tree' | 'map' | 'calendar' | 'archive'
+
 interface Props {
   people: Person[]
   layout: ChartLayout
   onLayoutChange: (l: ChartLayout) => void
+  viewMode: ViewMode
+  onViewModeChange: (v: ViewMode) => void
   onFocusPerson: (id: string) => void
   onFit: () => void
   onExpandAll: () => void
@@ -57,6 +68,7 @@ interface Props {
   onExportJson: () => void
   onImport: () => void
   onAddRoot: () => void
+  onExportIcs: () => void
 }
 
 export function Toolbar(props: Props) {
@@ -66,6 +78,7 @@ export function Toolbar(props: Props) {
   const isCompact = useMediaQuery(theme.breakpoints.down('lg'))
   const [query, setQuery] = useState('')
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
+  const [actionsAnchor, setActionsAnchor] = useState<HTMLElement | null>(null)
 
   const results = useMemo(() => {
     const q = query.trim().toLocaleLowerCase('bg')
@@ -75,55 +88,73 @@ export function Toolbar(props: Props) {
       .slice(0, 8)
   }, [query, props.people])
 
-  const addLabel = props.people.length === 0 ? t('addRoot') : t('addChild')
+  const addLabel = props.people.length === 0 ? t('addRoot') : t('addPerson')
   const closeMenu = () => setMenuAnchor(null)
+  const closeActionsMenu = () => setActionsAnchor(null)
 
-  const moreActions = (
-    <>
-      <MenuItem onClick={() => { props.onZoomOut(); closeMenu() }}>
-        <ListItemIcon><ZoomOutIcon fontSize="small" /></ListItemIcon>
-        <ListItemText>{t('zoomOut')}</ListItemText>
-      </MenuItem>
-      <MenuItem onClick={() => { props.onZoomIn(); closeMenu() }}>
-        <ListItemIcon><ZoomInIcon fontSize="small" /></ListItemIcon>
-        <ListItemText>{t('zoomIn')}</ListItemText>
-      </MenuItem>
-      <MenuItem onClick={() => { props.onFit(); closeMenu() }}>
-        <ListItemIcon><CenterFocusStrongIcon fontSize="small" /></ListItemIcon>
-        <ListItemText>{t('fit')}</ListItemText>
-      </MenuItem>
-      <Divider />
-      <MenuItem onClick={() => { props.onExpandAll(); closeMenu() }}>
-        <ListItemIcon><UnfoldMoreIcon fontSize="small" /></ListItemIcon>
-        <ListItemText>{t('expandAll')}</ListItemText>
-      </MenuItem>
-      <MenuItem onClick={() => { props.onCollapseAll(); closeMenu() }}>
-        <ListItemIcon><UnfoldLessIcon fontSize="small" /></ListItemIcon>
-        <ListItemText>{t('collapseAll')}</ListItemText>
-      </MenuItem>
-      <MenuItem
-        onClick={() => {
-          props.onLayoutChange(props.layout === 'top' ? 'bottom' : 'top')
-          closeMenu()
-        }}
-      >
-        <ListItemIcon><SwapVertIcon fontSize="small" /></ListItemIcon>
-        <ListItemText>{props.layout === 'top' ? 'Разгъване надолу' : 'Разгъване нагоре'}</ListItemText>
-      </MenuItem>
-      <Divider />
-      <MenuItem onClick={() => { props.onExportPng(); closeMenu() }}>
-        <ListItemIcon><ImageIcon fontSize="small" /></ListItemIcon>
-        <ListItemText>{t('exportPng')}</ListItemText>
-      </MenuItem>
-      <MenuItem onClick={() => { props.onExportJson(); closeMenu() }}>
+  // Export/import — infrequent, so they live in their own dropdown instead of
+  // crowding the main toolbar row (shown on every breakpoint).
+  const actionsMenu = (
+    <Menu anchorEl={actionsAnchor} open={Boolean(actionsAnchor)} onClose={closeActionsMenu}>
+      {props.viewMode === 'tree' && (
+        <MenuItem onClick={() => { props.onExportPng(); closeActionsMenu() }}>
+          <ListItemIcon><ImageIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>{t('exportPng')}</ListItemText>
+        </MenuItem>
+      )}
+      <MenuItem onClick={() => { props.onExportJson(); closeActionsMenu() }}>
         <ListItemIcon><DataObjectIcon fontSize="small" /></ListItemIcon>
         <ListItemText>{t('exportJson')}</ListItemText>
       </MenuItem>
       {isEditor && (
-        <MenuItem onClick={() => { props.onImport(); closeMenu() }}>
+        <MenuItem onClick={() => { props.onImport(); closeActionsMenu() }}>
           <ListItemIcon><UploadFileIcon fontSize="small" /></ListItemIcon>
           <ListItemText>{t('importJson')}</ListItemText>
         </MenuItem>
+      )}
+      <Divider />
+      <MenuItem onClick={() => { props.onExportIcs(); closeActionsMenu() }}>
+        <ListItemIcon><CalendarMonthIcon fontSize="small" /></ListItemIcon>
+        <ListItemText>{t('calendarExport')}</ListItemText>
+      </MenuItem>
+    </Menu>
+  )
+
+  const moreActions = (
+    <>
+      {props.viewMode === 'tree' && (
+        <>
+          <MenuItem onClick={() => { props.onZoomOut(); closeMenu() }}>
+            <ListItemIcon><ZoomOutIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>{t('zoomOut')}</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => { props.onZoomIn(); closeMenu() }}>
+            <ListItemIcon><ZoomInIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>{t('zoomIn')}</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => { props.onFit(); closeMenu() }}>
+            <ListItemIcon><CenterFocusStrongIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>{t('fit')}</ListItemText>
+          </MenuItem>
+          <Divider />
+          <MenuItem onClick={() => { props.onExpandAll(); closeMenu() }}>
+            <ListItemIcon><UnfoldMoreIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>{t('expandAll')}</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => { props.onCollapseAll(); closeMenu() }}>
+            <ListItemIcon><UnfoldLessIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>{t('collapseAll')}</ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              props.onLayoutChange(props.layout === 'top' ? 'bottom' : 'top')
+              closeMenu()
+            }}
+          >
+            <ListItemIcon><SwapVertIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>{props.layout === 'top' ? 'Разгъване надолу' : 'Разгъване нагоре'}</ListItemText>
+          </MenuItem>
+        </>
       )}
     </>
   )
@@ -141,6 +172,27 @@ export function Toolbar(props: Props) {
             </Typography>
           )}
         </Box>
+
+        <ToggleButtonGroup
+          size="small"
+          exclusive
+          value={props.viewMode}
+          onChange={(_, v: ViewMode | null) => v && props.onViewModeChange(v)}
+          sx={{ flexShrink: 0 }}
+        >
+          <ToggleButton value="tree" title={t('viewTree')} aria-label={t('viewTree')}>
+            <AccountTreeIcon fontSize="small" />
+          </ToggleButton>
+          <ToggleButton value="map" title={t('viewMap')} aria-label={t('viewMap')}>
+            <MapIcon fontSize="small" />
+          </ToggleButton>
+          <ToggleButton value="calendar" title={t('viewCalendar')} aria-label={t('viewCalendar')}>
+            <CalendarMonthIcon fontSize="small" />
+          </ToggleButton>
+          <ToggleButton value="archive" title={t('viewArchive')} aria-label={t('viewArchive')}>
+            <PhotoLibraryIcon fontSize="small" />
+          </ToggleButton>
+        </ToggleButtonGroup>
 
         <Autocomplete
           size="small"
@@ -175,42 +227,40 @@ export function Toolbar(props: Props) {
 
         <Box sx={{ flex: 1, display: { xs: 'none', lg: 'block' } }} />
 
+        <Button size="small" startIcon={<MoreHorizIcon />} onClick={(e) => setActionsAnchor(e.currentTarget)}>
+          {t('actions')}
+        </Button>
+        {actionsMenu}
+
         {!isCompact && (
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-            <ButtonGroup variant="outlined" size="small">
-              <Tooltip title={t('zoomOut')}>
-                <IconButton onClick={props.onZoomOut}><ZoomOutIcon fontSize="small" /></IconButton>
-              </Tooltip>
-              <Tooltip title={t('zoomIn')}>
-                <IconButton onClick={props.onZoomIn}><ZoomInIcon fontSize="small" /></IconButton>
-              </Tooltip>
-              <Tooltip title={t('fit')}>
-                <IconButton onClick={props.onFit}><CenterFocusStrongIcon fontSize="small" /></IconButton>
-              </Tooltip>
-            </ButtonGroup>
-            <Button size="small" startIcon={<UnfoldMoreIcon />} onClick={props.onExpandAll}>
-              {t('expandAll')}
-            </Button>
-            <Button size="small" startIcon={<UnfoldLessIcon />} onClick={props.onCollapseAll}>
-              {t('collapseAll')}
-            </Button>
-            <Button
-              size="small"
-              startIcon={<SwapVertIcon />}
-              onClick={() => props.onLayoutChange(props.layout === 'top' ? 'bottom' : 'top')}
-            >
-              {props.layout === 'top' ? '⬇ надолу' : '⬆ нагоре'}
-            </Button>
-            <Button size="small" startIcon={<ImageIcon />} onClick={props.onExportPng}>
-              {t('exportPng')}
-            </Button>
-            <Button size="small" startIcon={<DataObjectIcon />} onClick={props.onExportJson}>
-              {t('exportJson')}
-            </Button>
-            {isEditor && (
-              <Button size="small" startIcon={<UploadFileIcon />} onClick={props.onImport}>
-                {t('importJson')}
-              </Button>
+            {props.viewMode === 'tree' && (
+              <>
+                <ButtonGroup variant="outlined" size="small">
+                  <Tooltip title={t('zoomOut')}>
+                    <IconButton onClick={props.onZoomOut}><ZoomOutIcon fontSize="small" /></IconButton>
+                  </Tooltip>
+                  <Tooltip title={t('zoomIn')}>
+                    <IconButton onClick={props.onZoomIn}><ZoomInIcon fontSize="small" /></IconButton>
+                  </Tooltip>
+                  <Tooltip title={t('fit')}>
+                    <IconButton onClick={props.onFit}><CenterFocusStrongIcon fontSize="small" /></IconButton>
+                  </Tooltip>
+                </ButtonGroup>
+                <Button size="small" startIcon={<UnfoldMoreIcon />} onClick={props.onExpandAll}>
+                  {t('expandAll')}
+                </Button>
+                <Button size="small" startIcon={<UnfoldLessIcon />} onClick={props.onCollapseAll}>
+                  {t('collapseAll')}
+                </Button>
+                <Button
+                  size="small"
+                  startIcon={<SwapVertIcon />}
+                  onClick={() => props.onLayoutChange(props.layout === 'top' ? 'bottom' : 'top')}
+                >
+                  {props.layout === 'top' ? '⬇ надолу' : '⬆ нагоре'}
+                </Button>
+              </>
             )}
             {isEditor && (
               <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={props.onAddRoot}>

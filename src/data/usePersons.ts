@@ -16,6 +16,7 @@ import {
   descendantIds,
   type Person,
   type PersonDraft,
+  type RelationType,
 } from '../model/person'
 import { useAuth } from '../auth/AuthContext'
 
@@ -23,13 +24,31 @@ function fromDoc(id: string, data: DocumentData): Person {
   return {
     id,
     name: data.name ?? '',
+    patronymic: data.patronymic ?? '',
     surname: data.surname ?? '',
     parentId: data.parentId ?? null,
+    motherName: data.motherName ?? '',
+    fatherName: data.fatherName ?? '',
+    relation:
+      data.relation && typeof data.relation.type === 'string' && typeof data.relation.toId === 'string'
+        ? {
+            type: data.relation.type as RelationType,
+            toId: data.relation.toId,
+            toName: data.relation.toName ?? '',
+            customLabel: data.relation.customLabel ?? undefined,
+          }
+        : undefined,
     spouse: data.spouse ?? '',
     gender: data.gender ?? 'unknown',
     birthYear: data.birthYear ?? '',
     deathYear: data.deathYear ?? '',
     birthPlace: data.birthPlace ?? '',
+    address: data.address ?? '',
+    geo:
+      data.geo && typeof data.geo.lat === 'number' && typeof data.geo.lng === 'number'
+        ? { lat: data.geo.lat, lng: data.geo.lng }
+        : undefined,
+    birthMonthDay: data.birthMonthDay ?? '',
     note: data.note ?? '',
     childOrder: typeof data.childOrder === 'number' ? data.childOrder : undefined,
     verified: data.verified !== false,
@@ -39,7 +58,14 @@ function fromDoc(id: string, data: DocumentData): Person {
   }
 }
 
-/** Strip empty strings / undefined so Firestore docs stay tidy. */
+/**
+ * Strip empty strings / undefined so Firestore docs stay tidy.
+ *
+ * Note: this means a field can't be cleared back to empty by omitting it —
+ * `updateDoc` never even sees a dropped key, so the old value silently
+ * survives server-side. `null` is NOT stripped, so it's the way to explicitly
+ * clear an optional field (see `Person.geo`'s doc comment).
+ */
 function cleanDraft(draft: PersonDraft): DocumentData {
   const out: DocumentData = {}
   for (const [k, v] of Object.entries(draft)) {

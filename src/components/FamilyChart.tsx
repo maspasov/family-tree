@@ -12,8 +12,10 @@ import {
   type ChartDatum,
   type Person,
 } from '../model/person'
+import { escapeHtml } from '../lib/html'
 
 export type ChartLayout = 'top' | 'bottom'
+export type QuickLinkType = 'map' | 'calendar'
 
 export interface FamilyChartHandle {
   fit: () => void
@@ -30,20 +32,7 @@ interface Props {
   people: Person[]
   layout: ChartLayout
   onSelect: (id: string | null) => void
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) =>
-    c === '&'
-      ? '&amp;'
-      : c === '<'
-        ? '&lt;'
-        : c === '>'
-          ? '&gt;'
-          : c === '"'
-            ? '&quot;'
-            : '&#39;',
-  )
+  onQuickLink?: (type: QuickLinkType, personId: string) => void
 }
 
 function nodeHtml(node: OrgChartNode<ChartDatum>): string {
@@ -64,6 +53,21 @@ function nodeHtml(node: OrgChartNode<ChartDatum>): string {
   const kids = node.data._childCount ?? 0
   const kidsBadge = kids > 0 ? `<span class="ft-card__kids">${kids}</span>` : ''
 
+  const quickLinks: string[] = []
+  if (p.geo) {
+    quickLinks.push(
+      `<button type="button" class="ft-card__quicklink" title="Виж на картата" data-quicklink="map" data-person-id="${escapeHtml(p.id)}">📍</button>`,
+    )
+  }
+  if (p.birthMonthDay) {
+    quickLinks.push(
+      `<button type="button" class="ft-card__quicklink" title="Виж в календара" data-quicklink="calendar" data-person-id="${escapeHtml(p.id)}">🎂</button>`,
+    )
+  }
+  const quickLinksHtml = quickLinks.length
+    ? `<div class="ft-card__quicklinks">${quickLinks.join('')}</div>`
+    : ''
+
   return `
     <div class="ft-card ${genderClass}">
       ${flag}
@@ -71,6 +75,7 @@ function nodeHtml(node: OrgChartNode<ChartDatum>): string {
       ${years ? `<div class="ft-card__meta">${years}</div>` : ''}
       ${spouse ? `<div class="ft-card__spouse">⚭ ${spouse}</div>` : ''}
       ${place ? `<div class="ft-card__place">${place}</div>` : ''}
+      ${quickLinksHtml}
       ${kidsBadge}
     </div>`
 }
@@ -79,13 +84,15 @@ const NODE_W = 244
 const NODE_H = 108
 
 export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
-  function FamilyChart({ people, layout, onSelect }, ref) {
+  function FamilyChart({ people, layout, onSelect, onQuickLink }, ref) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const chartRef = useRef<OrgChart<ChartDatum> | null>(null)
     // Stable datum objects keyed by id so d3-org-chart keeps expand/collapse
     // state across Firestore snapshots instead of resetting on every edit.
     const cacheRef = useRef<Map<string, ChartDatum>>(new Map())
     const layoutRef = useRef<ChartLayout>(layout)
+    const onQuickLinkRef = useRef(onQuickLink)
+    onQuickLinkRef.current = onQuickLink
 
     // Build the array d3-org-chart consumes, reusing cached object identities.
     function buildData(): ChartDatum[] {
@@ -163,6 +170,27 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [people, layout])
+
+    // Delegated, capture-phase listener for the quick-link buttons inside
+    // `nodeHtml`'s raw HTML string — bound once on the stable container div
+    // (d3-org-chart only ever replaces its children, never this element), so
+    // it keeps working across every re-render without needing to be rebound.
+    // Capture phase + stopPropagation here is what stops the click from also
+    // bubbling into d3-org-chart's own onNodeClick handler on the node group.
+    useEffect(() => {
+      const el = containerRef.current
+      if (!el) return
+      function handleQuickLinkClick(e: MouseEvent) {
+        const target = (e.target as HTMLElement).closest<HTMLElement>('[data-quicklink]')
+        if (!target) return
+        e.stopPropagation()
+        const type = target.dataset.quicklink as QuickLinkType
+        const personId = target.dataset.personId
+        if (personId) onQuickLinkRef.current?.(type, personId)
+      }
+      el.addEventListener('click', handleQuickLinkClick, { capture: true })
+      return () => el.removeEventListener('click', handleQuickLinkClick, { capture: true })
+    }, [])
 
     // Re-fit on container resize.
     useEffect(() => {
