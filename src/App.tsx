@@ -4,7 +4,7 @@ import { Alert, Box, Button, CircularProgress, Snackbar, Stack, Typography } fro
 import { firebaseConfigured } from './lib/firebase'
 import { messages, motto, t, useLocale } from './lib/i18n'
 import { buildBirthdaysIcs, hasBirthdays } from './lib/ics'
-import { sendAddedNotification } from './lib/notifyEmail'
+import { sendAddedNotification, sendAdminNotification } from './lib/notifyEmail'
 import { useAuth } from './auth/AuthContext'
 import { usePersons } from './data/usePersons'
 import {
@@ -156,6 +156,9 @@ export default function App() {
           })
           .catch(() => setInfoMessage(messages.notifyFailed(draft.email!)))
       }
+      // Quiet background CC to the admin — every addition, not just ones with
+      // an email on file; failures aren't worth interrupting the editor for.
+      sendAdminNotification({ ...draft, id }).catch(() => {})
       setSelectedId(id)
       setEditing(null)
     } catch (e) {

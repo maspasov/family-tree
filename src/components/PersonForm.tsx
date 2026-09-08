@@ -28,8 +28,11 @@ export function PersonForm({
   const [draft, setDraft] = useState<PersonDraft>(initial)
   const [touched, setTouched] = useState(false)
 
-  // The very first person in an empty tree is allowed to have no parent.
-  const requireParent = mode === 'add' && people.length > 0
+  // The very first person in an empty tree is allowed to have no parent, and
+  // so is a wife/husband — joining the tree by marriage doesn't imply their
+  // own parent is known (or even part of this tree) too.
+  const isSpouseRelation = draft.relation?.type === 'wife' || draft.relation?.type === 'husband'
+  const requireParent = mode === 'add' && people.length > 0 && !isSpouseRelation
   const { ok, errors } = useMemo(
     () => validateDraft(draft, { requireParent }),
     [draft, requireParent],

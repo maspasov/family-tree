@@ -117,6 +117,12 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
     }
     if (draft.relation) set('relation', { ...draft.relation, type: newType })
     if (newType === 'child' && relationToPerson) set('parentId', relationToPerson.id)
+    // A wife/husband isn't a blood child of their spouse — attach her next to
+    // him (same parent) instead of leaving parentId empty, which would make
+    // her float as her own disconnected root in the strictly hierarchical chart.
+    if ((newType === 'wife' || newType === 'husband') && relationToPerson) {
+      set('parentId', relationToPerson.parentId ?? null)
+    }
   }
 
   function handleRelationToChange(person: Person | null) {
@@ -137,6 +143,7 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
       ...(customLabel ? { customLabel } : {}),
     })
     if (relationType === 'child') set('parentId', person.id)
+    if (relationType === 'wife' || relationType === 'husband') set('parentId', person.parentId ?? null)
   }
 
   async function locate() {
