@@ -97,6 +97,9 @@
   font-size: 15px;
   color: var(--ink);
   line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .ft-card__meta {
   font-size: 12px;
@@ -105,6 +108,15 @@
 .ft-card__spouse {
   font-size: 12px;
   color: var(--female);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ft-card__spouse--m {
+  color: var(--male);
+}
+.ft-card__spouse--u {
+  color: var(--unknown);
 }
 .ft-card__spouse--link {
   cursor: pointer;
@@ -117,6 +129,9 @@
   color: var(--ink-soft);
   font-style: italic;
   margin-top: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .ft-card__flag {
   position: absolute;

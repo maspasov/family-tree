@@ -8,6 +8,7 @@ import {
   IconButton,
   InputAdornment,
   MenuItem,
+  Popover,
   Stack,
   TextField,
   Tooltip,
@@ -19,10 +20,12 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { YearCalendar } from '@mui/x-date-pickers/YearCalendar'
 import dayjs, { type Dayjs } from 'dayjs'
 import 'dayjs/locale/bg'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
-import { t, RELATION_LABELS } from '../lib/i18n'
+import { t, messages, RELATION_LABELS } from '../lib/i18n'
 import { geocodeAddress } from '../lib/geocode'
 import {
   fullName,
@@ -42,6 +45,16 @@ const BIRTHDAY_REF_YEAR = 2024
 function birthMonthDayToDate(v: string | undefined): Dayjs | null {
   if (!v || !/^\d{2}-\d{2}$/.test(v)) return null
   const d = dayjs(`${BIRTHDAY_REF_YEAR}-${v}`)
+  return d.isValid() ? d : null
+}
+
+// Only used to drive the YearCalendar popover's selection — the field itself
+// stays free text so "~1860"/"1901?" (see validateDraft) keep working; the
+// picker is just a quick-fill for the common clean-4-digit case.
+function yearToDate(v: string | undefined): Dayjs | null {
+  const y = (v ?? '').trim()
+  if (!/^\d{4}$/.test(y)) return null
+  const d = dayjs(`${y}-01-01`)
   return d.isValid() ? d : null
 }
 
@@ -78,6 +91,28 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
     draft.geo ? draft.address ?? null : null,
   )
   const addressStale = Boolean(draft.geo) && (draft.address ?? '') !== geocodedAddress
+  const [yearPicker, setYearPicker] = useState<{
+    field: 'birthYear' | 'deathYear'
+    anchor: HTMLElement
+  } | null>(null)
+
+  // Suggestions drawn from data already in the tree — no external API/billing.
+  const birthPlaceOptions = useMemo(
+    () =>
+      Array.from(new Set(people.map((p) => p.birthPlace).filter((v): v is string => Boolean(v))))
+        .sort((a, b) => a.localeCompare(b, 'bg')),
+    [people],
+  )
+  const parentNameOptions = useMemo(() => {
+    const names = new Set<string>()
+    for (const p of people) {
+      if (p.motherName) names.add(p.motherName)
+      if (p.fatherName) names.add(p.fatherName)
+      const full = fullName(p)
+      if (full) names.add(full)
+    }
+    return Array.from(names).sort((a, b) => a.localeCompare(b, 'bg'))
+  }, [people])
 
   // Exclude self + descendants from the parent options to avoid cycles.
   const parentOptions = useMemo(() => {
@@ -259,12 +294,26 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
                   {...params}
                   label={t('fRelationTo')}
                   error={relationType === 'child' && Boolean(showErr('parentId'))}
-                  helperText={relationType === 'child' ? showErr('parentId') : undefined}
+                  helperText={
+                    relationType === 'child'
+                      ? showErr('parentId')
+                      : relationType === 'father'
+                        ? t('fRelationToHelpFather')
+                        : relationType === 'wife' || relationType === 'husband'
+                          ? t('fRelationToHelpSpouse')
+                          : t('fRelationToHelpLabelOnly')
+                  }
                 />
               )}
             />
           )}
         </Stack>
+
+        {relationType === 'father' && relationToPerson && (
+          <Typography variant="caption" color="warning.main">
+            {messages.fRelationFatherWarning(fullName(relationToPerson))}
+          </Typography>
+        )}
 
         {relationType === 'other' && (
           <TextField
@@ -282,6 +331,7 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
         {relationType !== 'child' && (
           <TextField
             select
+            fullWidth
             label={t('fParent')}
             value={draft.parentId ?? ''}
             onChange={(e) => set('parentId', e.target.value || null)}
@@ -298,17 +348,21 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
         )}
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <TextField
+          <Autocomplete
             fullWidth
-            label={t('fMother')}
-            value={draft.motherName ?? ''}
-            onChange={(e) => set('motherName', e.target.value)}
+            freeSolo
+            options={parentNameOptions}
+            inputValue={draft.motherName ?? ''}
+            onInputChange={(_, value) => set('motherName', value)}
+            renderInput={(params) => <TextField {...params} label={t('fMother')} />}
           />
-          <TextField
+          <Autocomplete
             fullWidth
-            label={t('fFather')}
-            value={draft.fatherName ?? ''}
-            onChange={(e) => set('fatherName', e.target.value)}
+            freeSolo
+            options={parentNameOptions}
+            inputValue={draft.fatherName ?? ''}
+            onInputChange={(_, value) => set('fatherName', value)}
+            renderInput={(params) => <TextField {...params} label={t('fFather')} />}
           />
         </Stack>
 
@@ -350,6 +404,20 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
             placeholder="1901"
             error={Boolean(showErr('birthYear'))}
             helperText={showErr('birthYear')}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={(e) => setYearPicker({ field: 'birthYear', anchor: e.currentTarget })}
+                    >
+                      <CalendarMonthIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
           <TextField
             fullWidth
@@ -359,15 +427,47 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
             placeholder="1970"
             error={Boolean(showErr('deathYear'))}
             helperText={showErr('deathYear')}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={(e) => setYearPicker({ field: 'deathYear', anchor: e.currentTarget })}
+                    >
+                      <CalendarMonthIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
+          <Popover
+            open={Boolean(yearPicker)}
+            anchorEl={yearPicker?.anchor ?? null}
+            onClose={() => setYearPicker(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          >
+            {yearPicker && (
+              <YearCalendar
+                value={yearToDate(draft[yearPicker.field])}
+                onChange={(value) => {
+                  set(yearPicker.field, value.format('YYYY'))
+                  setYearPicker(null)
+                }}
+              />
+            )}
+          </Popover>
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <TextField
+          <Autocomplete
             fullWidth
-            label={t('fBirthPlace')}
-            value={draft.birthPlace ?? ''}
-            onChange={(e) => set('birthPlace', e.target.value)}
+            freeSolo
+            options={birthPlaceOptions}
+            inputValue={draft.birthPlace ?? ''}
+            onInputChange={(_, value) => set('birthPlace', value)}
+            renderInput={(params) => <TextField {...params} label={t('fBirthPlace')} />}
           />
           <DatePicker
             label={t('fBirthMonthDay')}

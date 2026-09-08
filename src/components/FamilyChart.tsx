@@ -70,8 +70,15 @@ function nodeHtml(
   // panel. Falls back to the plain free-text `spouse` field when there's no
   // linked Person for this anchor.
   const linkedSpouse = spouseByAnchorId.get(p.id)
+  const spouseGenderClass = linkedSpouse
+    ? linkedSpouse.gender === 'm'
+      ? 'ft-card__spouse--m'
+      : linkedSpouse.gender === 'f'
+        ? ''
+        : 'ft-card__spouse--u'
+    : ''
   const spouseHtml = linkedSpouse
-    ? `<div class="ft-card__spouse ft-card__spouse--link" data-select-person="${escapeHtml(linkedSpouse.id)}">⚭ ${escapeHtml(fullName(linkedSpouse) || t('noName'))}</div>`
+    ? `<div class="ft-card__spouse ft-card__spouse--link ${spouseGenderClass}" data-select-person="${escapeHtml(linkedSpouse.id)}">⚭ ${escapeHtml(fullName(linkedSpouse) || t('noName'))}</div>`
     : p.spouse
       ? `<div class="ft-card__spouse">⚭ ${escapeHtml(p.spouse)}</div>`
       : ''

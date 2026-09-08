@@ -115,6 +115,11 @@ export const messages = {
   fRelationTo: 'Спрямо кого',
   fRelationCustomLabel: 'Име на връзката',
   fRelationCustomLabelPlaceholder: 'напр. Кръстник',
+  fRelationToHelpFather: 'Избраният човек ще стане дете на новия — виж предупреждението по-долу.',
+  fRelationToHelpSpouse: 'Ще се покаже като брачна връзка в картичката на избрания човек.',
+  fRelationToHelpLabelOnly: 'Само описателно — не променя мястото в дървото.',
+  fRelationFatherWarning: (name: string) =>
+    `При запис „${name}“ ще стане дете на новия човек в дървото (полето „Дете на“ по-долу засяга само мястото на новия човек, не на „${name}“).`,
   fGender: 'Пол',
   gMale: 'Мъж',
   gFemale: 'Жена',
@@ -144,6 +149,7 @@ export const messages = {
   save: 'Запис',
   cancel: 'Отказ',
   saving: 'Записване…',
+  discardEditConfirm: 'Имате незаписани промени. Да ги отхвърля ли?',
 
   // delete
   deleteTitle: 'Изтриване на човек',

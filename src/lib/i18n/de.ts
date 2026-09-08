@@ -116,6 +116,11 @@ export const messages: typeof bgMessages = {
   fRelationTo: 'In Bezug auf wen',
   fRelationCustomLabel: 'Bezeichnung der Beziehung',
   fRelationCustomLabelPlaceholder: 'z. B. Pate',
+  fRelationToHelpFather: 'Die ausgewählte Person wird zum Kind der neuen Person — siehe Warnung unten.',
+  fRelationToHelpSpouse: 'Wird als Ehe-Verknüpfung auf der Karte der ausgewählten Person angezeigt.',
+  fRelationToHelpLabelOnly: 'Nur beschreibend — ändert nicht die Platzierung im Baum.',
+  fRelationFatherWarning: (name: string) =>
+    `Beim Speichern wird „${name}“ zum Kind der neuen Person (das Feld „Kind von“ unten betrifft nur die Platzierung der neuen Person, nicht die von „${name}“).`,
   fGender: 'Geschlecht',
   gMale: 'Männlich',
   gFemale: 'Weiblich',
@@ -145,6 +150,7 @@ export const messages: typeof bgMessages = {
   save: 'Speichern',
   cancel: 'Abbrechen',
   saving: 'Wird gespeichert…',
+  discardEditConfirm: 'Sie haben ungespeicherte Änderungen. Verwerfen?',
 
   // delete
   deleteTitle: 'Person löschen',

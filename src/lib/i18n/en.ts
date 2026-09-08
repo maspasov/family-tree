@@ -116,6 +116,11 @@ export const messages: typeof bgMessages = {
   fRelationTo: 'Relative to whom',
   fRelationCustomLabel: 'Relation name',
   fRelationCustomLabelPlaceholder: 'e.g. Godfather',
+  fRelationToHelpFather: 'The selected person will become the new person’s child — see the warning below.',
+  fRelationToHelpSpouse: 'Shown as a marriage link on the selected person’s card.',
+  fRelationToHelpLabelOnly: 'Descriptive only — doesn’t change tree placement.',
+  fRelationFatherWarning: (name: string) =>
+    `On save, "${name}" will become a child of the new person (the "Child of" field below only affects the new person's own placement, not "${name}"'s).`,
   fGender: 'Gender',
   gMale: 'Male',
   gFemale: 'Female',
@@ -145,6 +150,7 @@ export const messages: typeof bgMessages = {
   save: 'Save',
   cancel: 'Cancel',
   saving: 'Saving…',
+  discardEditConfirm: 'You have unsaved changes. Discard them?',
 
   // delete
   deleteTitle: 'Delete person',

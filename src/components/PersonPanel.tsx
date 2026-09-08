@@ -198,13 +198,23 @@ export function PersonPanel({
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
+  // Keyed on person.id (not the `person` object) so a live Firestore update
+  // to the same person mid-edit doesn't blow away in-progress changes — but
+  // switching to look at a DIFFERENT person always resets local edit state,
+  // instead of leaving the previous person's stale draft showing under the
+  // new person's name/photos (e.g. clicking between merged spouses' cards,
+  // which goes through onSelect directly rather than the autoEdit path).
   useEffect(() => {
     if (autoEdit) {
       setEditDraftState(stripAudit(person))
       onAutoEditHandled?.()
+    } else {
+      setEditDraftState(null)
     }
+    setTouched(false)
+    setSaveError(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoEdit])
+  }, [person.id])
 
   // Editing an existing person never *requires* picking a parent (unlike
   // adding one to an otherwise non-empty tree) — matches the old modal's
@@ -228,6 +238,12 @@ export function PersonPanel({
     setEditDraftState(null)
     setTouched(false)
     setSaveError(null)
+  }
+
+  function handleClose() {
+    const dirty = editDraft && JSON.stringify(editDraft) !== JSON.stringify(stripAudit(person))
+    if (dirty && !window.confirm(t('discardEditConfirm'))) return
+    onClose()
   }
 
   async function saveEdit(e: FormEvent) {
@@ -295,12 +311,10 @@ export function PersonPanel({
       <Stack spacing={2} sx={{ p: 2.5, overflow: 'auto', height: '100%' }}>
         <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
           <Typography variant="h5">{fullName(person)}</Typography>
-          <IconButton aria-label={t('close')} onClick={onClose} size="small">
+          <IconButton aria-label={t('close')} onClick={handleClose} size="small">
             <CloseIcon fontSize="small" />
           </IconButton>
         </Stack>
-
-        <PhotoStrip key={person.id} personId={person.id} canEdit={canEdit} />
 
         {editDraft ? (
           <Stack component="form" spacing={2} onSubmit={saveEdit}>
@@ -422,6 +436,8 @@ export function PersonPanel({
             )}
           </>
         )}
+
+        <PhotoStrip key={person.id} personId={person.id} canEdit={canEdit} />
       </Stack>
     </Drawer>
   )

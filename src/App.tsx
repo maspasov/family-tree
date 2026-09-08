@@ -90,11 +90,20 @@ export default function App() {
   const focusPerson = useCallback(
     (id: string) => {
       setSelectedId(id)
+      // A merged wife/husband (see toChartData's isMergedSpouse) has no chart
+      // node of their own — center/highlight their spouse's card instead,
+      // where their name actually renders.
+      const person = byId.get(id)
+      const chartFocusId =
+        (person?.relation?.type === 'wife' || person?.relation?.type === 'husband') &&
+        byId.has(person.relation.toId)
+          ? person.relation.toId
+          : id
       if (viewMode === 'map') mapRef.current?.focus(id)
       else if (viewMode === 'calendar') calendarRef.current?.focus(id)
-      else chartRef.current?.focus(id)
+      else chartRef.current?.focus(chartFocusId)
     },
-    [viewMode],
+    [viewMode, byId],
   )
 
   // A card's quick-link switches view *and* focuses a person in one click.
