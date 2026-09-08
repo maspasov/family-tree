@@ -31,6 +31,7 @@ import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import DataObjectIcon from '@mui/icons-material/DataObject'
 import ImageIcon from '@mui/icons-material/Image'
+import LanguageIcon from '@mui/icons-material/Language'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import LoginIcon from '@mui/icons-material/Login'
 import LogoutIcon from '@mui/icons-material/Logout'
@@ -44,7 +45,7 @@ import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import ZoomInIcon from '@mui/icons-material/ZoomIn'
 import ZoomOutIcon from '@mui/icons-material/ZoomOut'
-import { t } from '../lib/i18n'
+import { t, useLocale, LOCALE_NAMES, type Locale } from '../lib/i18n'
 import { fullName, lifespan, type Person } from '../model/person'
 import { useAuth } from '../auth/AuthContext'
 import { useColorMode } from '../theme/ColorModeContext'
@@ -74,11 +75,13 @@ interface Props {
 export function Toolbar(props: Props) {
   const { user, isEditor, isViewerOnly, signIn, signOutUser } = useAuth()
   const { mode, toggle } = useColorMode()
+  const { locale, setLocale } = useLocale()
   const theme = useTheme()
   const isCompact = useMediaQuery(theme.breakpoints.down('lg'))
   const [query, setQuery] = useState('')
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
   const [actionsAnchor, setActionsAnchor] = useState<HTMLElement | null>(null)
+  const [langAnchor, setLangAnchor] = useState<HTMLElement | null>(null)
 
   const results = useMemo(() => {
     const q = query.trim().toLocaleLowerCase('bg')
@@ -152,7 +155,7 @@ export function Toolbar(props: Props) {
             }}
           >
             <ListItemIcon><SwapVertIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>{props.layout === 'top' ? 'Разгъване надолу' : 'Разгъване нагоре'}</ListItemText>
+            <ListItemText>{props.layout === 'top' ? t('layoutDownMenu') : t('layoutUpMenu')}</ListItemText>
           </MenuItem>
         </>
       )}
@@ -258,7 +261,7 @@ export function Toolbar(props: Props) {
                   startIcon={<SwapVertIcon />}
                   onClick={() => props.onLayoutChange(props.layout === 'top' ? 'bottom' : 'top')}
                 >
-                  {props.layout === 'top' ? '⬇ надолу' : '⬆ нагоре'}
+                  {props.layout === 'top' ? t('layoutDown') : t('layoutUp')}
                 </Button>
               </>
             )}
@@ -272,7 +275,7 @@ export function Toolbar(props: Props) {
 
         {isCompact && (
           <>
-            <Tooltip title="Меню">
+            <Tooltip title={t('menuLabel')}>
               <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)}>
                 <MoreVertIcon />
               </IconButton>
@@ -283,11 +286,31 @@ export function Toolbar(props: Props) {
           </>
         )}
 
-        <Tooltip title={mode === 'light' ? 'Тъмна тема' : 'Светла тема'}>
+        <Tooltip title={mode === 'light' ? t('darkMode') : t('lightMode')}>
           <IconButton onClick={toggle}>
             {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
         </Tooltip>
+
+        <Tooltip title={t('language')}>
+          <IconButton onClick={(e) => setLangAnchor(e.currentTarget)}>
+            <LanguageIcon />
+          </IconButton>
+        </Tooltip>
+        <Menu anchorEl={langAnchor} open={Boolean(langAnchor)} onClose={() => setLangAnchor(null)}>
+          {(Object.keys(LOCALE_NAMES) as Locale[]).map((l) => (
+            <MenuItem
+              key={l}
+              selected={l === locale}
+              onClick={() => {
+                setLocale(l)
+                setLangAnchor(null)
+              }}
+            >
+              {LOCALE_NAMES[l]}
+            </MenuItem>
+          ))}
+        </Menu>
 
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', pl: 1, borderLeft: 1, borderColor: 'divider' }}>
           {user ? (

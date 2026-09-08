@@ -6,6 +6,8 @@
  * the hand-drawn „Брусарите“ chart which is patrilineal). A spouse is recorded
  * as free text on `spouse` and rendered inside the same node card.
  */
+import { getLocale } from '../lib/i18n'
+
 export type Gender = 'm' | 'f' | 'unknown'
 
 /**
@@ -20,6 +22,8 @@ export type RelationType =
   | 'child'
   | 'father'
   | 'mother'
+  | 'wife'
+  | 'husband'
   | 'grandfather'
   | 'grandmother'
   | 'aunt'
@@ -36,6 +40,15 @@ export interface Person {
   patronymic?: string
   /** Family name, Cyrillic. Optional (many rows on the source chart omit it). */
   surname?: string
+  /**
+   * Latin-script counterparts, optional. When set and the active UI locale
+   * isn't `bg`, `fullName()` prefers these over the Cyrillic fields above —
+   * lets a person's name display correctly for EN/DE readers instead of
+   * always showing the Cyrillic transcription regardless of UI language.
+   */
+  nameEn?: string
+  patronymicEn?: string
+  surnameEn?: string
   /** Lineage parent's id, or null for the single root of the tree. */
   parentId: string | null
   /**
@@ -67,6 +80,8 @@ export interface Person {
   birthPlace?: string
   /** Current address, free text — geocoded into `geo` for the map view. */
   address?: string
+  /** Optional contact email — lets the app notify this person when they're added to the tree. */
+  email?: string
   /**
    * Geocoded from `address`. `undefined` = never geocoded; `null` = explicitly
    * cleared by the user. Use `null` (not `undefined`) to clear an existing pin —
@@ -99,6 +114,9 @@ export const EMPTY_DRAFT: PersonDraft = {
   name: '',
   patronymic: '',
   surname: '',
+  nameEn: '',
+  patronymicEn: '',
+  surnameEn: '',
   parentId: null,
   motherName: '',
   fatherName: '',
@@ -109,6 +127,7 @@ export const EMPTY_DRAFT: PersonDraft = {
   deathYear: '',
   birthPlace: '',
   address: '',
+  email: '',
   geo: undefined,
   birthMonthDay: '',
   note: '',
@@ -116,7 +135,21 @@ export const EMPTY_DRAFT: PersonDraft = {
   verified: true,
 }
 
-export function fullName(p: Pick<Person, 'name' | 'patronymic' | 'surname'>): string {
+/** Drop the fields the form doesn't own (id + audit), keep the editable rest. */
+export function stripAudit(p: Person): PersonDraft {
+  const { id, createdAt, updatedAt, updatedByEmail, ...draft } = p
+  return draft
+}
+
+export function fullName(
+  p: Pick<Person, 'name' | 'patronymic' | 'surname' | 'nameEn' | 'patronymicEn' | 'surnameEn'>,
+): string {
+  if (getLocale() !== 'bg' && (p.nameEn || p.surnameEn)) {
+    return [p.nameEn || p.name, p.patronymicEn, p.surnameEn || p.surname]
+      .filter(Boolean)
+      .join(' ')
+      .trim()
+  }
   return [p.name, p.patronymic, p.surname].filter(Boolean).join(' ').trim()
 }
 
@@ -160,6 +193,10 @@ export function validateDraft(
     if (!m || month < 1 || month > 12 || day < 1 || day > daysInMonth[month - 1]) {
       errors.birthMonthDay = 'Използвайте формат ММ-ДД, напр. 05-17.'
     }
+  }
+  const email = (draft.email ?? '').trim()
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.email = 'Невалиден имейл адрес.'
   }
   return { ok: Object.keys(errors).length === 0, errors }
 }

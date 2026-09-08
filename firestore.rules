@@ -2,21 +2,27 @@ rules_version = '2';
 
 // Security model for „Родословно дърво“ (invite-only):
 //   * the site is NOT public — only Google accounts whose (verified) e-mail is
-//     listed in config/app.editors may READ *or* write the tree at all;
+//     listed in config/app.editors OR config/app.viewers may READ the tree;
+//     only editors may write to it;
 //   * config/app itself stays publicly readable so the client (and these
-//     rules) can look up who's on the list, but no one can write to it from
-//     the app — edit the array from the Firebase console only.
+//     rules) can look up who's on either list, but no one can write to it
+//     from the app — edit the arrays from the Firebase console only.
 //
 // Bootstrap: before anyone can use the app you must create the document
 //   config/app  ->  { editors: ["you@gmail.com", "someone.else@gmail.com"] }
 // in the Firebase console (Firestore Database -> Start collection "config",
-// document id "app", field "editors" = array of strings).
+// document id "app", field "editors" = array of strings). Optionally add a
+// second field, "viewers" (also an array of strings), for read-only accounts.
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function editors() {
       return get(/databases/$(database)/documents/config/app).data.editors;
+    }
+
+    function viewers() {
+      return get(/databases/$(database)/documents/config/app).data.get('viewers', []);
     }
 
     function isEditor() {
@@ -26,14 +32,25 @@ service cloud.firestore {
         && request.auth.token.email.lower() in editors();
     }
 
-    // Public, read-only. Change the editors list from the console, not the app.
+    function isViewer() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && exists(/databases/$(database)/documents/config/app)
+        && request.auth.token.email.lower() in viewers();
+    }
+
+    function canRead() {
+      return isEditor() || isViewer();
+    }
+
+    // Public, read-only. Change the editors/viewers lists from the console, not the app.
     match /config/app {
       allow read: if true;
       allow write: if false;
     }
 
     match /persons/{personId} {
-      allow read: if isEditor();
+      allow read: if canRead();
 
       allow create: if isEditor()
         && request.resource.data.name is string
@@ -55,13 +72,28 @@ service cloud.firestore {
     // photo for one person to share that single budget instead of each
     // getting its own.
     match /persons/{personId}/photos/{photoId} {
-      allow read: if isEditor();
+      allow read: if canRead();
 
       allow create: if isEditor()
         && request.resource.data.dataUrl is string
         && request.resource.data.dataUrl.size() > 0
         && request.resource.data.dataUrl.size() < 900000;
 
+      allow delete: if isEditor();
+    }
+
+    // Scanned archive pages (the 1987 source document) — same one-doc-per-photo
+    // shape as persons/{id}/photos, kept out of the git repo/public build since
+    // this is a public GitHub repo; served from Firestore behind canRead() instead.
+    match /archive/{photoId} {
+      allow read: if canRead();
+
+      allow create: if isEditor()
+        && request.resource.data.dataUrl is string
+        && request.resource.data.dataUrl.size() > 0
+        && request.resource.data.dataUrl.size() < 900000;
+
+      allow update: if isEditor();
       allow delete: if isEditor();
     }
 

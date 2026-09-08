@@ -1,10 +1,6 @@
-import type { RelationType } from '../model/person'
+import type { RelationType } from '../../model/person'
 
-/**
- * The UI is Bulgarian-only. Strings live here (not inline) so a second language
- * can be added later without hunting through components. Usage: `t('save')`.
- */
-export const bg = {
+export const messages = {
   appTitle: 'Родословно дърво',
   appSubtitle: 'Родът „Брусарите“ — клон Тано Раде Брусарски',
 
@@ -48,6 +44,14 @@ export const bg = {
   calendarEmptyTitle: 'Няма въведени рождени дни',
   calendarEmptyBody:
     'Добавете „Рожден ден (ММ-ДД)“ на поне един човек във формата за редакция, за да се появят събития в календара.',
+  menuLabel: 'Меню',
+  darkMode: 'Тъмна тема',
+  lightMode: 'Светла тема',
+  language: 'Език',
+  layoutDown: '⬇ надолу',
+  layoutUp: '⬆ нагоре',
+  layoutDownMenu: 'Разгъване надолу',
+  layoutUpMenu: 'Разгъване нагоре',
 
   // Calendar export (.ics — no account, works with any calendar app)
   calendarExport: 'Изтегли календар (.ics)',
@@ -59,6 +63,7 @@ export const bg = {
   died: 'Починал/а',
   birthPlace: 'Месторождение',
   address: 'Адрес',
+  email: 'Имейл',
   photos: 'Снимки',
   addPhoto: 'Добави снимка',
   removePhoto: 'Премахни снимката',
@@ -69,6 +74,7 @@ export const bg = {
   mother: 'Майка',
   father: 'Баща',
   relation: 'Роднинска връзка',
+  relationConnector: 'на',
   children: 'Деца',
   unverified: 'Непроверено — данните от снимката са несигурни.',
   edit: 'Редакция',
@@ -81,12 +87,17 @@ export const bg = {
   fName: 'Име',
   fPatronymic: 'Презиме',
   fSurname: 'Фамилия',
+  fNameEnSection: 'Име на латиница (по желание)',
+  fNameEn: 'Име (EN)',
+  fPatronymicEn: 'Презиме (EN)',
+  fSurnameEn: 'Фамилия (EN)',
   fMother: 'Майка',
   fFather: 'Баща',
   fRelationType: 'Роднинска връзка',
   noRelation: '— без указана връзка —',
   fRelationTo: 'Спрямо кого',
   fRelationCustomLabel: 'Име на връзката',
+  fRelationCustomLabelPlaceholder: 'напр. Кръстник',
   fGender: 'Пол',
   gMale: 'Мъж',
   gFemale: 'Жена',
@@ -96,6 +107,9 @@ export const bg = {
   fBirthMonthDay: 'Рожден ден (ММ-ДД)',
   fBirthPlace: 'Месторождение',
   fAddress: 'Адрес (за картата)',
+  fEmail: 'Имейл',
+  notifySent: (email: string) => `Изпратен е имейл до ${email}.`,
+  notifyFailed: (email: string) => `Неуспешно изпращане на имейл до ${email}.`,
   locate: 'Намери координати',
   locating: 'Търсене…',
   locateFound: 'Координатите са намерени.',
@@ -143,25 +157,40 @@ export const bg = {
     'Копирайте .env.example като .env.local и попълнете стойностите от ' +
     'Firebase конзолата. Вижте README.md.',
   errorPrefix: 'Грешка',
-} as const
 
-export type MessageKey = keyof typeof bg
+  // org-chart card (raw HTML, outside React — see FamilyChart.tsx/FamilyMap.tsx)
+  synthRootLabel: 'Родословно дърво',
+  noName: 'Без име',
+  unverifiedFlagTitle: 'Непроверено',
+  quickLinkEditTitle: 'Редакция',
+  quickLinkMapTitle: 'Виж на картата',
+  quickLinkCalendarTitle: 'Виж в календара',
+  quickLinkDeleteTitle: 'Изтрий',
+  peopleAtAddress: (n: number) => `${n} души на този адрес`,
 
-/** Keys whose value is a plain string (the ones `t()` accepts). */
-export type StringKey = {
-  [K in keyof typeof bg]: (typeof bg)[K] extends string ? K : never
-}[keyof typeof bg]
+  // archive view
+  archiveTitle: 'Архив на рода',
+  archiveIntro: 'Оригиналните страници от 1987 г., по които е изградено това родословно дърво.',
+  archiveCaption1: '„Кратък очерк“ — написан от Димитър, внук на дядо Цано, 9.XII.1987 г.',
+  archiveCaption2: 'Родословно дърво на рода „Брусарите“ — клон Тано Раде Брусарски (стр. 2)',
+  archiveCaption3: 'Родословно дърво на рода „Брусарите“ — клон дядо Цано Радев Брусарски (стр. 3)',
+  archiveEmptyBody: 'Все още няма качени страници в архива.',
+  archiveCaptionPlaceholder: 'Добавете описание…',
 
-export function t(key: StringKey): string {
-  return bg[key] as string
+  // about
+  aboutLink: 'За автора',
+  aboutTitle: 'За автора',
+  aboutBody: 'Родословното дърво е създадено и се поддържа от:',
 }
 
 export const motto = 'Опознай рода си, за да си горд! Човек без роднини е сам.'
 
-export const RELATION_LABELS: Record<RelationType, string> = {
+export const relationLabels: Record<RelationType, string> = {
   child: 'Дете',
   father: 'Баща',
   mother: 'Майка',
+  wife: 'Съпруга',
+  husband: 'Съпруг',
   grandfather: 'Дядо',
   grandmother: 'Баба',
   aunt: 'Леля',

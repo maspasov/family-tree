@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import {
+  Alert,
   Box,
   Button,
   Chip,
@@ -16,10 +17,19 @@ import {
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import CloseIcon from '@mui/icons-material/Close'
 import { Lightbox } from './Lightbox'
+import { PersonFields } from './PersonFields'
 import { t, RELATION_LABELS } from '../lib/i18n'
 import { usePersonPhotos } from '../data/usePersonPhotos'
 import { compressImageToDataUrl } from '../lib/imageCompress'
-import { childrenOf, fullName, lifespan, type Person } from '../model/person'
+import {
+  childrenOf,
+  fullName,
+  lifespan,
+  stripAudit,
+  validateDraft,
+  type Person,
+  type PersonDraft,
+} from '../model/person'
 
 interface Props {
   person: Person
@@ -27,9 +37,12 @@ interface Props {
   canEdit: boolean
   onClose: () => void
   onSelect: (id: string) => void
-  onEdit: (p: Person) => void
+  onSave: (id: string, draft: PersonDraft) => Promise<void>
   onAddChild: (parent: Person) => void
   onDelete: (p: Person) => void
+  /** Set by a tree-card's quick-link to jump straight into edit mode when the panel opens. */
+  autoEdit?: boolean
+  onAutoEditHandled?: () => void
 }
 
 function Fact({ label, children }: { label: string; children: React.ReactNode }) {
@@ -171,12 +184,69 @@ export function PersonPanel({
   canEdit,
   onClose,
   onSelect,
-  onEdit,
+  onSave,
   onAddChild,
   onDelete,
+  autoEdit,
+  onAutoEditHandled,
 }: Props) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
+  const [editDraft, setEditDraftState] = useState<PersonDraft | null>(null)
+  const [touched, setTouched] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (autoEdit) {
+      setEditDraftState(stripAudit(person))
+      onAutoEditHandled?.()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoEdit])
+
+  // Editing an existing person never *requires* picking a parent (unlike
+  // adding one to an otherwise non-empty tree) — matches the old modal's
+  // `mode === 'edit'` behavior.
+  const { ok, errors } = useMemo(
+    () => (editDraft ? validateDraft(editDraft, { requireParent: false }) : { ok: true, errors: {} }),
+    [editDraft],
+  )
+
+  function setEditField<K extends keyof PersonDraft>(key: K, value: PersonDraft[K]) {
+    setEditDraftState((d) => (d ? { ...d, [key]: value } : d))
+  }
+
+  function startEdit() {
+    setEditDraftState(stripAudit(person))
+    setTouched(false)
+    setSaveError(null)
+  }
+
+  function cancelEdit() {
+    setEditDraftState(null)
+    setTouched(false)
+    setSaveError(null)
+  }
+
+  async function saveEdit(e: FormEvent) {
+    e.preventDefault()
+    setTouched(true)
+    if (!ok || !editDraft) return
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await onSave(person.id, editDraft)
+      setEditDraftState(null)
+    } catch (err) {
+      setSaveError((err as Error).message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const showErr = (k: keyof PersonDraft) => (touched ? errors[k] : undefined)
 
   const parent = person.parentId
     ? people.find((p) => p.id === person.parentId) ?? null
@@ -212,7 +282,9 @@ export function PersonPanel({
                   right: 12,
                   bottom: 12,
                   height: 'auto',
-                  width: 'min(340px, calc(100% - 24px))',
+                  width: editDraft
+                    ? 'min(600px, calc(100% - 24px))'
+                    : 'min(380px, calc(100% - 24px))',
                   borderRadius: 3,
                   boxShadow: 6,
                 }),
@@ -230,101 +302,125 @@ export function PersonPanel({
 
         <PhotoStrip key={person.id} personId={person.id} canEdit={canEdit} />
 
-        {person.verified === false && (
-          <Chip
-            size="small"
-            color="warning"
-            variant="outlined"
-            label={t('unverified')}
-            sx={{ alignSelf: 'flex-start' }}
-          />
-        )}
-
-        <Stack spacing={1.25}>
-          {years && (
-            <Fact label={`${t('born')} / ${t('died')}`}>{years}</Fact>
-          )}
-          {person.birthPlace && <Fact label={t('birthPlace')}>{person.birthPlace}</Fact>}
-          {person.address && <Fact label={t('address')}>{person.address}</Fact>}
-          {person.spouse && <Fact label={t('spouse')}>{person.spouse}</Fact>}
-          {parent && (
-            <Fact label={t('parent')}>
-              <Button
-                variant="text"
-                size="small"
-                sx={{ p: 0, minWidth: 0 }}
-                onClick={() => onSelect(parent.id)}
-              >
-                {fullName(parent)}
+        {editDraft ? (
+          <Stack component="form" spacing={2} onSubmit={saveEdit}>
+            <PersonFields draft={editDraft} set={setEditField} people={people} selfId={person.id} showErr={showErr} />
+            {saveError && <Alert severity="error">{saveError}</Alert>}
+            <Stack direction="row" sx={{ gap: 1 }}>
+              <Button variant="outlined" onClick={cancelEdit} disabled={saving}>
+                {t('cancel')}
               </Button>
-            </Fact>
-          )}
-          {person.motherName && <Fact label={t('mother')}>{person.motherName}</Fact>}
-          {person.fatherName && <Fact label={t('father')}>{person.fatherName}</Fact>}
-          {person.relation && (
-            <Fact label={t('relation')}>
-              {(person.relation.type === 'other' && person.relation.customLabel) ||
-                RELATION_LABELS[person.relation.type]}{' '}
-              на {person.relation.toName}
-            </Fact>
-          )}
-          {person.note && (
-            <Fact label={t('note')}>
-              <Box component="span" sx={{ whiteSpace: 'pre-wrap' }}>
-                {person.note}
-              </Box>
-            </Fact>
-          )}
-        </Stack>
-
-        {kids.length > 0 && (
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>
-              {t('children')} · {kids.length}
-            </Typography>
-            <Stack spacing={0.25} sx={{ alignItems: 'flex-start' }}>
-              {kids.map((k) => (
-                <Button
-                  key={k.id}
-                  variant="text"
-                  size="small"
-                  sx={{ p: 0, minWidth: 0, justifyContent: 'flex-start', textAlign: 'left' }}
-                  onClick={() => onSelect(k.id)}
-                >
-                  {fullName(k)}
-                  {lifespan(k) ? ` · ${lifespan(k)}` : ''}
-                </Button>
-              ))}
+              <Button type="submit" variant="contained" disabled={saving}>
+                {saving ? t('saving') : t('save')}
+              </Button>
             </Stack>
-          </Box>
-        )}
-
-        {canEdit && (
+          </Stack>
+        ) : (
           <>
-            <Divider sx={{ mt: 'auto' }} />
-            <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
-              <Button variant="outlined" size="small" onClick={() => onEdit(person)}>
-                {t('edit')}
-              </Button>
-              <Button variant="outlined" size="small" onClick={() => onAddChild(person)}>
-                {t('addChild')}
-              </Button>
-              <Button
-                variant="outlined"
+            {person.verified === false && (
+              <Chip
                 size="small"
-                color="error"
-                onClick={() => onDelete(person)}
-              >
-                {t('deletePerson')}
-              </Button>
-            </Stack>
-          </>
-        )}
+                color="warning"
+                variant="outlined"
+                label={t('unverified')}
+                sx={{ alignSelf: 'flex-start' }}
+              />
+            )}
 
-        {person.updatedByEmail && (
-          <Typography variant="caption" color="text.secondary">
-            {t('edit')}: {person.updatedByEmail}
-          </Typography>
+            <Stack spacing={1.25}>
+              {years && (
+                <Fact label={`${t('born')} / ${t('died')}`}>{years}</Fact>
+              )}
+              {person.birthPlace && <Fact label={t('birthPlace')}>{person.birthPlace}</Fact>}
+              {person.address && <Fact label={t('address')}>{person.address}</Fact>}
+              {person.email && (
+                <Fact label={t('email')}>
+                  <Box component="a" href={`mailto:${person.email}`} sx={{ color: 'primary.main' }}>
+                    {person.email}
+                  </Box>
+                </Fact>
+              )}
+              {person.spouse && <Fact label={t('spouse')}>{person.spouse}</Fact>}
+              {parent && (
+                <Fact label={t('parent')}>
+                  <Button
+                    variant="text"
+                    size="small"
+                    sx={{ p: 0, minWidth: 0 }}
+                    onClick={() => onSelect(parent.id)}
+                  >
+                    {fullName(parent)}
+                  </Button>
+                </Fact>
+              )}
+              {person.motherName && <Fact label={t('mother')}>{person.motherName}</Fact>}
+              {person.fatherName && <Fact label={t('father')}>{person.fatherName}</Fact>}
+              {person.relation && (
+                <Fact label={t('relation')}>
+                  {(person.relation.type === 'other' && person.relation.customLabel) ||
+                    RELATION_LABELS[person.relation.type]}{' '}
+                  {t('relationConnector')} {person.relation.toName}
+                </Fact>
+              )}
+              {person.note && (
+                <Fact label={t('note')}>
+                  <Box component="span" sx={{ whiteSpace: 'pre-wrap' }}>
+                    {person.note}
+                  </Box>
+                </Fact>
+              )}
+            </Stack>
+
+            {kids.length > 0 && (
+              <Box>
+                <Typography variant="subtitle2" gutterBottom>
+                  {t('children')} · {kids.length}
+                </Typography>
+                <Stack spacing={0.25} sx={{ alignItems: 'flex-start' }}>
+                  {kids.map((k) => (
+                    <Button
+                      key={k.id}
+                      variant="text"
+                      size="small"
+                      sx={{ p: 0, minWidth: 0, justifyContent: 'flex-start', textAlign: 'left' }}
+                      onClick={() => onSelect(k.id)}
+                    >
+                      {fullName(k)}
+                      {lifespan(k) ? ` · ${lifespan(k)}` : ''}
+                    </Button>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+
+            {canEdit && (
+              <>
+                <Divider sx={{ mt: 'auto' }} />
+                <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
+                  <Button variant="outlined" size="small" onClick={startEdit}>
+                    {t('edit')}
+                  </Button>
+                  <Button variant="outlined" size="small" onClick={() => onAddChild(person)}>
+                    {t('addChild')}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="error"
+                    onClick={() => onDelete(person)}
+                  >
+                    {t('deletePerson')}
+                  </Button>
+                </Stack>
+              </>
+            )}
+
+            {person.updatedByEmail && (
+              <Typography variant="caption" color="text.secondary">
+                {t('edit')}: {person.updatedByEmail}
+              </Typography>
+            )}
+          </>
         )}
       </Stack>
     </Drawer>

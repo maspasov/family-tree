@@ -1,65 +1,151 @@
-import { useState } from 'react'
-import { Box, Stack, Typography } from '@mui/material'
+import { useRef, useState } from 'react'
+import { Box, CircularProgress, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
+import CloseIcon from '@mui/icons-material/Close'
+import EditIcon from '@mui/icons-material/Edit'
 import { Lightbox, type LightboxItem } from './Lightbox'
-import ocherk1987 from '../assets/archive/ocherk-1987.jpg'
-import rodovoDurvoTano from '../assets/archive/rodovo-durvo-tano-str2.jpg'
-import rodovoDurvoTsano from '../assets/archive/rodovo-durvo-tsano-str3.jpg'
+import { useArchivePhotos } from '../data/useArchivePhotos'
+import { compressImageToDataUrl } from '../lib/imageCompress'
+import { useAuth } from '../auth/AuthContext'
+import { t, useLocale, type StringKey } from '../lib/i18n'
 
-const ITEMS: LightboxItem[] = [
-  {
-    src: ocherk1987,
-    caption: '„Кратък очерк“ — написан от Димитър, внук на дядо Цано, 9.XII.1987 г.',
-  },
-  {
-    src: rodovoDurvoTano,
-    caption: 'Родословно дърво на рода „Брусарите“ — клон Тано Раде Брусарски (стр. 2)',
-  },
-  {
-    src: rodovoDurvoTsano,
-    caption: 'Родословно дърво на рода „Брусарите“ — клон дядо Цано Радев Брусарски (стр. 3)',
-  },
-]
+// Prefilled onto the first three uploads, in order, purely as a convenience —
+// editors can change or clear them; nothing enforces this order afterwards.
+const SUGGESTED_CAPTIONS: StringKey[] = ['archiveCaption1', 'archiveCaption2', 'archiveCaption3']
 
 export function Archive() {
+  useLocale()
+  const { isEditor } = useAuth()
+  const { photos, addPhoto, deletePhoto, updateCaption } = useArchivePhotos()
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [editingCaptionId, setEditingCaptionId] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const items: LightboxItem[] = photos.map((p) => ({ src: p.dataUrl, caption: p.caption }))
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const dataUrl = await compressImageToDataUrl(file)
+      const suggested = SUGGESTED_CAPTIONS[photos.length]
+      await addPhoto(dataUrl, suggested ? t(suggested) : '')
+    } catch (err) {
+      setUploadError((err as Error).message)
+    } finally {
+      setUploading(false)
+    }
+  }
 
   return (
     <Box sx={{ position: 'absolute', inset: 0, overflow: 'auto', p: { xs: 2, sm: 4 } }}>
       <Stack spacing={3} sx={{ maxWidth: 900, mx: 'auto' }}>
         <Stack spacing={1}>
-          <Typography variant="h5">Архив на рода</Typography>
-          <Typography color="text.secondary">
-            Оригиналните страници от 1987 г., по които е изградено това родословно дърво.
-          </Typography>
+          <Typography variant="h5">{t('archiveTitle')}</Typography>
+          <Typography color="text.secondary">{t('archiveIntro')}</Typography>
         </Stack>
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          {ITEMS.map((item, i) => (
-            <Stack key={item.src} spacing={1} sx={{ flex: 1, cursor: 'pointer' }} onClick={() => setOpenIndex(i)}>
-              <Box
-                component="img"
-                src={item.src}
-                alt={item.caption}
-                loading="lazy"
-                sx={{
-                  width: '100%',
-                  height: 220,
-                  objectFit: 'cover',
-                  borderRadius: 2,
-                  border: 1,
-                  borderColor: 'divider',
-                  boxShadow: 2,
-                }}
-              />
-              <Typography variant="caption" color="text.secondary">
-                {item.caption}
-              </Typography>
-            </Stack>
-          ))}
-        </Stack>
+        {photos.length === 0 && !isEditor ? (
+          <Typography color="text.secondary">{t('archiveEmptyBody')}</Typography>
+        ) : (
+          <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 2 }}>
+            {photos.map((p, i) => (
+              <Stack key={p.id} spacing={1} sx={{ width: { xs: '100%', sm: 260 } }}>
+                <Box
+                  component="img"
+                  src={p.dataUrl}
+                  alt={p.caption ?? ''}
+                  loading="lazy"
+                  onClick={() => setOpenIndex(i)}
+                  sx={{
+                    width: '100%',
+                    height: 220,
+                    objectFit: 'cover',
+                    borderRadius: 2,
+                    border: 1,
+                    borderColor: 'divider',
+                    boxShadow: 2,
+                    cursor: 'pointer',
+                  }}
+                />
+                {isEditor && editingCaptionId === p.id ? (
+                  <TextField
+                    size="small"
+                    autoFocus
+                    defaultValue={p.caption ?? ''}
+                    placeholder={t('archiveCaptionPlaceholder')}
+                    onBlur={(e) => {
+                      updateCaption(p.id, e.target.value)
+                      setEditingCaptionId(null)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
+                    }}
+                  />
+                ) : (
+                  <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', gap: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      {p.caption}
+                    </Typography>
+                    {isEditor && (
+                      <Stack direction="row" sx={{ gap: 0.25, flexShrink: 0 }}>
+                        <IconButton size="small" onClick={() => setEditingCaptionId(p.id)}>
+                          <EditIcon sx={{ fontSize: 14 }} />
+                        </IconButton>
+                        <IconButton size="small" onClick={() => deletePhoto(p.id)}>
+                          <CloseIcon sx={{ fontSize: 14 }} />
+                        </IconButton>
+                      </Stack>
+                    )}
+                  </Stack>
+                )}
+              </Stack>
+            ))}
+
+            {isEditor && (
+              <>
+                <Tooltip title={t('addPhoto')}>
+                  <Box
+                    component="button"
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    sx={{
+                      width: { xs: '100%', sm: 260 },
+                      height: 220,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 2,
+                      border: 1,
+                      borderStyle: 'dashed',
+                      borderColor: 'divider',
+                      bgcolor: 'transparent',
+                      color: 'text.secondary',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {uploading ? <CircularProgress size={22} /> : <AddAPhotoIcon />}
+                  </Box>
+                </Tooltip>
+                <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleFile} />
+              </>
+            )}
+          </Stack>
+        )}
+        {uploadError && (
+          <Typography variant="caption" color="error">
+            {uploadError}
+          </Typography>
+        )}
       </Stack>
 
-      <Lightbox items={ITEMS} index={openIndex} onClose={() => setOpenIndex(null)} onNavigate={setOpenIndex} />
+      <Lightbox items={items} index={openIndex} onClose={() => setOpenIndex(null)} onNavigate={setOpenIndex} />
     </Box>
   )
 }

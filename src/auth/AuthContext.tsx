@@ -21,9 +21,15 @@ interface AuthState {
   loading: boolean
   /** Emails allowed to edit, from Firestore `config/app.editors`. */
   editors: string[]
+  /** Emails allowed to view (read-only), from Firestore `config/app.viewers`. */
+  viewers: string[]
   /** Signed in AND email is on the editors allow-list. */
   isEditor: boolean
-  /** Signed in but not on the allow-list. */
+  /** Signed in AND email is on the viewers allow-list. */
+  isViewer: boolean
+  /** Signed in and on either list — allowed past the login gate at all. */
+  canView: boolean
+  /** Can view but can't edit. */
   isViewerOnly: boolean
   error: string | null
   signIn: () => Promise<void>
@@ -37,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // When Firebase isn't configured there is nothing to wait for.
   const [loading, setLoading] = useState(firebaseConfigured)
   const [editors, setEditors] = useState<string[]>([])
+  const [viewers, setViewers] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -53,15 +60,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return onSnapshot(
       ref,
       (snap) => {
-        const raw = (snap.data()?.editors ?? []) as unknown[]
-        setEditors(
-          raw
+        const data = snap.data()
+        const normalize = (raw: unknown) =>
+          ((raw ?? []) as unknown[])
             .filter((e): e is string => typeof e === 'string')
-            .map((e) => e.toLowerCase().trim()),
-        )
+            .map((e) => e.toLowerCase().trim())
+        setEditors(normalize(data?.editors))
+        setViewers(normalize(data?.viewers))
       },
-      // Rules allow public read of config/app; a failure here just means "no editors yet".
-      () => setEditors([]),
+      // Rules allow public read of config/app; a failure here just means "no editors/viewers yet".
+      () => {
+        setEditors([])
+        setViewers([])
+      },
     )
   }, [])
 
@@ -69,12 +80,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const email = user?.email?.toLowerCase() ?? null
     const emailVerified = user?.emailVerified ?? false
     const isEditor = Boolean(email && emailVerified && editors.includes(email))
+    const isViewer = Boolean(email && emailVerified && viewers.includes(email))
+    const canView = isEditor || isViewer
     return {
       user,
       loading,
       editors,
+      viewers,
       isEditor,
-      isViewerOnly: Boolean(user) && !isEditor,
+      isViewer,
+      canView,
+      isViewerOnly: canView && !isEditor,
       error,
       async signIn() {
         setError(null)
@@ -93,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await signOut(auth)
       },
     }
-  }, [user, loading, editors, error])
+  }, [user, loading, editors, viewers, error])
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>
 }

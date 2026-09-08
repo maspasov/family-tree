@@ -3,6 +3,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { fullName, lifespan, type Person } from '../model/person'
 import { escapeHtml } from '../lib/html'
+import { t, messages, useLocale } from '../lib/i18n'
 
 export interface FamilyMapHandle {
   fit: () => void
@@ -41,14 +42,14 @@ function tooltipHtml(group: Person[]): string {
     const p = group[0]
     const years = lifespan(p)
     return `<div class="ft-pin-tip">
-      <strong>${escapeHtml(fullName(p) || 'Без име')}</strong>
+      <strong>${escapeHtml(fullName(p) || t('noName'))}</strong>
       ${years ? `<span>${escapeHtml(years)}</span>` : ''}
       ${p.address ? `<span>${escapeHtml(p.address)}</span>` : ''}
     </div>`
   }
-  const names = group.map((p) => escapeHtml(fullName(p) || 'Без име')).join(', ')
+  const names = group.map((p) => escapeHtml(fullName(p) || t('noName'))).join(', ')
   return `<div class="ft-pin-tip">
-    <strong>${group.length} души на този адрес</strong>
+    <strong>${escapeHtml(messages.peopleAtAddress(group.length))}</strong>
     <span>${names}</span>
   </div>`
 }
@@ -70,6 +71,7 @@ export const FamilyMap = forwardRef<FamilyMapHandle, Props>(function FamilyMap(
   { people, onSelect },
   ref,
 ) {
+  const { locale } = useLocale()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<L.Map | null>(null)
   const markersRef = useRef<Map<string, L.Marker>>(new Map())
@@ -121,7 +123,7 @@ export const FamilyMap = forwardRef<FamilyMapHandle, Props>(function FamilyMap(
         const popupHtml = `<div class="ft-pin-popup">${group
           .map((p) => {
             const years = lifespan(p)
-            return `<button type="button" class="ft-pin-popup__item" data-person-id="${escapeHtml(p.id)}">${escapeHtml(fullName(p) || 'Без име')}${years ? ` <span class="ft-muted">· ${escapeHtml(years)}</span>` : ''}</button>`
+            return `<button type="button" class="ft-pin-popup__item" data-person-id="${escapeHtml(p.id)}">${escapeHtml(fullName(p) || t('noName'))}${years ? ` <span class="ft-muted">· ${escapeHtml(years)}</span>` : ''}</button>`
           })
           .join('')}</div>`
         marker.bindPopup(popupHtml)
@@ -137,7 +139,7 @@ export const FamilyMap = forwardRef<FamilyMapHandle, Props>(function FamilyMap(
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [people])
+  }, [people, locale])
 
   // Re-size the map when its container changes size (e.g. the person panel opening/closing).
   useEffect(() => {

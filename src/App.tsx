@@ -2,14 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { Alert, Box, Button, CircularProgress, Snackbar, Stack, Typography } from '@mui/material'
 import { firebaseConfigured } from './lib/firebase'
-import { bg, motto, t } from './lib/i18n'
+import { messages, motto, t, useLocale } from './lib/i18n'
 import { buildBirthdaysIcs, hasBirthdays } from './lib/ics'
+import { sendAddedNotification } from './lib/notifyEmail'
 import { useAuth } from './auth/AuthContext'
 import { usePersons } from './data/usePersons'
 import {
   EMPTY_DRAFT,
   descendantIds,
   fullName,
+  stripAudit,
   type Person,
   type PersonDraft,
 } from './model/person'
@@ -22,6 +24,7 @@ import {
 import { FamilyMap, type FamilyMapHandle } from './components/FamilyMap'
 import { FamilyCalendar, type FamilyCalendarHandle } from './components/FamilyCalendar'
 import { Archive } from './components/Archive'
+import { About } from './components/About'
 import { Toolbar, type ViewMode } from './components/Toolbar'
 import { PersonPanel } from './components/PersonPanel'
 import { PersonForm } from './components/PersonForm'
@@ -29,10 +32,7 @@ import { ConfirmDialog } from './components/ConfirmDialog'
 import { ImportDialog } from './components/ImportDialog'
 import { LoginGate } from './components/LoginGate'
 
-type Editing =
-  | { kind: 'add'; parentId: string | null }
-  | { kind: 'edit'; person: Person }
-  | null
+type Editing = { kind: 'add'; parentId: string | null } | null
 
 function downloadJson(people: Person[]) {
   // Keep `id` (so re-import matches rows); drop server-managed audit fields.
@@ -59,6 +59,10 @@ function downloadIcs(people: Person[]) {
 }
 
 export default function App() {
+  // Subscribing here forces this whole tree to re-render on a language
+  // switch — most components below read the plain `t()`/`messages` imports
+  // directly rather than this hook, so this cascade is what refreshes them.
+  useLocale()
   const { isEditor } = useAuth()
   const { people, byId, loading, error, addPerson, updatePerson, deletePerson, importPeople } =
     usePersons(isEditor)
@@ -67,6 +71,7 @@ export default function App() {
   const [editing, setEditing] = useState<Editing>(null)
   const [deleteTarget, setDeleteTarget] = useState<Person | null>(null)
   const [showImport, setShowImport] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
   const [busy, setBusy] = useState(false)
   const [layout, setLayout] = useState<ChartLayout>('top')
   const [viewMode, setViewMode] = useState<ViewMode>('tree')
@@ -79,6 +84,7 @@ export default function App() {
   // Not reactive state on purpose — a quick-link only needs to *pass* a value
   // into the next effect run below, not trigger a render of its own.
   const pendingFocusIdRef = useRef<string | null>(null)
+  const [autoEditId, setAutoEditId] = useState<string | null>(null)
   const selected = selectedId ? byId.get(selectedId) ?? null : null
 
   const focusPerson = useCallback(
@@ -103,44 +109,64 @@ export default function App() {
     pendingFocusIdRef.current = null
   }, [viewMode])
 
-  const handleQuickLink = useCallback((type: QuickLinkType, personId: string) => {
-    setSelectedId(personId)
-    pendingFocusIdRef.current = personId
-    setViewMode(type)
-  }, [])
+  const handleQuickLink = useCallback(
+    (type: QuickLinkType, personId: string) => {
+      if (type === 'edit' || type === 'delete') {
+        const person = byId.get(personId)
+        if (!person) return
+        if (type === 'edit') {
+          setSelectedId(personId)
+          setAutoEditId(personId)
+        } else {
+          setDeleteTarget(person)
+        }
+        return
+      }
+      setSelectedId(personId)
+      pendingFocusIdRef.current = personId
+      setViewMode(type)
+    },
+    [byId],
+  )
 
   const deleteBlocked = useMemo(() => {
     if (!deleteTarget) return null
     const n = descendantIds(people, deleteTarget.id).size
-    return n > 0 ? bg.deleteBlockedHasChildren(fullName(deleteTarget), n) : null
+    return n > 0 ? messages.deleteBlockedHasChildren(fullName(deleteTarget), n) : null
   }, [deleteTarget, people])
 
   async function submitForm(draft: PersonDraft) {
     setBusy(true)
     setActionError(null)
     try {
-      if (editing?.kind === 'edit') {
-        await updatePerson(editing.person.id, draft)
-        setSelectedId(editing.person.id)
-      } else {
-        const id = await addPerson(draft)
-        // "баща" is the one relation type that reshapes the tree: the new
-        // person becomes the anchor's structural parent (parentId), matching
-        // the convention that parentId already represents the father's line.
-        if (draft.relation?.type === 'father') {
-          const anchor = byId.get(draft.relation.toId)
-          if (anchor) {
-            await updatePerson(anchor.id, { ...stripAudit(anchor), parentId: id })
-          }
+      const id = await addPerson(draft)
+      // "баща" is the one relation type that reshapes the tree: the new
+      // person becomes the anchor's structural parent (parentId), matching
+      // the convention that parentId already represents the father's line.
+      if (draft.relation?.type === 'father') {
+        const anchor = byId.get(draft.relation.toId)
+        if (anchor) {
+          await updatePerson(anchor.id, { ...stripAudit(anchor), parentId: id })
         }
-        setSelectedId(id)
       }
+      if (draft.email) {
+        sendAddedNotification({ ...draft, id })
+          .then((sent) => {
+            if (sent) setInfoMessage(messages.notifySent(draft.email!))
+          })
+          .catch(() => setInfoMessage(messages.notifyFailed(draft.email!)))
+      }
+      setSelectedId(id)
       setEditing(null)
     } catch (e) {
       setActionError((e as Error).message)
     } finally {
       setBusy(false)
     }
+  }
+
+  async function handleSavePerson(id: string, draft: PersonDraft) {
+    await updatePerson(id, draft)
   }
 
   async function confirmDelete() {
@@ -177,17 +203,14 @@ export default function App() {
     )
   }
 
-  const addAnchor = editing?.kind === 'add' && editing.parentId ? byId.get(editing.parentId) : undefined
-  const formInitial: PersonDraft =
-    editing?.kind === 'edit'
-      ? { ...EMPTY_DRAFT, ...stripAudit(editing.person) }
-      : {
-          ...EMPTY_DRAFT,
-          parentId: editing?.kind === 'add' ? editing.parentId : null,
-          relation: addAnchor
-            ? { type: 'child', toId: addAnchor.id, toName: fullName(addAnchor) }
-            : undefined,
-        }
+  const addAnchor = editing?.parentId ? byId.get(editing.parentId) : undefined
+  const formInitial: PersonDraft = {
+    ...EMPTY_DRAFT,
+    parentId: editing?.parentId ?? null,
+    relation: addAnchor
+      ? { type: 'child', toId: addAnchor.id, toName: fullName(addAnchor) }
+      : undefined,
+  }
 
   return (
     <LoginGate>
@@ -287,6 +310,7 @@ export default function App() {
               layout={layout}
               onSelect={setSelectedId}
               onQuickLink={handleQuickLink}
+              canEdit={isEditor}
             />
           )}
 
@@ -297,9 +321,11 @@ export default function App() {
               canEdit={isEditor}
               onClose={() => setSelectedId(null)}
               onSelect={focusPerson}
-              onEdit={(p) => setEditing({ kind: 'edit', person: p })}
+              onSave={handleSavePerson}
               onAddChild={(p) => setEditing({ kind: 'add', parentId: p.id })}
               onDelete={(p) => setDeleteTarget(p)}
+              autoEdit={autoEditId === selected.id}
+              onAutoEditHandled={() => setAutoEditId(null)}
             />
           )}
         </Box>
@@ -310,7 +336,6 @@ export default function App() {
             py: 1,
             px: 2,
             textAlign: 'center',
-            fontStyle: 'italic',
             fontSize: 13,
             color: 'text.secondary',
             bgcolor: 'background.paper',
@@ -318,15 +343,25 @@ export default function App() {
             borderColor: 'divider',
           }}
         >
-          {motto}
+          <Box component="span" sx={{ fontStyle: 'italic' }}>{motto}</Box>
+          {' · '}
+          <Box
+            component="button"
+            type="button"
+            onClick={() => setShowAbout(true)}
+            sx={{ border: 0, background: 'none', p: 0, font: 'inherit', color: 'inherit', textDecoration: 'underline', cursor: 'pointer' }}
+          >
+            {t('aboutLink')}
+          </Box>
         </Box>
+
+        {showAbout && <About onClose={() => setShowAbout(false)} />}
 
         {editing && (
           <PersonForm
-            mode={editing.kind === 'edit' ? 'edit' : 'add'}
+            mode="add"
             initial={formInitial}
             people={people}
-            selfId={editing.kind === 'edit' ? editing.person.id : undefined}
             busy={busy}
             onSubmit={submitForm}
             onCancel={() => setEditing(null)}
@@ -336,7 +371,7 @@ export default function App() {
         {deleteTarget && (
           <ConfirmDialog
             title={t('deleteTitle')}
-            message={bg.deleteConfirm(fullName(deleteTarget))}
+            message={messages.deleteConfirm(fullName(deleteTarget))}
             confirmLabel={t('confirmYes')}
             danger
             busy={busy}
@@ -366,10 +401,4 @@ export default function App() {
       </Box>
     </LoginGate>
   )
-}
-
-/** Drop the fields the form doesn't own (id + audit), keep the editable rest. */
-function stripAudit(p: Person): PersonDraft {
-  const { id, createdAt, updatedAt, updatedByEmail, ...draft } = p
-  return draft
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
 import { Modal } from './Modal'
-import { bg, t } from '../lib/i18n'
+import { messages, t } from '../lib/i18n'
 import type { Person } from '../model/person'
 import seedPeople from '../seed/seedData'
 
@@ -31,7 +31,7 @@ export function ImportDialog({ onImport, onClose }: Props) {
     setBusy(true)
     try {
       const n = await onImport(rows)
-      setMsg(bg.importDone(n))
+      setMsg(messages.importDone(n))
     } catch (e) {
       setErr(`${t('errorPrefix')}: ${(e as Error).message}`)
     } finally {

@@ -3,7 +3,11 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import type { DatesSetArg, EventClickArg, EventInput } from '@fullcalendar/core'
 import bgLocale from '@fullcalendar/core/locales/bg'
+import deLocale from '@fullcalendar/core/locales/de'
 import { fullName, type Person } from '../model/person'
+import { t, useLocale } from '../lib/i18n'
+
+const FULLCALENDAR_LOCALES = { bg: bgLocale, de: deLocale, en: undefined }
 
 export interface FamilyCalendarHandle {
   focus: (id: string) => void
@@ -25,7 +29,7 @@ function birthdayEvents(people: Person[], startYear: number, endYear: number): E
       if (date.getMonth() !== month - 1) continue // 29 Feb in a non-leap year — skip rather than roll into March
       events.push({
         id: `${p.id}-${year}`,
-        title: fullName(p) || 'Без име',
+        title: fullName(p) || t('noName'),
         start: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
         allDay: true,
         extendedProps: { personId: p.id },
@@ -39,11 +43,18 @@ export const FamilyCalendar = forwardRef<FamilyCalendarHandle, Props>(function F
   { people, onSelect },
   ref,
 ) {
+  const { locale } = useLocale()
   const calendarRef = useRef<FullCalendar | null>(null)
   const thisYear = new Date().getFullYear()
   const [range, setRange] = useState({ start: thisYear - 1, end: thisYear + 1 })
 
-  const events = useMemo(() => birthdayEvents(people, range.start, range.end), [people, range])
+  const events = useMemo(
+    () => birthdayEvents(people, range.start, range.end),
+    // `locale` isn't referenced directly here, but `birthdayEvents` calls
+    // `t('noName')` internally, so it does need to trigger a recompute.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [people, range, locale],
+  )
 
   const handleDatesSet = useCallback((arg: DatesSetArg) => {
     const start = arg.start.getFullYear() - 1
@@ -74,7 +85,7 @@ export const FamilyCalendar = forwardRef<FamilyCalendarHandle, Props>(function F
         ref={calendarRef}
         plugins={[dayGridPlugin]}
         initialView="dayGridMonth"
-        locale={bgLocale}
+        locale={FULLCALENDAR_LOCALES[locale]}
         firstDay={1}
         height="100%"
         headerToolbar={{ left: 'prevYear,prev,next,nextYear today', center: 'title', right: '' }}

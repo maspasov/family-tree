@@ -134,18 +134,28 @@
   padding-right: 24px; /* stay clear of the kids-count badge in the opposite corner */
 }
 .ft-card__quicklink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   background: transparent;
-  padding: 0 2px;
-  font-size: 14px;
-  line-height: 1;
+  padding: 3px;
   cursor: pointer;
   border-radius: 4px;
+  color: var(--ink-soft);
   opacity: 0.85;
 }
 .ft-card__quicklink:hover {
   opacity: 1;
+  color: var(--ink);
   background: var(--chart-grid-dot);
+}
+.ft-card__quicklink--danger {
+  color: #a13a2f;
+}
+.ft-card__quicklink--danger:hover {
+  background: rgba(161, 58, 47, 0.15);
+  color: #a13a2f;
 }
 
 .ft-card__kids {

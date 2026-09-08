@@ -26,6 +26,9 @@ function fromDoc(id: string, data: DocumentData): Person {
     name: data.name ?? '',
     patronymic: data.patronymic ?? '',
     surname: data.surname ?? '',
+    nameEn: data.nameEn ?? '',
+    patronymicEn: data.patronymicEn ?? '',
+    surnameEn: data.surnameEn ?? '',
     parentId: data.parentId ?? null,
     motherName: data.motherName ?? '',
     fatherName: data.fatherName ?? '',
@@ -35,7 +38,13 @@ function fromDoc(id: string, data: DocumentData): Person {
             type: data.relation.type as RelationType,
             toId: data.relation.toId,
             toName: data.relation.toName ?? '',
-            customLabel: data.relation.customLabel ?? undefined,
+            // Omit the key entirely rather than setting it to `undefined` —
+            // Firestore rejects `undefined` anywhere in a written document,
+            // including nested, and this object gets written back verbatim
+            // on the next edit (`updateDoc`) if the field is ever touched.
+            ...(typeof data.relation.customLabel === 'string'
+              ? { customLabel: data.relation.customLabel }
+              : {}),
           }
         : undefined,
     spouse: data.spouse ?? '',
@@ -44,6 +53,7 @@ function fromDoc(id: string, data: DocumentData): Person {
     deathYear: data.deathYear ?? '',
     birthPlace: data.birthPlace ?? '',
     address: data.address ?? '',
+    email: data.email ?? '',
     geo:
       data.geo && typeof data.geo.lat === 'number' && typeof data.geo.lng === 'number'
         ? { lat: data.geo.lat, lng: data.geo.lng }

@@ -13,7 +13,16 @@
       "Bash(xargs -r kill)",
       "Bash(curl -sf http://localhost:5175)",
       "Bash(firebase --version)",
-      "Bash(firebase projects:list)"
+      "Bash(firebase projects:list)",
+      "Bash(gcloud --version)",
+      "Bash(gcloud auth *)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(node import.mjs)",
+      "Bash(node fix1.mjs)",
+      "Bash(grep -E \"^\\(de|en\\)\\\\.js$\")",
+      "Bash(rm src/lib/i18n.ts)",
+      "Bash(mkdir -p src/lib/i18n)"
     ]
   }
 }

@@ -1,8 +1,30 @@
 import type { ReactNode } from 'react'
-import { Alert, Box, Button, CircularProgress, Paper, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import LoginIcon from '@mui/icons-material/Login'
 import { useAuth } from '../auth/AuthContext'
-import { bg, motto, t } from '../lib/i18n'
+import { messages, motto, t, useLocale, type Locale } from '../lib/i18n'
+
+/** Short codes rather than full names here — this switcher has to be readable before the visitor necessarily reads any of these three languages. */
+const LOCALE_CODES: Record<Locale, string> = { bg: 'БГ', en: 'EN', de: 'DE' }
+
+function LanguageSwitcher() {
+  const { locale, setLocale } = useLocale()
+  return (
+    <ToggleButtonGroup
+      size="small"
+      exclusive
+      value={locale}
+      onChange={(_, v: Locale | null) => v && setLocale(v)}
+      sx={{ position: 'fixed', top: 16, right: 16, bgcolor: 'background.paper' }}
+    >
+      {(Object.keys(LOCALE_CODES) as Locale[]).map((l) => (
+        <ToggleButton key={l} value={l}>
+          {LOCALE_CODES[l]}
+        </ToggleButton>
+      ))}
+    </ToggleButtonGroup>
+  )
+}
 
 function GateShell({ children }: { children: ReactNode }) {
   return (
@@ -19,6 +41,7 @@ function GateShell({ children }: { children: ReactNode }) {
         backgroundSize: '22px 22px',
       }}
     >
+      <LanguageSwitcher />
       <Paper elevation={3} sx={{ width: 'min(420px, 100%)', textAlign: 'center', p: 4, borderRadius: 4 }}>
         {children}
       </Paper>
@@ -32,7 +55,7 @@ function GateShell({ children }: { children: ReactNode }) {
  * Firestore rules enforce the same check server-side; this is just the UI half.
  */
 export function LoginGate({ children }: { children: ReactNode }) {
-  const { loading, user, isEditor, error, signIn, signOutUser } = useAuth()
+  const { loading, user, canView, error, signIn, signOutUser } = useAuth()
 
   if (loading) {
     return (
@@ -67,11 +90,11 @@ export function LoginGate({ children }: { children: ReactNode }) {
     )
   }
 
-  if (!isEditor) {
+  if (!canView) {
     return (
       <GateShell>
         <Typography variant="h4" gutterBottom>{t('restrictedTitle')}</Typography>
-        <Typography sx={{ my: 2.5 }}>{bg.restrictedBody(user.email ?? '')}</Typography>
+        <Typography sx={{ my: 2.5 }}>{messages.restrictedBody(user.email ?? '')}</Typography>
         <Button fullWidth variant="outlined" onClick={signOutUser}>
           {t('tryAnotherAccount')}
         </Button>
