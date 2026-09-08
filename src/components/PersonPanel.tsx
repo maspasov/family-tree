@@ -317,17 +317,9 @@ export function PersonPanel({
         </Stack>
 
         {editDraft ? (
-          <Stack component="form" spacing={2} onSubmit={saveEdit}>
+          <Stack component="form" id="ft-panel-edit-form" spacing={2} onSubmit={saveEdit}>
             <PersonFields draft={editDraft} set={setEditField} people={people} selfId={person.id} showErr={showErr} />
             {saveError && <Alert severity="error">{saveError}</Alert>}
-            <Stack direction="row" sx={{ gap: 1 }}>
-              <Button variant="outlined" onClick={cancelEdit} disabled={saving}>
-                {t('cancel')}
-              </Button>
-              <Button type="submit" variant="contained" disabled={saving}>
-                {saving ? t('saving') : t('save')}
-              </Button>
-            </Stack>
           </Stack>
         ) : (
           <>
@@ -438,6 +430,17 @@ export function PersonPanel({
         )}
 
         <PhotoStrip key={person.id} personId={person.id} canEdit={canEdit} />
+
+        {editDraft && (
+          <Stack direction="row" sx={{ gap: 1 }}>
+            <Button variant="outlined" onClick={cancelEdit} disabled={saving}>
+              {t('cancel')}
+            </Button>
+            <Button type="submit" form="ft-panel-edit-form" variant="contained" disabled={saving}>
+              {saving ? t('saving') : t('save')}
+            </Button>
+          </Stack>
+        )}
       </Stack>
     </Drawer>
   )
