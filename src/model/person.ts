@@ -219,10 +219,19 @@ export interface ChartDatum {
 
 /** True when `p` is a wife/husband whose spouse still exists — see `toChartData`. */
 export function isMergedSpouse(p: Person, byId: Map<string, Person>): boolean {
-  return (
-    (p.relation?.type === 'wife' || p.relation?.type === 'husband') &&
-    Boolean(p.relation.toId && byId.has(p.relation.toId))
-  )
+  const rel = p.relation
+  if (!rel || (rel.type !== 'wife' && rel.type !== 'husband')) return false
+  const anchor = rel.toId ? byId.get(rel.toId) : undefined
+  if (!anchor) return false
+  const anchorRel = anchor.relation
+  const mutual =
+    anchorRel &&
+    (anchorRel.type === 'wife' || anchorRel.type === 'husband') &&
+    anchorRel.toId === p.id
+  // If both people point a wife/husband relation at each other, merging both
+  // would hide the pair entirely (neither gets a chart node to merge into).
+  // Break the cycle deterministically so exactly one of them keeps a node.
+  return mutual ? p.id > anchor.id : true
 }
 
 export function toChartData(people: Person[]): ChartDatum[] {
