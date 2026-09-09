@@ -9,7 +9,6 @@ import { navigate, useHashRoute } from './lib/hashRoute'
 import { TreeProvider, useTree } from './tree/TreeContext'
 import { usePersons } from './data/usePersons'
 import {
-  EMPTY_DRAFT,
   descendantIds,
   fullName,
   stripAudit,
@@ -28,7 +27,7 @@ import { Archive } from './components/Archive'
 import { About } from './components/About'
 import { Toolbar, type ViewMode } from './components/Toolbar'
 import { PersonPanel } from './components/PersonPanel'
-import { PersonForm } from './components/PersonForm'
+import { AddPersonWizard } from './components/AddPersonWizard'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { ImportDialog } from './components/ImportDialog'
 import { LoginGate } from './components/LoginGate'
@@ -109,6 +108,14 @@ function TreeApp() {
   const [autoEditId, setAutoEditId] = useState<string | null>(null)
   const selected = selectedId ? byId.get(selectedId) ?? null : null
 
+  // Browser-tab title follows the open tree; back to the generic app name on exit.
+  useEffect(() => {
+    document.title = tree?.name ? `${tree.name} — ${t('appTitle')}` : t('appTitle')
+    return () => {
+      document.title = t('appTitle')
+    }
+  }, [tree?.name])
+
   const focusPerson = useCallback(
     (id: string) => {
       setSelectedId(id)
@@ -181,7 +188,7 @@ function TreeApp() {
         }
       }
       if (draft.email) {
-        sendAddedNotification({ ...draft, id })
+        sendAddedNotification({ ...draft, id }, tree)
           .then((sent) => {
             if (sent) setInfoMessage(messages.notifySent(draft.email!))
           })
@@ -189,7 +196,7 @@ function TreeApp() {
       }
       // Quiet background CC to the admin — every addition, not just ones with
       // an email on file; failures aren't worth interrupting the editor for.
-      sendAdminNotification({ ...draft, id }).catch(() => {})
+      sendAdminNotification({ ...draft, id }, tree).catch(() => {})
       setSelectedId(id)
       setEditing(null)
     } catch (e) {
@@ -258,15 +265,6 @@ function TreeApp() {
         action={<Button variant="outlined" onClick={() => navigate('/')}>{t('backToTrees')}</Button>}
       />
     )
-  }
-
-  const addAnchor = editing?.parentId ? byId.get(editing.parentId) : undefined
-  const formInitial: PersonDraft = {
-    ...EMPTY_DRAFT,
-    parentId: editing?.parentId ?? null,
-    relation: addAnchor
-      ? { type: 'child', toId: addAnchor.id, toName: fullName(addAnchor) }
-      : undefined,
   }
 
   return (
@@ -415,10 +413,9 @@ function TreeApp() {
         {showAbout && <About onClose={() => setShowAbout(false)} />}
 
         {editing && (
-          <PersonForm
-            mode="add"
-            initial={formInitial}
+          <AddPersonWizard
             people={people}
+            anchorId={editing.parentId}
             busy={busy}
             onSubmit={submitForm}
             onCancel={() => setEditing(null)}

@@ -3,7 +3,7 @@ import type { RelationType } from '../../model/person'
 
 export const messages: typeof bgMessages = {
   appTitle: 'Family Tree',
-  appSubtitle: 'The Brusarite family — Tano Rade Brusarski branch',
+  appSubtitle: 'An online family tree for your family',
 
   // auth
   signIn: 'Sign in with Google',
@@ -156,6 +156,29 @@ export const messages: typeof bgMessages = {
   cancel: 'Cancel',
   saving: 'Saving…',
   discardEditConfirm: 'You have unsaved changes. Discard them?',
+
+  // add-person wizard
+  back: 'Back',
+  next: 'Next',
+  optional: 'optional',
+  yes: 'Yes',
+  no: 'No',
+  wizStepOf: (n: number, total: number) => `Step ${n} of ${total}`,
+  wizRelTitle: 'How is the new person related to the tree?',
+  wizRelPickAnchor: 'Pick a relative already in the tree',
+  wizRelChild: (name: string) => `Child of ${name}`,
+  wizRelSpouse: (name: string) => `Spouse of ${name}`,
+  wizRelParent: (name: string) => `Parent of ${name}`,
+  wizNameTitle: "What's the new person's name?",
+  wizDetailsTitle: 'A few more details',
+  wizDetailsHint: 'All optional here — you can just press "Next".',
+  wizAlive: 'Is this person still living?',
+  wizReviewTitle: 'Check and save',
+  wizReviewLine: (name: string, rel: string) => `You're adding ${name} — ${rel}.`,
+  wizPhraseChildOf: (name: string) => `child of ${name}`,
+  wizPhraseSpouseOf: (name: string) => `spouse of ${name}`,
+  wizPhraseParentOf: (name: string) => `parent of ${name}`,
+  wizPhraseFirst: 'the first person in the tree',
 
   // delete
   deleteTitle: 'Delete person',

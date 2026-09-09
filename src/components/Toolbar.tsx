@@ -181,9 +181,9 @@ export function Toolbar(props: Props) {
           <Typography variant="h6" component="strong" sx={{ display: 'block', fontSize: { xs: '1rem', sm: '1.15rem' } }}>
             {tree?.name || t('appTitle')}
           </Typography>
-          {!isCompact && (
+          {!isCompact && tree?.subtitle && (
             <Typography variant="caption" color="text.secondary">
-              {tree?.subtitle || t('appSubtitle')}
+              {tree.subtitle}
             </Typography>
           )}
         </Box>

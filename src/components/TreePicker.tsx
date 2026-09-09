@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -37,6 +37,10 @@ export function TreePicker() {
   const { trees, loading, error } = useTrees()
   const [creating, setCreating] = useState(false)
   const [deleting, setDeleting] = useState<Tree | null>(null)
+
+  useEffect(() => {
+    document.title = t('appTitle')
+  }, [locale])
 
   return (
     <Box

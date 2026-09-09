@@ -2,7 +2,7 @@ import type { RelationType } from '../../model/person'
 
 export const messages = {
   appTitle: 'Родословно дърво',
-  appSubtitle: 'Родът „Брусарите“ — клон Тано Раде Брусарски',
+  appSubtitle: 'Онлайн родословно дърво за семейството',
 
   // auth
   signIn: 'Вход с Google',
@@ -155,6 +155,29 @@ export const messages = {
   cancel: 'Отказ',
   saving: 'Записване…',
   discardEditConfirm: 'Имате незаписани промени. Да ги отхвърля ли?',
+
+  // add-person wizard
+  back: 'Назад',
+  next: 'Напред',
+  optional: 'по желание',
+  yes: 'Да',
+  no: 'Не',
+  wizStepOf: (n: number, total: number) => `Стъпка ${n} от ${total}`,
+  wizRelTitle: 'Как е свързан новият човек с дървото?',
+  wizRelPickAnchor: 'Изберете роднина, който вече е в дървото',
+  wizRelChild: (name: string) => `Дете на ${name}`,
+  wizRelSpouse: (name: string) => `Съпруг или съпруга на ${name}`,
+  wizRelParent: (name: string) => `Родител на ${name}`,
+  wizNameTitle: 'Как се казва новият човек?',
+  wizDetailsTitle: 'Още малко информация',
+  wizDetailsHint: 'Всичко тук е по желание — може просто да натиснете „Напред“.',
+  wizAlive: 'Този човек жив ли е?',
+  wizReviewTitle: 'Проверете и запазете',
+  wizReviewLine: (name: string, rel: string) => `Ще добавите ${name} — ${rel}.`,
+  wizPhraseChildOf: (name: string) => `дете на ${name}`,
+  wizPhraseSpouseOf: (name: string) => `съпруг/съпруга на ${name}`,
+  wizPhraseParentOf: (name: string) => `родител на ${name}`,
+  wizPhraseFirst: 'началния човек в дървото',
 
   // delete
   deleteTitle: 'Изтриване на човек',

@@ -3,7 +3,7 @@ import type { RelationType } from '../../model/person'
 
 export const messages: typeof bgMessages = {
   appTitle: 'Stammbaum',
-  appSubtitle: 'Die Familie Brusarite — Zweig Tano Rade Brusarski',
+  appSubtitle: 'Ein Online-Stammbaum für Ihre Familie',
 
   // auth
   signIn: 'Mit Google anmelden',
@@ -156,6 +156,29 @@ export const messages: typeof bgMessages = {
   cancel: 'Abbrechen',
   saving: 'Wird gespeichert…',
   discardEditConfirm: 'Sie haben ungespeicherte Änderungen. Verwerfen?',
+
+  // add-person wizard
+  back: 'Zurück',
+  next: 'Weiter',
+  optional: 'optional',
+  yes: 'Ja',
+  no: 'Nein',
+  wizStepOf: (n: number, total: number) => `Schritt ${n} von ${total}`,
+  wizRelTitle: 'Wie ist die neue Person mit dem Baum verwandt?',
+  wizRelPickAnchor: 'Wählen Sie eine Person, die schon im Baum ist',
+  wizRelChild: (name: string) => `Kind von ${name}`,
+  wizRelSpouse: (name: string) => `Ehepartner/in von ${name}`,
+  wizRelParent: (name: string) => `Elternteil von ${name}`,
+  wizNameTitle: 'Wie heißt die neue Person?',
+  wizDetailsTitle: 'Ein paar weitere Angaben',
+  wizDetailsHint: 'Alles optional — Sie können einfach auf „Weiter“ tippen.',
+  wizAlive: 'Lebt diese Person noch?',
+  wizReviewTitle: 'Prüfen und speichern',
+  wizReviewLine: (name: string, rel: string) => `Sie fügen ${name} hinzu — ${rel}.`,
+  wizPhraseChildOf: (name: string) => `Kind von ${name}`,
+  wizPhraseSpouseOf: (name: string) => `Ehepartner/in von ${name}`,
+  wizPhraseParentOf: (name: string) => `Elternteil von ${name}`,
+  wizPhraseFirst: 'die erste Person im Baum',
 
   // delete
   deleteTitle: 'Person löschen',
