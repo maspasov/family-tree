@@ -21,11 +21,14 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { YearCalendar } from '@mui/x-date-pickers/YearCalendar'
+import { bgBG, deDE, enUS } from '@mui/x-date-pickers/locales'
 import dayjs, { type Dayjs } from 'dayjs'
 import 'dayjs/locale/bg'
+import 'dayjs/locale/de'
+import 'dayjs/locale/en'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
-import { t, messages, RELATION_LABELS } from '../lib/i18n'
+import { getLocale, t, messages, RELATION_LABELS, type Locale } from '../lib/i18n'
 import { geocodeAddress } from '../lib/geocode'
 import {
   fullName,
@@ -63,6 +66,15 @@ const GENDERS: Array<{ value: Gender; label: string }> = [
   { value: 'f', label: t('gFemale') },
   { value: 'unknown', label: t('gUnknown') },
 ]
+
+// Per-UI-language config for the date pickers: `dayjs` locale drives the month
+// names shown in the field/calendar, the MUI X locale bundle drives the
+// picker's own chrome (toolbar, action buttons, aria labels).
+const PICKER_LOCALES: Record<Locale, { dayjs: string; muiX: typeof enUS }> = {
+  bg: { dayjs: 'bg', muiX: bgBG },
+  de: { dayjs: 'de', muiX: deDE },
+  en: { dayjs: 'en', muiX: enUS },
+}
 
 interface Props {
   draft: PersonDraft
@@ -205,8 +217,14 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
     setLocateState('idle')
   }
 
+  const picker = PICKER_LOCALES[getLocale()] ?? PICKER_LOCALES.bg
+
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="bg">
+    <LocalizationProvider
+      dateAdapter={AdapterDayjs}
+      adapterLocale={picker.dayjs}
+      localeText={picker.muiX.components.MuiLocalizationProvider.defaultProps.localeText}
+    >
       <Stack spacing={2}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <TextField
@@ -539,7 +557,11 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
 
         <TextField
           label={t('fEmail')}
-          type="email"
+          // Deliberately not type="email": native constraint validation would
+          // silently block the enclosing <form>'s submit (no noValidate) when
+          // the browser dislikes the value, with no visible error. `validateDraft`
+          // is the single source of truth for email validity instead.
+          slotProps={{ htmlInput: { inputMode: 'email' } }}
           value={draft.email ?? ''}
           onChange={(e) => set('email', e.target.value)}
           placeholder="ime@example.com"

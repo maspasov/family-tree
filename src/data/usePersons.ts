@@ -3,6 +3,7 @@ import {
   addDoc,
   collection,
   deleteDoc,
+  deleteField,
   doc,
   onSnapshot,
   serverTimestamp,
@@ -86,6 +87,24 @@ function cleanDraft(draft: PersonDraft): DocumentData {
   return out
 }
 
+/**
+ * Build an `updateDoc` payload from a full draft. Unlike `cleanDraft` (creates
+ * only), a field the user emptied must be sent as an explicit `deleteField()` —
+ * merely omitting the key leaves the previous value untouched server-side, so
+ * an email / address / note / … could never be cleared once saved.
+ */
+function cleanDraftForUpdate(draft: PersonDraft): DocumentData {
+  const out: DocumentData = {}
+  for (const [k, v] of Object.entries(draft)) {
+    if (k === 'parentId') {
+      out.parentId = v ?? null
+      continue
+    }
+    out[k] = v === undefined || v === '' ? deleteField() : v
+  }
+  return out
+}
+
 export interface PersonsApi {
   people: Person[]
   byId: Map<string, Person>
@@ -153,7 +172,7 @@ export function usePersons(enabled: boolean): PersonsApi {
 
       async updatePerson(id, draft) {
         await updateDoc(doc(db, paths.persons, id), {
-          ...cleanDraft(draft),
+          ...cleanDraftForUpdate(draft),
           ...audit(),
         })
       },
