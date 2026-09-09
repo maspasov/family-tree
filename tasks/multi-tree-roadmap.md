@@ -283,20 +283,21 @@ per-tree fields), `usePersons`/`usePersonPhotos`/`useArchivePhotos` (take
 `tsc`, `oxlint`, `vite build` all pass. Not yet exercised against a live
 Firestore.
 
-## 10. Cutover status
+## 10. Cutover — done
 
 1. ~~Deploy the rules~~ — **done**.
 2. ~~Run the migration~~ — **done** (`trees/brusarite`: 5 people, 1 photo, 3
    archive pages; `config/app.admins` seeded).
 3. ~~Verify the app at `#/t/brusarite`~~ — **done**.
-4. **Delete the legacy data** — run
-   `node scripts/cleanup-legacy.mjs --key <key> --slug brusarite --confirm`
-   (dry-run first without `--confirm`). The legacy block has already been
-   removed from `firestore.rules` and `AuthContext` — **redeploy the rules and
-   the app** after the cleanup succeeds.
-5. *(optional)* strip the now-unused `editors` / `viewers` fields off
-   `config/app` — nothing reads them any more; per-tree lists live on
-   `trees/{slug}`.
+4. ~~Delete the legacy data~~ — **done**: legacy top-level `persons/` +
+   `archive/` removed, `config/app.editors` / `.viewers` stripped
+   (`config/app` is now just `{ admins }`).
+5. `firestore.rules` and `AuthContext` no longer have the legacy fallback —
+   **redeploy the rules and the app**. That's the only step left.
+
+The one-off `migrate-to-trees.mjs` / `cleanup-legacy.mjs` scripts were deleted
+after the cutover; `scripts/set-admins.mjs` stays as the way to manage
+`config/app.admins`.
 
 ## 11. Admin: delete a tree — built
 
