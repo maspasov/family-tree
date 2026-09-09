@@ -26,6 +26,7 @@ import {
 } from '@mui/material'
 import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import AddIcon from '@mui/icons-material/Add'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
@@ -49,6 +50,8 @@ import ZoomOutIcon from '@mui/icons-material/ZoomOut'
 import { t, useLocale, LOCALE_NAMES, type Locale } from '../lib/i18n'
 import { fullName, lifespan, type Person } from '../model/person'
 import { useAuth } from '../auth/AuthContext'
+import { useTree } from '../tree/TreeContext'
+import { navigate } from '../lib/hashRoute'
 import { useColorMode } from '../theme/ColorModeContext'
 import { RolesDialog } from './RolesDialog'
 import type { ChartLayout } from './FamilyChart'
@@ -75,7 +78,8 @@ interface Props {
 }
 
 export function Toolbar(props: Props) {
-  const { user, isEditor, isViewerOnly, signIn, signOutUser } = useAuth()
+  const { user, signIn, signOutUser } = useAuth()
+  const { tree, isEditor, isViewerOnly } = useTree()
   const { mode, toggle } = useColorMode()
   const { locale, setLocale } = useLocale()
   const theme = useTheme()
@@ -168,13 +172,18 @@ export function Toolbar(props: Props) {
   return (
     <AppBar position="static" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
       <MuiToolbar sx={{ gap: { xs: 1, sm: 2 }, py: 1, flexWrap: { xs: 'wrap', lg: 'nowrap' } }}>
+        <Tooltip title={t('backToTrees')}>
+          <IconButton size="small" onClick={() => navigate('/')} sx={{ flexShrink: 0 }}>
+            <ArrowBackIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
         <Box sx={{ lineHeight: 1.2, flexShrink: 0 }}>
           <Typography variant="h6" component="strong" sx={{ display: 'block', fontSize: { xs: '1rem', sm: '1.15rem' } }}>
-            {t('appTitle')}
+            {tree?.name || t('appTitle')}
           </Typography>
           {!isCompact && (
             <Typography variant="caption" color="text.secondary">
-              {t('appSubtitle')}
+              {tree?.subtitle || t('appSubtitle')}
             </Typography>
           )}
         </Box>

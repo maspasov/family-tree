@@ -59,6 +59,10 @@ export const messages: typeof bgMessages = {
   mapEmptyTitle: 'Noch keine Adressen',
   mapEmptyBody:
     'Fügen Sie mindestens einer Person eine Adresse hinzu (Standort-Symbol im Formular), damit Punkte auf der Karte erscheinen.',
+  mapLocateMe: 'Meinen Standort anzeigen',
+  mapYouAreHere: 'Sie sind hier',
+  mapLocateDenied: 'Der Browser hat den Zugriff auf Ihren Standort verweigert.',
+  mapLocateError: 'Ihr Standort konnte nicht ermittelt werden.',
   calendarEmptyTitle: 'Noch keine Geburtstage',
   calendarEmptyBody:
     'Fügen Sie mindestens einer Person im Bearbeitungsformular einen „Geburtstag (MM-TT)“ hinzu, damit Termine im Kalender erscheinen.',
@@ -141,6 +145,7 @@ export const messages: typeof bgMessages = {
   addressChangedWarning:
     'Die Adresse wurde seit der letzten Suche geändert — klicken Sie auf das Standort-Symbol, um die Koordinaten zu aktualisieren.',
   clearPin: 'Koordinaten entfernen',
+  clear: 'Löschen',
   fSpouse: 'Ehepartner/in',
   fParent: 'Kind von',
   fChildOrder: 'Reihenfolge unter Geschwistern',
@@ -205,6 +210,37 @@ export const messages: typeof bgMessages = {
   aboutLink: 'Über den Autor',
   aboutTitle: 'Über den Autor',
   aboutBody: 'Dieser Stammbaum wurde erstellt und wird gepflegt von:',
+
+  // multiple trees
+  treesTitle: 'Stammbäume',
+  treesPickBody: 'Wählen Sie einen Stammbaum zum Öffnen.',
+  treesNone: 'Sie haben noch keinen Zugriff auf einen Stammbaum. Wenden Sie sich an den Verwalter.',
+  treesNoneAdmin: 'Noch keine Stammbäume erstellt.',
+  treesNew: 'Neuer Stammbaum',
+  deleteTree: 'Stammbaum löschen',
+  deleteTreeTitle: 'Stammbaum löschen',
+  deleteTreeCta: 'Endgültig löschen',
+  deleteTreeWarn: (name: string) =>
+    `„${name}“ wird mit allen Personen, Fotos und Archivseiten darin gelöscht. Das kann nicht rückgängig gemacht werden.`,
+  deleteTreeTypeSlug: (slug: string) => `Geben Sie „${slug}“ zur Bestätigung ein:`,
+  backToTrees: 'Zu den Stammbäumen',
+  treeNotFound: 'Stammbaum nicht gefunden',
+  treeNotFoundBody: 'Unter dieser Adresse gibt es keinen Stammbaum. Er wurde evtl. verschoben oder gelöscht.',
+  treeNoAccess: 'Kein Zugriff',
+  treeNoAccessBody: 'Dieses Konto wurde nicht zu diesem Stammbaum eingeladen. Wenden Sie sich an den Verwalter.',
+  createTreeTitle: 'Neuer Stammbaum',
+  create: 'Erstellen',
+  ctName: 'Name des Stammbaums',
+  ctNameRequired: 'Ein Name ist erforderlich.',
+  ctSlug: 'Adresse (in der URL)',
+  ctSlugHelp: 'Nur Kleinbuchstaben, Ziffern und Bindestriche. Später nicht änderbar.',
+  ctSlugInvalid: 'Ungültige Adresse — nur a–z, 0–9 und Bindestriche.',
+  ctSlugTaken: 'Diese Adresse ist bereits vergeben.',
+  ctSubtitle: 'Untertitel (optional)',
+  ctMotto: 'Motto (optional)',
+  ctFirstEditor: 'Erster Bearbeiter (E-Mail)',
+  ctFirstEditorHelp: 'Dieses Konto kann den neuen Stammbaum bearbeiten.',
+  ctEditorInvalid: 'Ungültige E-Mail-Adresse.',
 }
 
 export const motto = 'Kenne deine Familie, damit du stolz sein kannst! Ein Mensch ohne Verwandte ist allein.'

@@ -201,6 +201,11 @@
   position: absolute;
   inset: 0;
   background: var(--chart-bg);
+  /* Contain Leaflet's internal z-indexes (panes 200–700, controls 800+) to
+     this box's own stacking context — otherwise they leak into .ft-main and
+     paint over the PersonPanel drawer (z-index 4), so a marker click "opens"
+     the panel behind the map. */
+  isolation: isolate;
 }
 
 .ft-pin {
@@ -229,6 +234,39 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.ft-pin--me {
+  background: #2f6be0;
+  box-shadow: 0 0 0 4px rgba(47, 107, 224, 0.25), var(--card-shadow);
+}
+
+/* "My location" map control — sized to match Leaflet's zoom buttons. */
+.ft-locate button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: #fff;
+  color: #3a3a3a;
+  cursor: pointer;
+}
+.ft-locate button:hover {
+  background: #f4f4f4;
+}
+.ft-locate button.is-loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+:root[data-theme='dark'] .ft-locate button {
+  background: var(--card-bg);
+  color: var(--ink);
+}
+:root[data-theme='dark'] .ft-locate button:hover {
+  background: var(--card-border);
 }
 
 .ft-pin-popup {

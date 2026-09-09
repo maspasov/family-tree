@@ -50,12 +50,13 @@ function GateShell({ children }: { children: ReactNode }) {
 }
 
 /**
- * Gates the whole app behind Google sign-in AND the Firestore `config/app.editors`
- * allow-list — nothing (not even a read-only view) renders for anyone else.
- * Firestore rules enforce the same check server-side; this is just the UI half.
+ * Gates the whole app behind Google sign-in with a verified e-mail. Which
+ * trees the account may actually open is decided per-tree in `TreeContext`
+ * (and enforced server-side by `firestore.rules`); this gate is only the
+ * "are you signed in at all" half.
  */
 export function LoginGate({ children }: { children: ReactNode }) {
-  const { loading, user, canView, error, signIn, signOutUser } = useAuth()
+  const { loading, user, signedIn, error, signIn, signOutUser } = useAuth()
 
   if (loading) {
     return (
@@ -90,7 +91,9 @@ export function LoginGate({ children }: { children: ReactNode }) {
     )
   }
 
-  if (!canView) {
+  if (!signedIn) {
+    // Signed in with Google but the e-mail isn't verified — rare, but rules
+    // require a verified address so surface it rather than looping.
     return (
       <GateShell>
         <Typography variant="h4" gutterBottom>{t('restrictedTitle')}</Typography>

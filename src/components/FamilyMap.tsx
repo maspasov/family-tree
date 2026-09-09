@@ -19,6 +19,12 @@ interface Props {
 const DEFAULT_CENTER: L.LatLngTuple = [42.6977, 23.3219]
 const DEFAULT_ZOOM = 7
 
+/** Crosshair glyph for the "my location" control (inline so no icon font/asset). */
+const LOCATE_ICON =
+  '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">' +
+  '<path d="M12 8a4 4 0 100 8 4 4 0 000-8zm8.94 3A9 9 0 0013 3.06V1h-2v2.06A9 9 0 003.06 11H1v2h2.06A9 9 0 0011 20.94V23h2v-2.06A9 9 0 0020.94 13H23v-2h-2.06zM12 19a7 7 0 110-14 7 7 0 010 14z"/>' +
+  '</svg>'
+
 function genderClass(p: Person): string {
   return p.gender === 'm' ? 'ft-pin--m' : p.gender === 'f' ? 'ft-pin--f' : 'ft-pin--u'
 }
@@ -76,6 +82,9 @@ export const FamilyMap = forwardRef<FamilyMapHandle, Props>(function FamilyMap(
   const mapRef = useRef<L.Map | null>(null)
   const markersRef = useRef<Map<string, L.Marker>>(new Map())
   const personLocationRef = useRef<Map<string, string>>(new Map())
+  // The signed-in user's own position (browser geolocation), shown on demand.
+  const meMarkerRef = useRef<L.Marker | null>(null)
+  const meAccuracyRef = useRef<L.Circle | null>(null)
 
   // Create the map once.
   useEffect(() => {
@@ -87,9 +96,80 @@ export const FamilyMap = forwardRef<FamilyMapHandle, Props>(function FamilyMap(
       maxZoom: 19,
     }).addTo(map)
     mapRef.current = map
+
+    // "My location" control — geolocation needs a user gesture and shouldn't
+    // nag on load, so it's a button, not an auto-prompt.
+    const LocateControl = L.Control.extend({
+      options: { position: 'topleft' as L.ControlPosition },
+      onAdd() {
+        const wrap = L.DomUtil.create('div', 'leaflet-bar ft-locate')
+        const btn = L.DomUtil.create('button', '', wrap) as HTMLButtonElement
+        btn.type = 'button'
+        btn.title = t('mapLocateMe')
+        btn.setAttribute('aria-label', t('mapLocateMe'))
+        btn.innerHTML = LOCATE_ICON
+        L.DomEvent.disableClickPropagation(wrap)
+        L.DomEvent.on(btn, 'click', (e) => {
+          L.DomEvent.stop(e)
+          btn.classList.add('is-loading')
+          map.locate({ enableHighAccuracy: true, timeout: 10000 })
+        })
+        return wrap
+      },
+    })
+    const locateControl = new LocateControl()
+    map.addControl(locateControl)
+
+    const clearLoading = () =>
+      el.querySelector('.ft-locate button')?.classList.remove('is-loading')
+
+    map.on('locationfound', (e) => {
+      clearLoading()
+      const ll = e.latlng
+      if (meMarkerRef.current && meAccuracyRef.current) {
+        meMarkerRef.current.setLatLng(ll)
+        meAccuracyRef.current.setLatLng(ll).setRadius(e.accuracy)
+      } else {
+        meAccuracyRef.current = L.circle(ll, {
+          radius: e.accuracy,
+          color: '#2f6be0',
+          weight: 1,
+          fillColor: '#2f6be0',
+          fillOpacity: 0.12,
+          interactive: false,
+        }).addTo(map)
+        meMarkerRef.current = L.marker(ll, {
+          icon: L.divIcon({
+            html: '<div class="ft-pin ft-pin--me"></div>',
+            className: '',
+            iconSize: [22, 22],
+          }),
+          zIndexOffset: 1000,
+          keyboard: false,
+        }).addTo(map)
+        meMarkerRef.current.bindTooltip(t('mapYouAreHere'), {
+          direction: 'top',
+          offset: [0, -12],
+          className: 'ft-pin-tip-wrap',
+        })
+      }
+      map.setView(ll, Math.max(map.getZoom(), 13))
+    })
+
+    map.on('locationerror', (err) => {
+      clearLoading()
+      const denied = (err as L.ErrorEvent & { code?: number }).code === 1
+      L.popup({ className: 'ft-pin-tip-wrap' })
+        .setLatLng(map.getCenter())
+        .setContent(denied ? t('mapLocateDenied') : t('mapLocateError'))
+        .openOn(map)
+    })
+
     return () => {
       map.remove()
       mapRef.current = null
+      meMarkerRef.current = null
+      meAccuracyRef.current = null
     }
   }, [])
 

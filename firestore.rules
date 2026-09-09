@@ -1,107 +1,114 @@
 rules_version = '2';
 
-// Security model for „Родословно дърво“ (invite-only):
-//   * the site is NOT public — only Google accounts whose (verified) e-mail is
-//     listed in config/app.editors OR config/app.viewers may READ the tree;
-//     only editors may write to it;
-//   * config/app itself stays publicly readable so the client (and these
-//     rules) can look up who's on either list, but no one can write to it
-//     from the app — edit the arrays from the Firebase console only.
+// Security model for „Родословно дърво“ — multi-tree.
 //
-// Bootstrap: before anyone can use the app you must create the document
-//   config/app  ->  { editors: ["you@gmail.com", "someone.else@gmail.com"] }
-// in the Firebase console (Firestore Database -> Start collection "config",
-// document id "app", field "editors" = array of strings). Optionally add a
-// second field, "viewers" (also an array of strings), for read-only accounts.
+//   config/app                     -> { admins: ["you@gmail.com", ...] }
+//     Public read. `admins` may create/delete trees and edit any tree.
+//     Manage the array with scripts/set-admins.mjs or the Firebase console.
+//
+//   trees/{treeId}                 -> { slug, name, editors: [...], viewers: [...] }
+//     Public read (a display name + two e-mail lists — same sensitivity as
+//     config/app). `treeId` IS the slug. A tree's `editors` may write to it;
+//     `viewers` may read it. Everything the tree owns is nested underneath.
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function editors() {
-      return get(/databases/$(database)/documents/config/app).data.editors;
+    function configData() {
+      return exists(/databases/$(database)/documents/config/app)
+        ? get(/databases/$(database)/documents/config/app).data
+        : {};
+    }
+    function admins() {
+      return configData().get('admins', []);
+    }
+    function verified() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    function callerEmail() {
+      return request.auth.token.email.lower();
+    }
+    function isAdmin() {
+      return verified() && callerEmail() in admins();
     }
 
-    function viewers() {
-      return get(/databases/$(database)/documents/config/app).data.get('viewers', []);
+    function treeExists(treeId) {
+      return exists(/databases/$(database)/documents/trees/$(treeId));
+    }
+    function treeData(treeId) {
+      return get(/databases/$(database)/documents/trees/$(treeId)).data;
+    }
+    function isTreeEditor(treeId) {
+      return isAdmin()
+        || (verified() && treeExists(treeId)
+            && callerEmail() in treeData(treeId).get('editors', []));
+    }
+    function isTreeViewer(treeId) {
+      return isTreeEditor(treeId)
+        || (verified() && treeExists(treeId)
+            && callerEmail() in treeData(treeId).get('viewers', []));
     }
 
-    function isEditor() {
-      return request.auth != null
-        && request.auth.token.email_verified == true
-        && exists(/databases/$(database)/documents/config/app)
-        && request.auth.token.email.lower() in editors();
-    }
-
-    function isViewer() {
-      return request.auth != null
-        && request.auth.token.email_verified == true
-        && exists(/databases/$(database)/documents/config/app)
-        && request.auth.token.email.lower() in viewers();
-    }
-
-    function canRead() {
-      return isEditor() || isViewer();
-    }
-
-    // Public read. Any editor may update the editors/viewers arrays (the
-    // in-app "Роли" admin page) — nothing else on this doc, and the editors
-    // list can never be emptied out via a client write (that would lock
-    // everyone out). Creating/deleting the doc itself stays console-only.
+    // ---- global config ----
     match /config/app {
       allow read: if true;
-      allow update: if isEditor()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['editors', 'viewers'])
+      // Only the admins list is client-writable, and it can't be emptied
+      // (that would lock everyone out of tree creation). Creating/deleting the
+      // doc itself stays console-only.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['admins'])
+        && request.resource.data.admins is list
+        && request.resource.data.admins.size() > 0;
+    }
+
+    // ---- one document per family tree ----
+    match /trees/{treeId} {
+      allow read: if true;
+
+      allow create: if isAdmin()
+        && request.resource.data.slug is string
+        && request.resource.data.slug == treeId
         && request.resource.data.editors is list
         && request.resource.data.editors.size() > 0
-        && (!('viewers' in request.resource.data) || request.resource.data.viewers is list);
-    }
+        && request.resource.data.viewers is list;
 
-    match /persons/{personId} {
-      allow read: if canRead();
+      // Admins may change anything; a tree's own editors may only touch its
+      // role lists and chrome, and can never empty the editor list.
+      allow update: if isAdmin()
+        || (isTreeEditor(treeId)
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['editors', 'viewers', 'name', 'subtitle', 'motto'])
+            && request.resource.data.editors is list
+            && request.resource.data.editors.size() > 0);
 
-      allow create: if isEditor()
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() < 120
-        && (request.resource.data.parentId == null
-            || request.resource.data.parentId is string);
+      allow delete: if isAdmin();
 
-      allow update: if isEditor()
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() < 120;
+      match /persons/{personId} {
+        allow read: if isTreeViewer(treeId);
+        allow create, update: if isTreeEditor(treeId)
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() < 120;
+        allow delete: if isTreeEditor(treeId);
 
-      allow delete: if isEditor();
-    }
+        match /photos/{photoId} {
+          allow read: if isTreeViewer(treeId);
+          allow create: if isTreeEditor(treeId)
+            && request.resource.data.dataUrl is string
+            && request.resource.data.dataUrl.size() > 0
+            && request.resource.data.dataUrl.size() < 900000;
+          allow delete: if isTreeEditor(treeId);
+        }
+      }
 
-    // One photo per document (not an array field on `persons/{id}`) because a
-    // Firestore document caps at 1 MiB total — an array would force every
-    // photo for one person to share that single budget instead of each
-    // getting its own.
-    match /persons/{personId}/photos/{photoId} {
-      allow read: if canRead();
-
-      allow create: if isEditor()
-        && request.resource.data.dataUrl is string
-        && request.resource.data.dataUrl.size() > 0
-        && request.resource.data.dataUrl.size() < 900000;
-
-      allow delete: if isEditor();
-    }
-
-    // Scanned archive pages (the 1987 source document) — same one-doc-per-photo
-    // shape as persons/{id}/photos, kept out of the git repo/public build since
-    // this is a public GitHub repo; served from Firestore behind canRead() instead.
-    match /archive/{photoId} {
-      allow read: if canRead();
-
-      allow create: if isEditor()
-        && request.resource.data.dataUrl is string
-        && request.resource.data.dataUrl.size() > 0
-        && request.resource.data.dataUrl.size() < 900000;
-
-      allow update: if isEditor();
-      allow delete: if isEditor();
+      match /archive/{photoId} {
+        allow read: if isTreeViewer(treeId);
+        allow create: if isTreeEditor(treeId)
+          && request.resource.data.dataUrl is string
+          && request.resource.data.dataUrl.size() > 0
+          && request.resource.data.dataUrl.size() < 900000;
+        allow update, delete: if isTreeEditor(treeId);
+      }
     }
 
     // Everything else is closed.

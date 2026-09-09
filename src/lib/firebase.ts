@@ -51,8 +51,25 @@ export const db = dbInstance as Firestore
 export const googleProvider = new GoogleAuthProvider()
 googleProvider.setCustomParameters({ prompt: 'select_account' })
 
-/** Firestore collection / doc paths, kept in one place. */
+/**
+ * Firestore paths, kept in one place.
+ *
+ * Everything a single family tree owns lives under `trees/{treeId}/…` — see
+ * `treePaths()`. `treeId` is the tree's URL slug (unique, `[a-z0-9-]+`), so no
+ * separate slug→id lookup is needed. `config/app` is the one global doc:
+ * `{ admins: [email…] }` — the accounts allowed to create trees.
+ */
 export const paths = {
-  persons: 'persons',
+  trees: 'trees',
   configDoc: ['config', 'app'] as const,
+}
+
+/** Per-tree Firestore paths. `treeId` is the tree's slug. */
+export function treePaths(treeId: string) {
+  return {
+    doc: ['trees', treeId] as const,
+    persons: `trees/${treeId}/persons`,
+    archive: `trees/${treeId}/archive`,
+    personPhotos: (personId: string) => `trees/${treeId}/persons/${personId}/photos`,
+  }
 }

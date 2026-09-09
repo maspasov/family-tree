@@ -19,6 +19,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import { Lightbox } from './Lightbox'
 import { PersonFields } from './PersonFields'
 import { t, RELATION_LABELS } from '../lib/i18n'
+import { useTree } from '../tree/TreeContext'
 import { usePersonPhotos } from '../data/usePersonPhotos'
 import { compressImageToDataUrl } from '../lib/imageCompress'
 import {
@@ -57,7 +58,8 @@ function Fact({ label, children }: { label: string; children: React.ReactNode })
 }
 
 function PhotoStrip({ personId, canEdit }: { personId: string; canEdit: boolean }) {
-  const { photos, addPhoto, deletePhoto } = usePersonPhotos(personId)
+  const { treeId } = useTree()
+  const { photos, addPhoto, deletePhoto } = usePersonPhotos(treeId, personId)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)

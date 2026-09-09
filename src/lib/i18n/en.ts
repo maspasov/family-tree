@@ -59,6 +59,10 @@ export const messages: typeof bgMessages = {
   mapEmptyTitle: 'No addresses yet',
   mapEmptyBody:
     'Add an address to at least one person (the locate button in the form) for pins to appear on the map.',
+  mapLocateMe: 'Show my location',
+  mapYouAreHere: 'You are here',
+  mapLocateDenied: 'The browser denied access to your location.',
+  mapLocateError: 'Could not determine your location.',
   calendarEmptyTitle: 'No birthdays yet',
   calendarEmptyBody:
     'Add a "Birthday (MM-DD)" to at least one person in the edit form for events to appear on the calendar.',
@@ -141,6 +145,7 @@ export const messages: typeof bgMessages = {
   addressChangedWarning:
     'The address changed since the last search — click the locate icon to update the coordinates.',
   clearPin: 'Remove coordinates',
+  clear: 'Clear',
   fSpouse: 'Spouse',
   fParent: 'Child of',
   fChildOrder: 'Order among siblings',
@@ -205,6 +210,37 @@ export const messages: typeof bgMessages = {
   aboutLink: 'About the creator',
   aboutTitle: 'About the creator',
   aboutBody: 'This family tree was built and is maintained by:',
+
+  // multiple trees
+  treesTitle: 'Family trees',
+  treesPickBody: 'Pick a tree to open.',
+  treesNone: "You don't have access to any tree yet. Contact the tree's owner.",
+  treesNoneAdmin: 'No trees created yet.',
+  treesNew: 'New tree',
+  deleteTree: 'Delete tree',
+  deleteTreeTitle: 'Delete tree',
+  deleteTreeCta: 'Delete permanently',
+  deleteTreeWarn: (name: string) =>
+    `"${name}" will be deleted along with every person, photo and archive page in it. This cannot be undone.`,
+  deleteTreeTypeSlug: (slug: string) => `Type "${slug}" to confirm:`,
+  backToTrees: 'Back to trees',
+  treeNotFound: 'Tree not found',
+  treeNotFoundBody: 'There is no tree at this address. It may have been moved or deleted.',
+  treeNoAccess: 'No access',
+  treeNoAccessBody: "This account hasn't been invited to this tree. Contact its owner.",
+  createTreeTitle: 'New family tree',
+  create: 'Create',
+  ctName: 'Tree name',
+  ctNameRequired: 'A name is required.',
+  ctSlug: 'Address (in the URL)',
+  ctSlugHelp: 'Lowercase letters, digits and hyphens only. Cannot be changed later.',
+  ctSlugInvalid: 'Invalid address — only a–z, 0–9 and hyphens.',
+  ctSlugTaken: 'That address is already taken.',
+  ctSubtitle: 'Subtitle (optional)',
+  ctMotto: 'Motto (optional)',
+  ctFirstEditor: 'First editor (email)',
+  ctFirstEditorHelp: 'This account will be able to edit the new tree.',
+  ctEditorInvalid: 'Invalid email address.',
 }
 
 export const motto = 'Know your family, and be proud of it! A person without kin is alone.'

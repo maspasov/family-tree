@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { Alert, Box, Button, IconButton, Stack, TextField, Typography, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import { doc, updateDoc } from 'firebase/firestore'
 import { Modal } from './Modal'
-import { db, paths } from '../lib/firebase'
 import { useAuth } from '../auth/AuthContext'
+import { useTree } from '../tree/TreeContext'
 import { t } from '../lib/i18n'
 
 type Role = 'editor' | 'viewer'
@@ -20,7 +19,8 @@ function normalize(email: string): string {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function RolesDialog({ onClose }: Props) {
-  const { user, editors, viewers } = useAuth()
+  const { user } = useAuth()
+  const { editors, viewers, setRoles } = useTree()
   const [newEmail, setNewEmail] = useState('')
   const [newRole, setNewRole] = useState<Role>('viewer')
   const [saving, setSaving] = useState(false)
@@ -30,10 +30,7 @@ export function RolesDialog({ onClose }: Props) {
     setSaving(true)
     setError(null)
     try {
-      await updateDoc(doc(db, ...paths.configDoc), {
-        editors: nextEditors,
-        viewers: nextViewers,
-      })
+      await setRoles(nextEditors, nextViewers)
     } catch (e) {
       setError((e as Error).message)
     } finally {

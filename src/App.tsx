@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import './App.css'
 import { Alert, Box, Button, CircularProgress, Snackbar, Stack, Typography } from '@mui/material'
 import { firebaseConfigured } from './lib/firebase'
 import { messages, motto, t, useLocale } from './lib/i18n'
 import { buildBirthdaysIcs, hasBirthdays } from './lib/ics'
 import { sendAddedNotification, sendAdminNotification } from './lib/notifyEmail'
-import { useAuth } from './auth/AuthContext'
+import { navigate, useHashRoute } from './lib/hashRoute'
+import { TreeProvider, useTree } from './tree/TreeContext'
 import { usePersons } from './data/usePersons'
 import {
   EMPTY_DRAFT,
@@ -31,8 +32,29 @@ import { PersonForm } from './components/PersonForm'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { ImportDialog } from './components/ImportDialog'
 import { LoginGate } from './components/LoginGate'
+import { TreePicker } from './components/TreePicker'
 
 type Editing = { kind: 'add'; parentId: string | null } | null
+
+function CenteredMessage({
+  title,
+  body,
+  action,
+}: {
+  title: string
+  body: string
+  action?: ReactNode
+}) {
+  return (
+    <Box sx={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3, textAlign: 'center' }}>
+      <Stack spacing={1.5} sx={{ alignItems: 'center', maxWidth: 420 }}>
+        <Typography variant="h4">{title}</Typography>
+        <Typography color="text.secondary">{body}</Typography>
+        {action}
+      </Stack>
+    </Box>
+  )
+}
 
 function downloadJson(people: Person[]) {
   // Keep `id` (so re-import matches rows); drop server-managed audit fields.
@@ -58,14 +80,14 @@ function downloadIcs(people: Person[]) {
   URL.revokeObjectURL(url)
 }
 
-export default function App() {
+function TreeApp() {
   // Subscribing here forces this whole tree to re-render on a language
   // switch — most components below read the plain `t()`/`messages` imports
   // directly rather than this hook, so this cascade is what refreshes them.
   useLocale()
-  const { isEditor } = useAuth()
+  const { treeId, tree, isEditor, canView, loading: treeLoading, notFound } = useTree()
   const { people, byId, loading, error, addPerson, updatePerson, deletePerson, importPeople } =
-    usePersons(isEditor)
+    usePersons(treeId, canView)
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<Editing>(null)
@@ -206,12 +228,35 @@ export default function App() {
 
   if (!firebaseConfigured) {
     return (
-      <Box sx={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3, textAlign: 'center' }}>
-        <Stack spacing={1.5} sx={{ alignItems: 'center', maxWidth: 420 }}>
-          <Typography variant="h4">{t('configMissingTitle')}</Typography>
-          <Typography color="text.secondary">{t('configMissingBody')}</Typography>
-        </Stack>
+      <CenteredMessage title={t('configMissingTitle')} body={t('configMissingBody')} />
+    )
+  }
+
+  if (treeLoading) {
+    return (
+      <Box sx={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
       </Box>
+    )
+  }
+
+  if (notFound) {
+    return (
+      <CenteredMessage
+        title={t('treeNotFound')}
+        body={t('treeNotFoundBody')}
+        action={<Button variant="contained" onClick={() => navigate('/')}>{t('backToTrees')}</Button>}
+      />
+    )
+  }
+
+  if (!canView) {
+    return (
+      <CenteredMessage
+        title={t('treeNoAccess')}
+        body={t('treeNoAccessBody')}
+        action={<Button variant="outlined" onClick={() => navigate('/')}>{t('backToTrees')}</Button>}
+      />
     )
   }
 
@@ -225,7 +270,7 @@ export default function App() {
   }
 
   return (
-    <LoginGate>
+    <>
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100svh', overflow: 'hidden' }}>
         <Toolbar
           people={people}
@@ -355,7 +400,7 @@ export default function App() {
             borderColor: 'divider',
           }}
         >
-          <Box component="span" sx={{ fontStyle: 'italic' }}>{motto}</Box>
+          <Box component="span" sx={{ fontStyle: 'italic' }}>{tree?.motto || motto}</Box>
           {' · '}
           <Box
             component="button"
@@ -411,6 +456,29 @@ export default function App() {
           </Alert>
         </Snackbar>
       </Box>
-    </LoginGate>
+    </>
   )
+}
+
+/**
+ * Route dispatch: `#/` is the tree picker, `#/t/<slug>` mounts one tree. The
+ * login gate wraps both so nothing renders until the visitor is signed in.
+ */
+export default function App() {
+  useLocale()
+  const { segments } = useHashRoute()
+
+  let body: ReactNode
+  if (segments[0] === 't' && segments[1]) {
+    // Key on the slug so switching trees fully remounts with fresh state.
+    body = (
+      <TreeProvider key={segments[1]} treeId={segments[1]}>
+        <TreeApp />
+      </TreeProvider>
+    )
+  } else {
+    body = <TreePicker />
+  }
+
+  return <LoginGate>{body}</LoginGate>
 }

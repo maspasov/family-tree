@@ -12,7 +12,7 @@ import {
   writeBatch,
   type DocumentData,
 } from 'firebase/firestore'
-import { db, firebaseConfigured, paths } from '../lib/firebase'
+import { db, firebaseConfigured, treePaths } from '../lib/firebase'
 import {
   descendantIds,
   type Person,
@@ -119,19 +119,21 @@ export interface PersonsApi {
 }
 
 /**
- * @param enabled Only subscribe once the caller knows the signed-in account is
- *   allowed in (see `LoginGate`) — Firestore rules would reject the read
+ * @param treeId  Which tree's people to load — `trees/{treeId}/persons`.
+ * @param enabled Only subscribe once the caller knows the signed-in account may
+ *   read this tree (see `TreeContext`) — Firestore rules would reject the read
  *   anyway, but there's no point even trying before that's known.
  */
-export function usePersons(enabled: boolean): PersonsApi {
+export function usePersons(treeId: string, enabled: boolean): PersonsApi {
   const { user } = useAuth()
+  const personsPath = treePaths(treeId).persons
   const [people, setPeople] = useState<Person[]>([])
   const [loading, setLoading] = useState(firebaseConfigured)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!firebaseConfigured || !enabled) return
-    const col = collection(db, paths.persons)
+    const col = collection(db, personsPath)
     return onSnapshot(
       col,
       (snap) => {
@@ -144,7 +146,7 @@ export function usePersons(enabled: boolean): PersonsApi {
         setLoading(false)
       },
     )
-  }, [enabled])
+  }, [enabled, personsPath])
 
   const byId = useMemo(() => new Map(people.map((p) => [p.id, p])), [people])
 
@@ -162,7 +164,7 @@ export function usePersons(enabled: boolean): PersonsApi {
       error,
 
       async addPerson(draft) {
-        const ref = await addDoc(collection(db, paths.persons), {
+        const ref = await addDoc(collection(db, personsPath), {
           ...cleanDraft(draft),
           createdAt: serverTimestamp(),
           ...audit(),
@@ -171,7 +173,7 @@ export function usePersons(enabled: boolean): PersonsApi {
       },
 
       async updatePerson(id, draft) {
-        await updateDoc(doc(db, paths.persons, id), {
+        await updateDoc(doc(db, personsPath, id), {
           ...cleanDraftForUpdate(draft),
           ...audit(),
         })
@@ -184,7 +186,7 @@ export function usePersons(enabled: boolean): PersonsApi {
             `Човекът има ${kids.size} потомък/ци — първо ги преместете или изтрийте.`,
           )
         }
-        await deleteDoc(doc(db, paths.persons, id))
+        await deleteDoc(doc(db, personsPath, id))
       },
 
       async importPeople(rows) {
@@ -196,9 +198,9 @@ export function usePersons(enabled: boolean): PersonsApi {
             // `id`, `createdAt`, `updatedAt`, `updatedByEmail` are dropped via
             // the rest pattern; the rest is the person's editable fields.
             const { id: rawId, createdAt, updatedAt, updatedByEmail, ...rest } = row
-            const id = (rawId && String(rawId)) || doc(collection(db, paths.persons)).id
+            const id = (rawId && String(rawId)) || doc(collection(db, personsPath)).id
             batch.set(
-              doc(db, paths.persons, id),
+              doc(db, personsPath, id),
               {
                 name: '',
                 parentId: null,
@@ -217,12 +219,12 @@ export function usePersons(enabled: boolean): PersonsApi {
         return written
       },
     }
-  }, [people, byId, loading, error, user])
+  }, [people, byId, loading, error, user, personsPath])
 
   return api
 }
 
 /** Standalone helper for a one-shot upsert used outside React (rare). */
-export async function upsertPerson(id: string, data: DocumentData) {
-  await setDoc(doc(db, paths.persons, id), data, { merge: true })
+export async function upsertPerson(treeId: string, id: string, data: DocumentData) {
+  await setDoc(doc(db, treePaths(treeId).persons, id), data, { merge: true })
 }

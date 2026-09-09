@@ -6,7 +6,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import { Lightbox, type LightboxItem } from './Lightbox'
 import { useArchivePhotos } from '../data/useArchivePhotos'
 import { compressImageToDataUrl } from '../lib/imageCompress'
-import { useAuth } from '../auth/AuthContext'
+import { useTree } from '../tree/TreeContext'
 import { t, useLocale, type StringKey } from '../lib/i18n'
 
 // Prefilled onto the first three uploads, in order, purely as a convenience —
@@ -15,8 +15,8 @@ const SUGGESTED_CAPTIONS: StringKey[] = ['archiveCaption1', 'archiveCaption2', '
 
 export function Archive() {
   useLocale()
-  const { isEditor } = useAuth()
-  const { photos, addPhoto, deletePhoto, updateCaption } = useArchivePhotos()
+  const { treeId, isEditor } = useTree()
+  const { photos, addPhoto, deletePhoto, updateCaption } = useArchivePhotos(treeId)
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)

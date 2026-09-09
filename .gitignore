@@ -19,6 +19,12 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Service-account keys for the scripts/ admin tools — these ARE secret.
+*serviceaccount*.json
+*service-account*.json
+*-key.json
+firebase-adminsdk-*.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

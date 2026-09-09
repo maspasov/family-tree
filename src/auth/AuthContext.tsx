@@ -19,18 +19,12 @@ interface AuthState {
   /** null until Firebase reports the first auth state. */
   user: User | null
   loading: boolean
-  /** Emails allowed to edit, from Firestore `config/app.editors`. */
-  editors: string[]
-  /** Emails allowed to view (read-only), from Firestore `config/app.viewers`. */
-  viewers: string[]
-  /** Signed in AND email is on the editors allow-list. */
-  isEditor: boolean
-  /** Signed in AND email is on the viewers allow-list. */
-  isViewer: boolean
-  /** Signed in and on either list — allowed past the login gate at all. */
-  canView: boolean
-  /** Can view but can't edit. */
-  isViewerOnly: boolean
+  /** True once signed in with a verified e-mail — enough to reach the tree picker. */
+  signedIn: boolean
+  /** Emails allowed to create/administer trees, from Firestore `config/app.admins`. */
+  admins: string[]
+  /** Signed in AND on the admins allow-list — may create trees and edit any tree. */
+  isAdmin: boolean
   error: string | null
   signIn: () => Promise<void>
   signOutUser: () => Promise<void>
@@ -42,8 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   // When Firebase isn't configured there is nothing to wait for.
   const [loading, setLoading] = useState(firebaseConfigured)
-  const [editors, setEditors] = useState<string[]>([])
-  const [viewers, setViewers] = useState<string[]>([])
+  const [admins, setAdmins] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -61,36 +54,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ref,
       (snap) => {
         const data = snap.data()
-        const normalize = (raw: unknown) =>
-          ((raw ?? []) as unknown[])
+        setAdmins(
+          ((data?.admins ?? []) as unknown[])
             .filter((e): e is string => typeof e === 'string')
-            .map((e) => e.toLowerCase().trim())
-        setEditors(normalize(data?.editors))
-        setViewers(normalize(data?.viewers))
+            .map((e) => e.toLowerCase().trim()),
+        )
       },
-      // Rules allow public read of config/app; a failure here just means "no editors/viewers yet".
-      () => {
-        setEditors([])
-        setViewers([])
-      },
+      // Rules allow public read of config/app; a failure here just means "no admins yet".
+      () => setAdmins([]),
     )
   }, [])
 
   const value = useMemo<AuthState>(() => {
     const email = user?.email?.toLowerCase() ?? null
     const emailVerified = user?.emailVerified ?? false
-    const isEditor = Boolean(email && emailVerified && editors.includes(email))
-    const isViewer = Boolean(email && emailVerified && viewers.includes(email))
-    const canView = isEditor || isViewer
+    const signedIn = Boolean(email && emailVerified)
     return {
       user,
       loading,
-      editors,
-      viewers,
-      isEditor,
-      isViewer,
-      canView,
-      isViewerOnly: canView && !isEditor,
+      signedIn,
+      admins,
+      isAdmin: Boolean(signedIn && email && admins.includes(email)),
       error,
       async signIn() {
         setError(null)
@@ -109,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await signOut(auth)
       },
     }
-  }, [user, loading, editors, viewers, error])
+  }, [user, loading, admins, error])
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>
 }

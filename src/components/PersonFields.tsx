@@ -19,7 +19,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
 import { YearCalendar } from '@mui/x-date-pickers/YearCalendar'
 import { bgBG, deDE, enUS } from '@mui/x-date-pickers/locales'
 import dayjs, { type Dayjs } from 'dayjs'
@@ -107,6 +107,7 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
     field: 'birthYear' | 'deathYear'
     anchor: HTMLElement
   } | null>(null)
+  const [birthdayAnchor, setBirthdayAnchor] = useState<HTMLElement | null>(null)
 
   // Suggestions drawn from data already in the tree — no external API/billing.
   const birthPlaceOptions = useMemo(
@@ -218,6 +219,8 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
   }
 
   const picker = PICKER_LOCALES[getLocale()] ?? PICKER_LOCALES.bg
+  const birthday = birthMonthDayToDate(draft.birthMonthDay)
+  const birthdayLabel = birthday ? birthday.locale(picker.dayjs).format('D MMMM') : ''
 
   return (
     <LocalizationProvider
@@ -487,20 +490,57 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
             onInputChange={(_, value) => set('birthPlace', value)}
             renderInput={(params) => <TextField {...params} label={t('fBirthPlace')} />}
           />
-          <DatePicker
+          <TextField
+            fullWidth
             label={t('fBirthMonthDay')}
-            views={['month', 'day']}
-            format="D MMMM"
-            value={birthMonthDayToDate(draft.birthMonthDay)}
-            onChange={(value) => set('birthMonthDay', value?.isValid() ? value.format('MM-DD') : '')}
+            value={birthdayLabel}
+            onClick={(e) => setBirthdayAnchor(e.currentTarget)}
+            error={Boolean(showErr('birthMonthDay'))}
+            helperText={showErr('birthMonthDay')}
+            sx={{ cursor: 'pointer' }}
             slotProps={{
-              textField: {
-                fullWidth: true,
-                error: Boolean(showErr('birthMonthDay')),
-                helperText: showErr('birthMonthDay'),
+              htmlInput: { readOnly: true, style: { cursor: 'pointer' } },
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {/* Opens via the field-level onClick above (bubbles up). */}
+                    <IconButton size="small" tabIndex={-1}>
+                      <CalendarMonthIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
               },
             }}
           />
+          <Popover
+            open={Boolean(birthdayAnchor)}
+            anchorEl={birthdayAnchor}
+            onClose={() => setBirthdayAnchor(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          >
+            <Stack sx={{ alignItems: 'flex-start', p: 1 }}>
+              <DateCalendar
+                views={['month', 'day']}
+                openTo="month"
+                value={birthday}
+                onChange={(value: Dayjs | null, state?: string) => {
+                  if (value?.isValid()) set('birthMonthDay', value.format('MM-DD'))
+                  if (state === 'finish') setBirthdayAnchor(null)
+                }}
+                slotProps={{ calendarHeader: { format: 'MMMM' } }}
+              />
+              <Button
+                size="small"
+                color="inherit"
+                onClick={() => {
+                  set('birthMonthDay', '')
+                  setBirthdayAnchor(null)
+                }}
+              >
+                {t('clear')}
+              </Button>
+            </Stack>
+          </Popover>
         </Stack>
 
         <Stack spacing={0.5}>
