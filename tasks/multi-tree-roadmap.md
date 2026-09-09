@@ -250,10 +250,10 @@ layout). 4–6 turn it into a multi-tree product.
 
 ## 08. Out of scope (deferred)
 
-- **Cross-tree links** — a marriage joining two families' trees. Needs a
-  person to be referenceable from another tree; big rules/data change, and the
-  `d3-org-chart` single-parent hierarchy doesn't render unions anyway (see
-  `project-summary.md`). Revisit only with a different chart library.
+- **Merging trees into one** — a full merge that renders both lineages as one
+  continuous chart is still out: `d3-org-chart` is single-parent and can't draw
+  a union. What *was* built instead is a **cross-tree marriage link** (§13):
+  the trees stay separate, joined by a navigable bridge on the married pair.
 - **Public tree directory** — listing/searching trees you're *not* a member
   of. This memo keeps `trees/{treeId}` publicly readable for slug resolution
   but assumes you only ever navigate to a tree you were invited to.
@@ -314,6 +314,45 @@ family-sized data; a Cloud Function would be needed at large scale.
 - Tree switcher dropdown in the toolbar (there's a back-arrow to `#/` for now).
 - A dedicated admin screen for `config/app.admins` — use `scripts/set-admins.mjs`
   (`--list` / `--add` / `--remove`) or the console.
+- An in-app "edit tree" screen for `name` / `subtitle` / `motto` (console for now).
 - Per-tree seed data / `About` text (seed loader still loads the Брусарите set).
+
+## 13. Cross-tree marriage link — built
+
+Joins a couple's two family trees without merging them.
+
+- **Data:** `Person.partnerLink = { treeId, personId, personName, treeName? } | null`
+  — a mirrored record on *both* people (`null` clears, same convention as `geo`).
+- **`src/data/treeLinks.ts`** — `linkPartners` / `unlinkPartners` write both ends
+  in one `writeBatch` (atomic; needs editor on **both** trees or the whole
+  batch fails), plus `fetchTreePeople(treeId)` for the picker.
+- **`LinkPartnerDialog`** (from the person panel, editors) — pick another tree
+  you can edit → pick the person → confirm. `PersonPanel` shows the link as a
+  `Fact` and a remove button.
+- **Indicators:**
+  - Chart card — a violet left accent stripe (`ft-card--linked`, `--cross-link`,
+    reads at any zoom) plus a clickable `⚭ <name> · <tree> →` line
+    (`FamilyChart`'s `onCrossLink` prop → `navigate`).
+  - Toolbar — a `⛓ N` chip next to the tree name (only when links exist),
+    opening a menu of the connected trees; derived live from
+    `people[].partnerLink`, no denormalised field.
+- **Navigation:** the link routes to `#/t/<otherSlug>/p/<personId>`; `App`
+  passes that person id to `TreeApp` which opens its panel and centres the chart.
+- No rules change — `partnerLink` is an ordinary field on `persons/{id}`, and
+  the cross-tree write is already gated by `isTreeEditor(otherTree)`.
+- Single link per person for now (remarriage across families would need an array).
+
+### Combined view — built
+
+`#/t/<slug>/all` (`CombinedView`, from the toolbar's `⛓` menu → "Виж всички
+свързани дървета"). BFS's the tree graph out from `<slug>` following
+`partnerLink.treeId`, one-shot `fetchTreePeople` per tree, then flattens into a
+single **namespaced** `Person[]` (`<treeId>::<id>` on `id` / `parentId` /
+`relation.toId`) fed to `FamilyChart` read-only. Each tree hangs off the
+existing synthetic root; cards carry a tree-name pill (`FamilyChart`'s new
+`treeLabelOf` prop; per-node height grows for the extra line). Clicking a card
+jumps into that person's own editable tree (`#/t/<treeId>/p/<id>`); clicking a
+card's ⚭ line scrolls to the partner within the combined chart. Still not a
+true union render — the trees are sibling subtrees, not merged branches.
 
 > „Опознай рода си, за да си горд! Човек без роднини е сам."

@@ -18,6 +18,7 @@
   --flag-bg: #e8c06a;
   --flag-ink: #5a3d0a;
   --pin-group-bg: #2f5233;
+  --cross-link: #7a5cc4;
   --sans: 'PT Sans', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --serif: 'PT Serif', 'Times New Roman', Georgia, serif;
 }
@@ -35,6 +36,7 @@
   --female: #cb8fa0;
   --unknown: #a89e8e;
   --pin-group-bg: #6fa876;
+  --cross-link: #a58ae0;
 }
 
 .ft-main {
@@ -123,6 +125,37 @@
 }
 .ft-card__spouse--link:hover {
   text-decoration: underline;
+}
+/* Cross-tree marriage bridge (Person.partnerLink) */
+.ft-card--linked {
+  box-shadow: inset 4px 0 0 var(--cross-link), var(--card-shadow);
+}
+.ft-card__crosslink {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cross-link);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ft-card__crosslink:hover {
+  text-decoration: underline;
+}
+/* Tree-of-origin label on a card in the combined multi-tree view */
+.ft-card__tree {
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--cross-link);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .ft-card__place {
   font-size: 11px;

@@ -70,6 +70,15 @@ export interface Person {
    * label-only.
    */
   relation?: { type: RelationType; toId: string; toName: string; customLabel?: string } | null
+  /**
+   * Cross-tree marriage bridge: this person is married to someone who lives in
+   * a *different* tree (e.g. joining a couple's two family trees). A mirror
+   * `partnerLink` is written on the other person too. `personName` / `treeName`
+   * are denormalized for display and cross-tree navigation (`#/t/<treeId>/p/<personId>`).
+   * The two trees stay independent — this is only a navigable link, not a merge.
+   * `null` (not `undefined`) explicitly clears it — same convention as `geo`.
+   */
+  partnerLink?: { treeId: string; personId: string; personName: string; treeName?: string } | null
   /** Spouse, free text e.g. „Елена (по баща Петрова)“. */
   spouse?: string
   gender: Gender
@@ -121,6 +130,7 @@ export const EMPTY_DRAFT: PersonDraft = {
   motherName: '',
   fatherName: '',
   relation: undefined,
+  partnerLink: undefined,
   spouse: '',
   gender: 'unknown',
   birthYear: '',

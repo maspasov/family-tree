@@ -27,6 +27,7 @@ import {
 import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import AddIcon from '@mui/icons-material/Add'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import LinkIcon from '@mui/icons-material/Link'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
@@ -79,7 +80,7 @@ interface Props {
 
 export function Toolbar(props: Props) {
   const { user, signIn, signOutUser } = useAuth()
-  const { tree, isEditor, isViewerOnly } = useTree()
+  const { treeId, tree, isEditor, isViewerOnly } = useTree()
   const { mode, toggle } = useColorMode()
   const { locale, setLocale } = useLocale()
   const theme = useTheme()
@@ -88,7 +89,17 @@ export function Toolbar(props: Props) {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
   const [actionsAnchor, setActionsAnchor] = useState<HTMLElement | null>(null)
   const [langAnchor, setLangAnchor] = useState<HTMLElement | null>(null)
+  const [linkedAnchor, setLinkedAnchor] = useState<HTMLElement | null>(null)
   const [showRoles, setShowRoles] = useState(false)
+
+  // Other trees this one is connected to via a cross-tree marriage link.
+  const linkedTrees = useMemo(() => {
+    const byId = new Map<string, string>()
+    for (const p of props.people) {
+      if (p.partnerLink) byId.set(p.partnerLink.treeId, p.partnerLink.treeName || p.partnerLink.treeId)
+    }
+    return [...byId].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name, 'bg'))
+  }, [props.people])
 
   const results = useMemo(() => {
     const q = query.trim().toLocaleLowerCase('bg')
@@ -187,6 +198,52 @@ export function Toolbar(props: Props) {
             </Typography>
           )}
         </Box>
+
+        {linkedTrees.length > 0 && (
+          <>
+            <Tooltip title={t('linkedTreesLabel')}>
+              <Chip
+                icon={<LinkIcon />}
+                label={linkedTrees.length}
+                size="small"
+                onClick={(e) => setLinkedAnchor(e.currentTarget)}
+                sx={{ flexShrink: 0, color: 'var(--cross-link)', borderColor: 'var(--cross-link)' }}
+                variant="outlined"
+              />
+            </Tooltip>
+            <Menu
+              anchorEl={linkedAnchor}
+              open={Boolean(linkedAnchor)}
+              onClose={() => setLinkedAnchor(null)}
+            >
+              <MenuItem
+                onClick={() => {
+                  navigate(`/t/${treeId}/all`)
+                  setLinkedAnchor(null)
+                }}
+              >
+                <ListItemIcon><AccountTreeIcon fontSize="small" /></ListItemIcon>
+                <ListItemText>{t('combinedView')}</ListItemText>
+              </MenuItem>
+              <Divider />
+              <MenuItem disabled sx={{ opacity: 1, fontWeight: 700 }}>
+                {t('linkedTreesLabel')}
+              </MenuItem>
+              {linkedTrees.map((lt) => (
+                <MenuItem
+                  key={lt.id}
+                  onClick={() => {
+                    navigate(`/t/${lt.id}`)
+                    setLinkedAnchor(null)
+                  }}
+                >
+                  <ListItemIcon><LinkIcon fontSize="small" /></ListItemIcon>
+                  <ListItemText>{lt.name}</ListItemText>
+                </MenuItem>
+              ))}
+            </Menu>
+          </>
+        )}
 
         <ToggleButtonGroup
           size="small"

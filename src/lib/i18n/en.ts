@@ -264,6 +264,25 @@ export const messages: typeof bgMessages = {
   ctFirstEditor: 'First editor (email)',
   ctFirstEditorHelp: 'This account will be able to edit the new tree.',
   ctEditorInvalid: 'Invalid email address.',
+
+  // cross-tree partner link (marriage joining two family trees)
+  linkFactLabel: 'Spouse in another tree',
+  linkAction: 'Link to another tree',
+  linkRemove: 'Remove link',
+  linkRemoveConfirm: 'Remove the link to the other tree (from both sides)?',
+  linkTitle: 'Link to another tree',
+  linkConfirm: 'Link',
+  linkNoTrees: "You don't have editor rights in another tree to link this person to.",
+  linkPickTree: 'Choose the other tree',
+  linkPickPerson: 'Choose a person in that tree',
+  linkNoPeople: 'No people in that tree.',
+  linkFailed: 'Linking failed. Editor rights are needed in both trees.',
+  linkIntro: (name: string) =>
+    `Choose a person from another tree whom "${name}" is married to. The two trees stay separate — this only creates a link to navigate between them.`,
+  linkPreview: (a: string, b: string, treeName: string) => `${a}  ⚭  ${b} (${treeName})`,
+  linkedTreesLabel: 'Linked trees',
+  combinedView: 'View all linked trees',
+  combinedTitle: 'All linked trees',
 }
 
 export const motto = 'Know your family, and be proud of it! A person without kin is alone.'

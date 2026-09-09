@@ -21,7 +21,7 @@ import {
 } from '../model/person'
 import { useAuth } from '../auth/AuthContext'
 
-function fromDoc(id: string, data: DocumentData): Person {
+export function fromDoc(id: string, data: DocumentData): Person {
   return {
     id,
     name: data.name ?? '',
@@ -45,6 +45,19 @@ function fromDoc(id: string, data: DocumentData): Person {
             // on the next edit (`updateDoc`) if the field is ever touched.
             ...(typeof data.relation.customLabel === 'string'
               ? { customLabel: data.relation.customLabel }
+              : {}),
+          }
+        : undefined,
+    partnerLink:
+      data.partnerLink &&
+      typeof data.partnerLink.treeId === 'string' &&
+      typeof data.partnerLink.personId === 'string'
+        ? {
+            treeId: data.partnerLink.treeId,
+            personId: data.partnerLink.personId,
+            personName: data.partnerLink.personName ?? '',
+            ...(typeof data.partnerLink.treeName === 'string'
+              ? { treeName: data.partnerLink.treeName }
               : {}),
           }
         : undefined,

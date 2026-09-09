@@ -32,6 +32,7 @@ import { ConfirmDialog } from './components/ConfirmDialog'
 import { ImportDialog } from './components/ImportDialog'
 import { LoginGate } from './components/LoginGate'
 import { TreePicker } from './components/TreePicker'
+import { CombinedView } from './components/CombinedView'
 
 type Editing = { kind: 'add'; parentId: string | null } | null
 
@@ -79,7 +80,7 @@ function downloadIcs(people: Person[]) {
   URL.revokeObjectURL(url)
 }
 
-function TreeApp() {
+function TreeApp({ initialPersonId }: { initialPersonId?: string }) {
   // Subscribing here forces this whole tree to re-render on a language
   // switch — most components below read the plain `t()`/`messages` imports
   // directly rather than this hook, so this cascade is what refreshes them.
@@ -88,7 +89,9 @@ function TreeApp() {
   const { people, byId, loading, error, addPerson, updatePerson, deletePerson, importPeople } =
     usePersons(treeId, canView)
 
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  // Seeded from `#/t/<slug>/p/<id>` (e.g. a cross-tree partner link) — this
+  // component remounts per tree (keyed in App), so the initializer is enough.
+  const [selectedId, setSelectedId] = useState<string | null>(initialPersonId ?? null)
   const [editing, setEditing] = useState<Editing>(null)
   const [deleteTarget, setDeleteTarget] = useState<Person | null>(null)
   const [showImport, setShowImport] = useState(false)
@@ -107,6 +110,16 @@ function TreeApp() {
   const pendingFocusIdRef = useRef<string | null>(null)
   const [autoEditId, setAutoEditId] = useState<string | null>(null)
   const selected = selectedId ? byId.get(selectedId) ?? null : null
+
+  // Once the deep-linked person's data has loaded, centre the chart on them
+  // (the panel is already open via the `selectedId` initializer above).
+  const deepLinkFocusedRef = useRef(false)
+  useEffect(() => {
+    if (!initialPersonId || deepLinkFocusedRef.current || !byId.has(initialPersonId)) return
+    deepLinkFocusedRef.current = true
+    const raf = requestAnimationFrame(() => chartRef.current?.focus(initialPersonId))
+    return () => cancelAnimationFrame(raf)
+  }, [initialPersonId, byId])
 
   // Browser-tab title follows the open tree; back to the generic app name on exit.
   useEffect(() => {
@@ -365,6 +378,7 @@ function TreeApp() {
               layout={layout}
               onSelect={setSelectedId}
               onQuickLink={handleQuickLink}
+              onCrossLink={({ treeId: tid, personId }) => navigate(`/t/${tid}/p/${personId}`)}
               canEdit={isEditor}
             />
           )}
@@ -466,11 +480,18 @@ export default function App() {
   const { segments } = useHashRoute()
 
   let body: ReactNode
-  if (segments[0] === 't' && segments[1]) {
-    // Key on the slug so switching trees fully remounts with fresh state.
+  if (segments[0] === 't' && segments[1] && segments[2] === 'all') {
+    // `#/t/<slug>/all` — read-only overview of this tree + every tree it's
+    // linked to via a cross-tree marriage.
+    body = <CombinedView key={`all:${segments[1]}`} slug={segments[1]} />
+  } else if (segments[0] === 't' && segments[1]) {
+    // `#/t/<slug>` — optionally `.../p/<personId>` to open straight to a person
+    // (used by cross-tree partner links). Key on the slug so switching trees
+    // fully remounts with fresh state.
+    const initialPersonId = segments[2] === 'p' ? segments[3] : undefined
     body = (
       <TreeProvider key={segments[1]} treeId={segments[1]}>
-        <TreeApp />
+        <TreeApp initialPersonId={initialPersonId} />
       </TreeProvider>
     )
   } else {

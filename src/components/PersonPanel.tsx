@@ -18,9 +18,12 @@ import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import CloseIcon from '@mui/icons-material/Close'
 import { Lightbox } from './Lightbox'
 import { PersonFields } from './PersonFields'
+import { LinkPartnerDialog } from './LinkPartnerDialog'
 import { t, RELATION_LABELS } from '../lib/i18n'
 import { useTree } from '../tree/TreeContext'
+import { navigate } from '../lib/hashRoute'
 import { usePersonPhotos } from '../data/usePersonPhotos'
+import { unlinkPartners } from '../data/treeLinks'
 import { compressImageToDataUrl } from '../lib/imageCompress'
 import {
   childrenOf,
@@ -194,11 +197,31 @@ export function PersonPanel({
 }: Props) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const { treeId } = useTree()
 
   const [editDraft, setEditDraftState] = useState<PersonDraft | null>(null)
   const [touched, setTouched] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [showLink, setShowLink] = useState(false)
+  const [unlinking, setUnlinking] = useState(false)
+
+  const partnerLink = person.partnerLink ?? null
+
+  async function removePartnerLink() {
+    if (!partnerLink || !window.confirm(t('linkRemoveConfirm'))) return
+    setUnlinking(true)
+    try {
+      await unlinkPartners(
+        { treeId, personId: person.id },
+        { treeId: partnerLink.treeId, personId: partnerLink.personId },
+      )
+    } catch (e) {
+      window.alert((e as Error).message)
+    } finally {
+      setUnlinking(false)
+    }
+  }
 
   // Keyed on person.id (not the `person` object) so a live Firestore update
   // to the same person mid-edit doesn't blow away in-progress changes — but
@@ -349,6 +372,20 @@ export function PersonPanel({
                 </Fact>
               )}
               {person.spouse && <Fact label={t('spouse')}>{person.spouse}</Fact>}
+              {partnerLink && (
+                <Fact label={t('linkFactLabel')}>
+                  <Button
+                    variant="text"
+                    size="small"
+                    sx={{ p: 0, minWidth: 0, textAlign: 'left' }}
+                    onClick={() => navigate(`/t/${partnerLink.treeId}/p/${partnerLink.personId}`)}
+                  >
+                    {partnerLink.personName || t('noName')}
+                    {' · '}
+                    {partnerLink.treeName || partnerLink.treeId} →
+                  </Button>
+                </Fact>
+              )}
               {parent && (
                 <Fact label={t('parent')}>
                   <Button
@@ -411,6 +448,20 @@ export function PersonPanel({
                   <Button variant="outlined" size="small" onClick={() => onAddChild(person)}>
                     {t('addChild')}
                   </Button>
+                  {partnerLink ? (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled={unlinking}
+                      onClick={removePartnerLink}
+                    >
+                      {t('linkRemove')}
+                    </Button>
+                  ) : (
+                    <Button variant="outlined" size="small" onClick={() => setShowLink(true)}>
+                      {t('linkAction')}
+                    </Button>
+                  )}
                   <Button
                     variant="outlined"
                     size="small"
@@ -444,6 +495,14 @@ export function PersonPanel({
           </Stack>
         )}
       </Stack>
+
+      {showLink && (
+        <LinkPartnerDialog
+          person={person}
+          onClose={() => setShowLink(false)}
+          onDone={() => setShowLink(false)}
+        />
+      )}
     </Drawer>
   )
 }

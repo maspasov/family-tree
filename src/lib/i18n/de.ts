@@ -264,6 +264,25 @@ export const messages: typeof bgMessages = {
   ctFirstEditor: 'Erster Bearbeiter (E-Mail)',
   ctFirstEditorHelp: 'Dieses Konto kann den neuen Stammbaum bearbeiten.',
   ctEditorInvalid: 'Ungültige E-Mail-Adresse.',
+
+  // cross-tree partner link (marriage joining two family trees)
+  linkFactLabel: 'Ehepartner/in in einem anderen Baum',
+  linkAction: 'Mit anderem Baum verbinden',
+  linkRemove: 'Verknüpfung entfernen',
+  linkRemoveConfirm: 'Die Verknüpfung zum anderen Baum entfernen (auf beiden Seiten)?',
+  linkTitle: 'Mit anderem Baum verbinden',
+  linkConfirm: 'Verbinden',
+  linkNoTrees: 'Sie haben in keinem anderen Baum Bearbeitungsrechte, um diese Person zu verknüpfen.',
+  linkPickTree: 'Wählen Sie den anderen Baum',
+  linkPickPerson: 'Wählen Sie eine Person in diesem Baum',
+  linkNoPeople: 'Keine Personen in diesem Baum.',
+  linkFailed: 'Verknüpfen fehlgeschlagen. In beiden Bäumen sind Bearbeitungsrechte nötig.',
+  linkIntro: (name: string) =>
+    `Wählen Sie eine Person aus einem anderen Baum, mit der „${name}“ verheiratet ist. Die beiden Bäume bleiben getrennt — es entsteht nur eine Verknüpfung zum Wechseln zwischen ihnen.`,
+  linkPreview: (a: string, b: string, treeName: string) => `${a}  ⚭  ${b} (${treeName})`,
+  linkedTreesLabel: 'Verknüpfte Bäume',
+  combinedView: 'Alle verknüpften Bäume ansehen',
+  combinedTitle: 'Alle verknüpften Bäume',
 }
 
 export const motto = 'Kenne deine Familie, damit du stolz sein kannst! Ein Mensch ohne Verwandte ist allein.'

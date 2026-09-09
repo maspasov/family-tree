@@ -17,6 +17,7 @@ import { t, useLocale } from '../lib/i18n'
 
 export type ChartLayout = 'top' | 'bottom'
 export type QuickLinkType = 'map' | 'calendar' | 'edit' | 'delete'
+export type CrossLink = { treeId: string; personId: string }
 
 // Real MUI icon glyphs (exact path data from @mui/icons-material), inlined
 // as raw SVG — this card is injected as an HTML string by d3-org-chart
@@ -50,6 +51,10 @@ interface Props {
   layout: ChartLayout
   onSelect: (id: string | null) => void
   onQuickLink?: (type: QuickLinkType, personId: string) => void
+  /** Follow a person's cross-tree marriage link to the other tree. */
+  onCrossLink?: (link: CrossLink) => void
+  /** Combined view only: label each card with the tree it belongs to. */
+  treeLabelOf?: (personId: string) => string | undefined
   canEdit: boolean
 }
 
@@ -57,6 +62,7 @@ function nodeHtml(
   node: OrgChartNode<ChartDatum>,
   canEdit: boolean,
   spouseByAnchorId: Map<string, Person>,
+  treeLabelOf?: (personId: string) => string | undefined,
 ): string {
   const datum = node.data
   if (datum._synthetic || !datum.person) {
@@ -82,6 +88,13 @@ function nodeHtml(
     : p.spouse
       ? `<div class="ft-card__spouse">⚭ ${escapeHtml(p.spouse)}</div>`
       : ''
+  // Cross-tree marriage bridge (see Person.partnerLink) — a left accent stripe
+  // on the card (`ft-card--linked`, reads at any zoom) plus a clickable line
+  // through to the other tree.
+  const cl = p.partnerLink
+  const crossLinkHtml = cl
+    ? `<div class="ft-card__crosslink" data-cross-link data-cross-tree="${escapeHtml(cl.treeId)}" data-cross-person="${escapeHtml(cl.personId)}" title="${escapeHtml(t('linkFactLabel'))}">⚭ ${escapeHtml(cl.personName || t('noName'))} · ${escapeHtml(cl.treeName || cl.treeId)} →</div>`
+    : ''
   const place = p.birthPlace ? escapeHtml(p.birthPlace) : ''
   const genderClass =
     p.gender === 'm' ? 'ft-card--m' : p.gender === 'f' ? 'ft-card--f' : 'ft-card--u'
@@ -90,6 +103,10 @@ function nodeHtml(
     : ''
   const kids = node.data._childCount ?? 0
   const kidsBadge = kids > 0 ? `<span class="ft-card__kids">${kids}</span>` : ''
+  const treeLabel = treeLabelOf?.(p.id)
+  const treeLabelHtml = treeLabel
+    ? `<div class="ft-card__tree">${escapeHtml(treeLabel)}</div>`
+    : ''
 
   const quickLinks: string[] = []
   if (canEdit) {
@@ -117,11 +134,13 @@ function nodeHtml(
     : ''
 
   return `
-    <div class="ft-card ${genderClass}">
+    <div class="ft-card ${genderClass}${cl ? ' ft-card--linked' : ''}">
       ${flag}
+      ${treeLabelHtml}
       <div class="ft-card__name">${name}</div>
       ${years ? `<div class="ft-card__meta">${years}</div>` : ''}
       ${spouseHtml}
+      ${crossLinkHtml}
       ${place ? `<div class="ft-card__place">${place}</div>` : ''}
       ${quickLinksHtml}
       ${kidsBadge}
@@ -130,9 +149,15 @@ function nodeHtml(
 
 const NODE_W = 244
 const NODE_H = 108
+// Extra room per optional card line so it doesn't spill out of the fixed card.
+const H_CROSSLINK = 20 // the ⚭ cross-tree link line
+const H_TREELABEL = 16 // the tree name (combined view)
 
 export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
-  function FamilyChart({ people, layout, onSelect, onQuickLink, canEdit }, ref) {
+  function FamilyChart(
+    { people, layout, onSelect, onQuickLink, onCrossLink, treeLabelOf, canEdit },
+    ref,
+  ) {
     const { locale } = useLocale()
     const containerRef = useRef<HTMLDivElement | null>(null)
     const chartRef = useRef<OrgChart<ChartDatum> | null>(null)
@@ -144,6 +169,8 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
     onQuickLinkRef.current = onQuickLink
     const onSelectRef = useRef(onSelect)
     onSelectRef.current = onSelect
+    const onCrossLinkRef = useRef(onCrossLink)
+    onCrossLinkRef.current = onCrossLink
 
     // Build the array d3-org-chart consumes, reusing cached object identities.
     function buildData(): ChartDatum[] {
@@ -204,7 +231,15 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
         .nodeId((d: ChartDatum) => d.id)
         .parentNodeId((d: ChartDatum) => d.parentId ?? undefined)
         .nodeWidth(() => NODE_W)
-        .nodeHeight(() => NODE_H)
+        .nodeHeight((d: OrgChartNode<ChartDatum>) => {
+          const person = d.data.person
+          if (!person) return NODE_H
+          return (
+            NODE_H +
+            (person.partnerLink ? H_CROSSLINK : 0) +
+            (treeLabelOf?.(person.id) ? H_TREELABEL : 0)
+          )
+        })
         .childrenMargin(() => 70)
         .siblingsMargin(() => 26)
         .compactMarginBetween(() => 24)
@@ -214,7 +249,9 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
         .layout(layout)
         .initialExpandLevel(4)
         .scaleExtent([0.08, 2.5])
-        .nodeContent((d: OrgChartNode<ChartDatum>) => nodeHtml(d, canEdit, spouseByAnchorId))
+        .nodeContent((d: OrgChartNode<ChartDatum>) =>
+          nodeHtml(d, canEdit, spouseByAnchorId, treeLabelOf),
+        )
         .onNodeClick((node: OrgChartNode<ChartDatum>) => {
           const datum = node.data
           onSelect(datum && !datum._synthetic ? datum.id : null)
@@ -226,7 +263,7 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
         chart.fit()
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [people, layout, canEdit, locale])
+    }, [people, layout, canEdit, locale, treeLabelOf])
 
     // Delegated, capture-phase listener for the quick-link buttons inside
     // `nodeHtml`'s raw HTML string — bound once on the stable container div
@@ -244,6 +281,14 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
           const type = quicklinkTarget.dataset.quicklink as QuickLinkType
           const personId = quicklinkTarget.dataset.personId
           if (personId) onQuickLinkRef.current?.(type, personId)
+          return
+        }
+        const crossTarget = (e.target as HTMLElement).closest<HTMLElement>('[data-cross-link]')
+        if (crossTarget) {
+          e.stopPropagation()
+          const treeId = crossTarget.dataset.crossTree
+          const personId = crossTarget.dataset.crossPerson
+          if (treeId && personId) onCrossLinkRef.current?.({ treeId, personId })
           return
         }
         // The linked-spouse name merged into a card (see nodeHtml) opens that

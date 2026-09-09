@@ -263,6 +263,25 @@ export const messages = {
   ctFirstEditor: 'Първи редактор (имейл)',
   ctFirstEditorHelp: 'Този акаунт ще може да редактира новото дърво.',
   ctEditorInvalid: 'Невалиден имейл адрес.',
+
+  // cross-tree partner link (marriage joining two family trees)
+  linkFactLabel: 'Съпруг/а в друго дърво',
+  linkAction: 'Свържи с друго дърво',
+  linkRemove: 'Премахни връзката',
+  linkRemoveConfirm: 'Да премахна ли връзката към другото дърво (и от двете страни)?',
+  linkTitle: 'Свързване с друго дърво',
+  linkConfirm: 'Свържи',
+  linkNoTrees: 'Нямате права на редактор в друго дърво, с което да свържете този човек.',
+  linkPickTree: 'Изберете другото дърво',
+  linkPickPerson: 'Изберете човек от това дърво',
+  linkNoPeople: 'В това дърво няма хора.',
+  linkFailed: 'Свързването не бе успешно. Нужни са права на редактор и в двете дървета.',
+  linkIntro: (name: string) =>
+    `Изберете човек от друго дърво, за когото „${name}“ е съпруг или съпруга. Двете дървета остават отделни — създава се само връзка за навигация между тях.`,
+  linkPreview: (a: string, b: string, treeName: string) => `${a}  ⚭  ${b} (${treeName})`,
+  linkedTreesLabel: 'Свързани дървета',
+  combinedView: 'Виж всички свързани дървета',
+  combinedTitle: 'Всички свързани дървета',
 }
 
 export const motto = 'Опознай рода си, за да си горд! Човек без роднини е сам.'
