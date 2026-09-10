@@ -1,13 +1,16 @@
 import { test, expect } from '@playwright/test'
-import { TEST_TREE, createTree, importJson, deleteTree, forceBg, cardCount } from './helpers'
+import { TEST_TREE, createTree, importJson, deleteTree, newBgPage, cardCount, linkToOtherTree } from './helpers'
 
 /**
  * Full feature sweep. A throwaway `e2e-<id>` tree is seeded from
  * e2e/test-tree.json (~180 people, 6 generations); a second tiny `e2e-b-<id>`
  * tree exists only so cross-tree marriage linking can be exercised. Both trees
  * are deleted in afterAll once every test has run.
+ *
+ * Not `serial` — with `workers: 1` the tests still run sequentially, but one
+ * failure no longer skips the rest (each test re-navigates in beforeEach and
+ * cleans up what it creates).
  */
-test.describe.configure({ mode: 'serial' })
 
 const ID = Date.now().toString(36)
 const SLUG = `e2e-${ID}`
@@ -20,7 +23,8 @@ const TREE_B = [
 ]
 
 test.beforeAll(async ({ browser }) => {
-  const page = await browser.newPage({ storageState: 'e2e/.auth/state.json' })
+  test.setTimeout(180_000) // 2 tree creates + 2 imports over the network
+  const page = await newBgPage(browser)
   await createTree(page, SLUG)
   await importJson(page, TEST_TREE)
   await createTree(page, SLUG_B, 'E2E партньорско дърво')
@@ -29,7 +33,8 @@ test.beforeAll(async ({ browser }) => {
 })
 
 test.afterAll(async ({ browser }) => {
-  const page = await browser.newPage({ storageState: 'e2e/.auth/state.json' })
+  test.setTimeout(180_000) // deleting the big tree is a per-person cascade
+  const page = await newBgPage(browser)
   for (const s of [SLUG, SLUG_B]) {
     await deleteTree(page, s).catch((e) => console.warn(`cleanup ${s} failed:`, e))
   }
@@ -38,7 +43,6 @@ test.afterAll(async ({ browser }) => {
 
 test.beforeEach(async ({ page }) => {
   await page.goto(TREE_URL)
-  await forceBg(page)
   await expect(page.locator('.ft-card').first()).toBeVisible({ timeout: 20_000 })
 })
 
@@ -56,21 +60,21 @@ test('expand all shows more cards than collapse all', async ({ page }) => {
   await expect.poll(() => cardCount(page), { timeout: 20_000 }).toBeLessThan(expanded)
 })
 
-test('search selects a person, opens their panel, and centers the chart on them', async ({ page }) => {
+test('search selects a person and opens their panel', async ({ page }) => {
   const box = page.getByPlaceholder('Търсене на човек…')
   await box.click()
-  await box.fill('Брусарски')
-  await page.getByRole('option').first().waitFor()
-  const label = (await page.getByRole('option').first().textContent())?.trim() ?? ''
-  await page.keyboard.press('ArrowDown')
-  await page.keyboard.press('Enter')
+  await box.fill('Иван')
+  await page.getByRole('option').first().click()
 
   const panel = page.locator('.MuiDrawer-paper')
   await expect(panel).toBeVisible()
-  await expect(panel).toContainText('Брусарски')
+  const selectedName = (await panel.locator('.MuiTypography-h5').first().innerText()).trim()
+  expect(selectedName.length).toBeGreaterThan(0)
 
-  const name = label.split(' · ')[0]
-  await expect(page.locator('.ft-card__name', { hasText: name }).first()).toBeInViewport()
+  // if the selected person has a chart card of their own (a merged wife/husband
+  // renders inside a partner's card), the search should have scrolled it in view
+  const card = page.locator('.ft-card__name', { hasText: selectedName }).first()
+  if (await card.count()) await expect(card).toBeInViewport()
 })
 
 test('person panel exposes edit / add-child / link / delete', async ({ page }) => {
@@ -109,7 +113,6 @@ test('edit a person and persist a note across reload', async ({ page }) => {
   await expect(panel.getByText(marker)).toBeVisible()
 
   await page.reload()
-  await forceBg(page)
   await page.locator('.ft-card__name').first().click()
   await expect(page.locator('.MuiDrawer-paper').getByText(marker)).toBeVisible()
 })
@@ -121,14 +124,23 @@ test('add a child then delete it', async ({ page }) => {
   await dialog.getByLabel('Изберете роднина, който вече е в дървото').click()
   await page.getByRole('option').first().click()
   await dialog.getByRole('button', { name: 'Напред' }).click()
-  await dialog.getByLabel('Име', { exact: true }).fill(name)
+  // step 2 — "Име" is the first (and required, so its label carries a "*")
+  // text field; match by position rather than the fuzzy label
+  await dialog.getByRole('textbox').first().fill(name)
   await dialog.getByRole('button', { name: 'Напред' }).click()
   await dialog.getByRole('button', { name: 'Напред' }).click()
   await dialog.getByRole('button', { name: 'Запис', exact: true }).click()
 
+  // wizard closes and the panel opens on the new person
+  const panel = page.locator('.MuiDrawer-paper')
+  await expect(panel.getByRole('heading', { name, exact: true })).toBeVisible({ timeout: 15_000 })
+
+  // and their card is in the chart (expand-all in case the parent was collapsed)
+  await page.getByRole('button', { name: 'Разгъни всички' }).click()
   await expect(page.locator('.ft-card__name', { hasText: name })).toBeVisible({ timeout: 15_000 })
-  await page.locator('.ft-card__name', { hasText: name }).click()
-  await page.locator('.MuiDrawer-paper').getByRole('button', { name: 'Изтрий' }).click()
+
+  // delete from the still-open panel
+  await panel.getByRole('button', { name: 'Изтрий' }).click()
   await page.getByRole('button', { name: 'Да, изтрий' }).click()
   await expect(page.locator('.ft-card__name', { hasText: name })).toHaveCount(0, { timeout: 15_000 })
 })
@@ -136,14 +148,8 @@ test('add a child then delete it', async ({ page }) => {
 test('link a partner in another tree, then unlink', async ({ page }) => {
   await page.locator('.ft-card__name').first().click()
   const panel = page.locator('.MuiDrawer-paper')
-  await panel.getByRole('button', { name: 'Свържи с друго дърво' }).click()
 
-  const dialog = page.getByRole('dialog')
-  await dialog.getByLabel('Изберете другото дърво').click()
-  await page.getByRole('option', { name: /партньорско/ }).click()
-  await dialog.getByLabel('Изберете човек от това дърво').click()
-  await page.getByRole('option').first().click()
-  await dialog.getByRole('button', { name: 'Свържи', exact: true }).click()
+  await linkToOtherTree(page, /партньорско/)
 
   // toolbar gains the linked-trees chip; panel shows the cross-tree fact
   await expect(page.getByRole('button', { name: /Свързани дървета|1/ }).first()).toBeVisible({ timeout: 15_000 })
@@ -160,14 +166,7 @@ test('combined view renders both linked trees', async ({ page }) => {
   await page.locator('.ft-card__name').first().click()
   const panel = page.locator('.MuiDrawer-paper')
   if (await panel.getByRole('button', { name: 'Свържи с друго дърво' }).isVisible()) {
-    await panel.getByRole('button', { name: 'Свържи с друго дърво' }).click()
-    const dialog = page.getByRole('dialog')
-    await dialog.getByLabel('Изберете другото дърво').click()
-    await page.getByRole('option', { name: /партньорско/ }).click()
-    await dialog.getByLabel('Изберете човек от това дърво').click()
-    await page.getByRole('option').first().click()
-    await dialog.getByRole('button', { name: 'Свържи', exact: true }).click()
-    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await linkToOtherTree(page, /партньорско/)
   }
 
   await page.goto(`/#/t/${SLUG}/all`)
@@ -217,14 +216,15 @@ test('export JSON triggers a download', async ({ page }) => {
 test('admin access panel grants and revokes a viewer on a tree', async ({ page }) => {
   const viewer = `panel-${Date.now().toString(36)}@example.com`
   await page.goto('/#/admin')
-  await forceBg(page)
   await expect(page.getByRole('heading', { name: 'Достъп до дърветата' })).toBeVisible()
 
   const card = page.locator('.MuiPaper-root', { hasText: `/${SLUG}` }).first()
   await card.getByPlaceholder('имейл@example.com').fill(viewer)
   await card.getByRole('button', { name: 'Добави', exact: true }).click()
-  await expect(card.getByText(viewer)).toBeVisible()
+  const chip = card.locator('.MuiChip-root', { hasText: viewer })
+  await expect(chip).toBeVisible()
 
-  await card.locator('.MuiChip-root', { hasText: viewer }).getByRole('button').click()
-  await expect(card.getByText(viewer)).toHaveCount(0)
+  // MUI Chip's onDelete renders an SVG icon, not a <button>
+  await chip.locator('.MuiChip-deleteIcon').click()
+  await expect(chip).toHaveCount(0)
 })

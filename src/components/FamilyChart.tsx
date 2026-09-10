@@ -331,9 +331,13 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
       zoomIn: () => chartRef.current?.zoomIn(),
       zoomOut: () => chartRef.current?.zoomOut(),
       focus: (id: string) => {
-        const chart = chartRef.current
-        if (!chart) return
-        chart.setUpToTheRootHighlighted(id).setCentered(id).render()
+        // Deferred a frame — called synchronously from the toolbar search /
+        // panel-link handlers, before the chart has settled.
+        requestAnimationFrame(() => {
+          const chart = chartRef.current
+          if (!chart) return
+          chart.setUpToTheRootHighlighted(id).setCentered(id).render()
+        })
       },
       clearFocus: () => chartRef.current?.clearHighlighting(),
       exportPng: () => {

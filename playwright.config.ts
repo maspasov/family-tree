@@ -46,6 +46,9 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: BASE_URL,
+    // `navigator.language` starts with "bg" → the app boots Bulgarian, so the
+    // (Bulgarian) selectors match without clicking the БГ toggle.
+    locale: 'bg-BG',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

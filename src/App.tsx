@@ -11,6 +11,7 @@ import { usePersons } from './data/usePersons'
 import {
   descendantIds,
   fullName,
+  isMergedSpouse,
   stripAudit,
   type Person,
   type PersonDraft,
@@ -122,6 +123,18 @@ function TreeApp({ initialPersonId }: { initialPersonId?: string }) {
     return () => cancelAnimationFrame(raf)
   }, [initialPersonId, byId])
 
+  // A just-added person: centre the chart on them once the live query has
+  // caught up (their parent's subtree may be collapsed, so the node isn't in
+  // the chart yet at submit time).
+  const focusAfterAddRef = useRef<string | null>(null)
+  useEffect(() => {
+    const id = focusAfterAddRef.current
+    if (!id || !byId.has(id)) return
+    focusAfterAddRef.current = null
+    const raf = requestAnimationFrame(() => chartRef.current?.focus(id))
+    return () => cancelAnimationFrame(raf)
+  }, [byId])
+
   // Browser-tab title follows the open tree; back to the generic app name on exit.
   useEffect(() => {
     document.title = tree?.name ? `${tree.name} — ${t('appTitle')}` : t('appTitle')
@@ -133,13 +146,13 @@ function TreeApp({ initialPersonId }: { initialPersonId?: string }) {
   const focusPerson = useCallback(
     (id: string) => {
       setSelectedId(id)
-      // A merged wife/husband (see toChartData's isMergedSpouse) has no chart
-      // node of their own — center/highlight their spouse's card instead,
-      // where their name actually renders.
+      // A merged wife/husband has no chart node of their own — center on their
+      // spouse's card instead, where their name renders. Only redirect when
+      // THIS person is the merged one (a member who merely *has* a spouse still
+      // has their own node), and only to an id the chart can actually show.
       const person = byId.get(id)
       const chartFocusId =
-        (person?.relation?.type === 'wife' || person?.relation?.type === 'husband') &&
-        byId.has(person.relation.toId)
+        person && isMergedSpouse(person, byId) && person.relation && byId.has(person.relation.toId)
           ? person.relation.toId
           : id
       if (viewMode === 'map') mapRef.current?.focus(id)
@@ -212,6 +225,9 @@ function TreeApp({ initialPersonId }: { initialPersonId?: string }) {
       // an email on file; failures aren't worth interrupting the editor for.
       sendAdminNotification({ ...draft, id }, tree).catch(() => {})
       setSelectedId(id)
+      // reveal + centre the new person once the live query catches up (their
+      // parent's subtree may be collapsed, so the card isn't rendered yet).
+      focusAfterAddRef.current = id
       setEditing(null)
     } catch (e) {
       setActionError((e as Error).message)

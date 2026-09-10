@@ -281,6 +281,7 @@ export function Toolbar(props: Props) {
             setQuery('')
           }}
           getOptionLabel={(p) => fullName(p)}
+          getOptionKey={(p) => p.id}
           renderOption={(optionProps, p) => {
             const { key, ...rest } = optionProps
             const years = lifespan(p)

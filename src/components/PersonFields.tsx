@@ -308,6 +308,7 @@ export function PersonFields({ draft, set, people, selfId, showErr }: Props) {
               fullWidth
               options={parentOptions}
               getOptionLabel={(p) => fullName(p)}
+              getOptionKey={(p) => p.id}
               value={relationToPerson}
               onChange={(_, value) => handleRelationToChange(value)}
               renderInput={(params) => (

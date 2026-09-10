@@ -137,6 +137,7 @@ export function LinkPartnerDialog({ person, onClose, onDone }: Props) {
                   value={partner}
                   onChange={(_, v) => setPartner(v)}
                   getOptionLabel={(p) => fullName(p)}
+                  getOptionKey={(p) => p.id}
                   isOptionEqualToValue={(a, b) => a.id === b.id}
                   openOnFocus
                   noOptionsText={t('linkNoPeople')}

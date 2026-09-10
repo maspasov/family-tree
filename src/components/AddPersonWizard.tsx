@@ -155,6 +155,7 @@ export function AddPersonWizard({ people, anchorId, busy, onSubmit, onCancel }: 
               value={anchor}
               onChange={(_, v) => setAnchor(v)}
               getOptionLabel={(p) => fullName(p)}
+              getOptionKey={(p) => p.id}
               isOptionEqualToValue={(a, b) => a.id === b.id}
               renderInput={(params) => (
                 <TextField {...params} label={t('wizRelPickAnchor')} autoFocus />
