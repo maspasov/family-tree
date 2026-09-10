@@ -49,12 +49,12 @@ test('roles dialog refuses to remove the last editor', async ({ page }) => {
   await expect(dialog.getByText('Роли и достъп')).toBeVisible()
   await expect(dialog.getByRole('heading', { name: 'Редактори' })).toBeVisible()
 
-  // the sandbox tree has exactly one editor (the e2e bot) — the guard blocks it
-  await dialog
-    .locator(`text=${BOT_EMAIL}`)
-    .locator('xpath=following-sibling::button')
-    .first()
-    .click()
-  await expect(dialog.getByText('Трябва да остане поне един редактор.')).toBeVisible()
-  await expect(dialog.getByText(BOT_EMAIL)).toBeVisible() // still there
+  // the sandbox tree has exactly one editor and no viewers here, so the lone
+  // "Премахни" button is that editor's — and the guard must refuse it
+  const remove = dialog.getByRole('button', { name: 'Премахни' })
+  await expect(remove).toHaveCount(1)
+  await remove.click()
+
+  await expect(dialog.getByRole('alert')).toContainText('редактор') // guard message
+  await expect(remove).toHaveCount(1) // editor still listed
 })
