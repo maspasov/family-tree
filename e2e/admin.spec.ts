@@ -47,7 +47,7 @@ test('roles dialog refuses to remove the last editor', async ({ page }) => {
   await openRolesDialog(page)
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByText('Роли и достъп')).toBeVisible()
-  await expect(dialog.getByText('Редактори')).toBeVisible()
+  await expect(dialog.getByRole('heading', { name: 'Редактори' })).toBeVisible()
 
   // the sandbox tree has exactly one editor (the e2e bot) — the guard blocks it
   await dialog
