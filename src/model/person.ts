@@ -284,8 +284,12 @@ export function toChartData(people: Person[]): ChartDatum[] {
 }
 
 export function childrenOf(people: Person[], parentId: string | null): Person[] {
+  // A wife/husband is attached to their spouse's parent (so they don't float as
+  // a disconnected root — see PersonFields), but they are an in-law, not a
+  // child: exclude them here so the panel's "Деца" list/count matches the chart.
+  const byId = new Map(people.map((p) => [p.id, p]))
   return people
-    .filter((p) => p.parentId === parentId)
+    .filter((p) => p.parentId === parentId && !isMergedSpouse(p, byId))
     .sort(
       (a, b) =>
         (a.childOrder ?? 1e9) - (b.childOrder ?? 1e9) ||

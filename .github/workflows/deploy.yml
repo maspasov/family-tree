@@ -26,7 +26,12 @@ jobs:
           node-version: 22
           cache: yarn
 
+      # The e2e suite (Playwright) is intentionally NOT part of the deploy:
+      # it needs a real Google/email login and can't run headless in CI. Skip
+      # the Playwright browser download so `yarn install` stays fast here.
       - run: yarn install --frozen-lockfile
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
 
       - name: Compute base path
         id: base

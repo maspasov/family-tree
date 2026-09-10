@@ -8,6 +8,7 @@ import {
   onSnapshot,
   serverTimestamp,
   setDoc,
+  updateDoc,
   writeBatch,
   type DocumentReference,
 } from 'firebase/firestore'
@@ -35,6 +36,8 @@ export interface TreesApi {
   createTree: (input: CreateTreeInput) => Promise<string>
   /** Admin only: deletes a tree and everything under it (people, photos, archive). */
   deleteTree: (slug: string) => Promise<void>
+  /** Admin (or the tree's own editors): replace a tree's editor/viewer lists. */
+  setTreeRoles: (slug: string, editors: string[], viewers: string[]) => Promise<void>
 }
 
 async function deleteRefs(refs: DocumentReference[]) {
@@ -136,6 +139,12 @@ export function useTrees(): TreesApi {
         for (const far of farEnds) {
           await clearPartnerLink(far.treeId, far.personId)
         }
+      },
+      async setTreeRoles(slug, editors, viewers) {
+        // Firestore rules allow this for admins (any tree) and for a tree's own
+        // editors (their tree only); the caller is responsible for not emptying
+        // the editor list (rules reject that too).
+        await updateDoc(doc(db, ...treePaths(slug).doc), { editors, viewers })
       },
     }
   }, [all, loading, error, user, isAdmin])

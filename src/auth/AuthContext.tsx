@@ -8,12 +8,22 @@ import {
 } from 'react'
 import {
   onAuthStateChanged,
+  signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
   type User,
 } from 'firebase/auth'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { auth, db, firebaseConfigured, googleProvider, paths } from '../lib/firebase'
+
+/**
+ * E2E only: when `VITE_E2E_EMAIL` / `VITE_E2E_PASSWORD` are set, sign in with a
+ * real email/password Firebase user instead of the interactive Google popup, so
+ * the Playwright suite needs no OAuth. These vars are never set for the GitHub
+ * Pages production build — keep it that way.
+ */
+const E2E_EMAIL = import.meta.env.VITE_E2E_EMAIL as string | undefined
+const E2E_PASSWORD = import.meta.env.VITE_E2E_PASSWORD as string | undefined
 
 interface AuthState {
   /** null until Firebase reports the first auth state. */
@@ -44,6 +54,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return onAuthStateChanged(auth, (u) => {
       setUser(u)
       setLoading(false)
+      if (!u && E2E_EMAIL && E2E_PASSWORD) {
+        void signInWithEmailAndPassword(auth, E2E_EMAIL, E2E_PASSWORD).catch((e) =>
+          setError(`e2e sign-in failed: ${(e as Error).message}`),
+        )
+      }
     })
   }, [])
 

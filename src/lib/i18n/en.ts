@@ -283,6 +283,12 @@ export const messages: typeof bgMessages = {
   linkedTreesLabel: 'Linked trees',
   combinedView: 'View all linked trees',
   combinedTitle: 'All linked trees',
+
+  // admin: manage per-tree access
+  adminAccessTitle: 'Tree access',
+  adminAccessIntro:
+    'For each tree, manage who can see it (viewers) and who can edit it (editors).',
+  adminAccessNoTrees: 'No trees created yet.',
 }
 
 export const motto = 'Know your family, and be proud of it! A person without kin is alone.'

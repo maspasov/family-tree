@@ -283,6 +283,12 @@ export const messages: typeof bgMessages = {
   linkedTreesLabel: 'Verknüpfte Bäume',
   combinedView: 'Alle verknüpften Bäume ansehen',
   combinedTitle: 'Alle verknüpften Bäume',
+
+  // admin: manage per-tree access
+  adminAccessTitle: 'Baumzugriff',
+  adminAccessIntro:
+    'Verwalten Sie pro Baum, wer ihn sehen (Betrachter) und wer ihn bearbeiten (Bearbeiter) darf.',
+  adminAccessNoTrees: 'Noch keine Bäume erstellt.',
 }
 
 export const motto = 'Kenne deine Familie, damit du stolz sein kannst! Ein Mensch ohne Verwandte ist allein.'

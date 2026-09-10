@@ -403,8 +403,16 @@ export function PersonPanel({
               {person.relation && (
                 <Fact label={t('relation')}>
                   {(person.relation.type === 'other' && person.relation.customLabel) ||
-                    RELATION_LABELS[person.relation.type]}{' '}
-                  {t('relationConnector')} {person.relation.toName}
+                    RELATION_LABELS[person.relation.type]}
+                  {/* toName is denormalized but may be blank on imported data —
+                      fall back to the live person, and drop the "спрямо …"
+                      tail entirely if the target can't be named. */}
+                  {(() => {
+                    const rel = person.relation!
+                    const match = people.find((p) => p.id === rel.toId)
+                    const name = rel.toName || (match ? fullName(match) : '')
+                    return name ? ` ${t('relationConnector')} ${name}` : ''
+                  })()}
                 </Fact>
               )}
               {person.note && (

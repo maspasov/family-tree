@@ -165,6 +165,9 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
     // state across Firestore snapshots instead of resetting on every edit.
     const cacheRef = useRef<Map<string, ChartDatum>>(new Map())
     const layoutRef = useRef<ChartLayout>(layout)
+    // Fit once, on the first render that actually has data — otherwise a wide
+    // tree opens scrolled with cards clipped off the left edge.
+    const needsInitialFitRef = useRef(true)
     const onQuickLinkRef = useRef(onQuickLink)
     onQuickLinkRef.current = onQuickLink
     const onSelectRef = useRef(onSelect)
@@ -258,7 +261,8 @@ export const FamilyChart = forwardRef<FamilyChartHandle, Props>(
         })
         .render()
 
-      if (layoutRef.current !== layout) {
+      if (needsInitialFitRef.current || layoutRef.current !== layout) {
+        needsInitialFitRef.current = false
         layoutRef.current = layout
         chart.fit()
       }

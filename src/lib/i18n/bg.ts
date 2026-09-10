@@ -282,6 +282,12 @@ export const messages = {
   linkedTreesLabel: 'Свързани дървета',
   combinedView: 'Виж всички свързани дървета',
   combinedTitle: 'Всички свързани дървета',
+
+  // admin: manage per-tree access
+  adminAccessTitle: 'Достъп до дърветата',
+  adminAccessIntro:
+    'За всяко дърво управлявайте кой може да го вижда (наблюдатели) и кой да го редактира (редактори).',
+  adminAccessNoTrees: 'Още няма създадени дървета.',
 }
 
 export const motto = 'Опознай рода си, за да си горд! Човек без роднини е сам.'

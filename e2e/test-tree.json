@@ -1,0 +1,2282 @@
+[
+  {
+    "id": "root",
+    "name": "Иван",
+    "patronymic": "Борисов",
+    "surname": "Брусарски",
+    "parentId": null,
+    "gender": "m",
+    "birthYear": "~1855",
+    "deathYear": "~1921",
+    "birthPlace": "с. Враняк, Врачанско",
+    "childOrder": 0,
+    "verified": false,
+    "note": "Родоначалник на тестовия клон."
+  },
+  {
+    "id": "p002_sp",
+    "name": "Севда",
+    "surname": "Захариева",
+    "parentId": "root",
+    "gender": "f",
+    "birthYear": "1881",
+    "birthPlace": "гр. Бяла Слатина",
+    "relation": {
+      "type": "wife",
+      "toId": "p001",
+      "toName": "Кирил Иванов Захариев"
+    }
+  },
+  {
+    "id": "p001",
+    "name": "Кирил",
+    "patronymic": "Иванов",
+    "surname": "Захариев",
+    "parentId": "root",
+    "gender": "m",
+    "birthYear": "~1883",
+    "birthPlace": "с. Борован",
+    "deathYear": "1949",
+    "birthMonthDay": "11-16",
+    "relation": {
+      "type": "husband",
+      "toId": "p002_sp",
+      "toName": "Севда Захариева"
+    }
+  },
+  {
+    "id": "p004_sp",
+    "name": "Величка",
+    "surname": "Маринова",
+    "parentId": "root",
+    "gender": "f",
+    "birthYear": "1884",
+    "birthPlace": "гр. Пловдив",
+    "relation": {
+      "type": "wife",
+      "toId": "p003",
+      "toName": "Марин Иванов Захариев"
+    }
+  },
+  {
+    "id": "p003",
+    "name": "Марин",
+    "patronymic": "Иванов",
+    "surname": "Захариев",
+    "parentId": "root",
+    "gender": "m",
+    "birthYear": "1887?",
+    "birthPlace": "гр. Пловдив",
+    "childOrder": 1,
+    "deathYear": "1962",
+    "birthMonthDay": "03-08"
+  },
+  {
+    "id": "p006_sp",
+    "name": "Ана",
+    "surname": "Гошева",
+    "parentId": "root",
+    "gender": "f",
+    "birthYear": "1885",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "wife",
+      "toId": "p005",
+      "toName": "Марин Иванов Петров"
+    }
+  },
+  {
+    "id": "p005",
+    "name": "Марин",
+    "patronymic": "Иванов",
+    "surname": "Петров",
+    "parentId": "root",
+    "gender": "m",
+    "birthYear": "~1886",
+    "birthPlace": "гр. Бяла Слатина",
+    "childOrder": 2,
+    "deathYear": "1963"
+  },
+  {
+    "id": "p007",
+    "name": "Мария",
+    "patronymic": "Иванова",
+    "surname": "Тодорова",
+    "parentId": "root",
+    "gender": "f",
+    "birthYear": "1887",
+    "birthPlace": "гр. Пловдив",
+    "childOrder": 3,
+    "deathYear": "1949",
+    "birthMonthDay": "05-13"
+  },
+  {
+    "id": "p008",
+    "name": "Димитър",
+    "patronymic": "Иванов",
+    "surname": "Тодоров",
+    "parentId": "root",
+    "gender": "m",
+    "birthYear": "1888",
+    "birthPlace": "гр. София",
+    "deathYear": "1972"
+  },
+  {
+    "id": "p010_sp",
+    "name": "Цветана",
+    "surname": "Петрова",
+    "parentId": "root",
+    "gender": "f",
+    "birthYear": "1887",
+    "birthPlace": "гр. Враца",
+    "relation": {
+      "type": "wife",
+      "toId": "p009",
+      "toName": "Никола Иванов Вранчев"
+    }
+  },
+  {
+    "id": "p009",
+    "name": "Никола",
+    "patronymic": "Иванов",
+    "surname": "Вранчев",
+    "parentId": "root",
+    "gender": "m",
+    "birthYear": "1885",
+    "birthPlace": "с. Борован",
+    "childOrder": 5,
+    "deathYear": "1941",
+    "note": "Ковач по занаят."
+  },
+  {
+    "id": "p012_sp",
+    "name": "Ангел",
+    "surname": "Петров",
+    "parentId": "root",
+    "gender": "m",
+    "birthYear": "1888",
+    "birthPlace": "с. Враняк, Врачанско",
+    "relation": {
+      "type": "husband",
+      "toId": "p011",
+      "toName": "Цветана Иванова Захариева"
+    }
+  },
+  {
+    "id": "p011",
+    "name": "Цветана",
+    "patronymic": "Иванова",
+    "surname": "Захариева",
+    "parentId": "root",
+    "gender": "f",
+    "birthYear": "~1886",
+    "birthPlace": "гр. Варна",
+    "childOrder": 6,
+    "deathYear": "1944",
+    "birthMonthDay": "08-18"
+  },
+  {
+    "id": "p014_sp",
+    "name": "Тодор",
+    "surname": "Тодоров",
+    "parentId": "root",
+    "gender": "m",
+    "birthYear": "1891",
+    "birthPlace": "Чикаго, САЩ",
+    "relation": {
+      "type": "husband",
+      "toId": "p013",
+      "toName": "Стойка Иванова Маринова"
+    }
+  },
+  {
+    "id": "p013",
+    "name": "Стойка",
+    "patronymic": "Иванова",
+    "surname": "Маринова",
+    "parentId": "root",
+    "gender": "f",
+    "birthYear": "~1892",
+    "birthPlace": "гр. София",
+    "verified": false,
+    "deathYear": "1975",
+    "birthMonthDay": "05-27",
+    "note": "Учител."
+  },
+  {
+    "id": "p016_sp",
+    "name": "Ангел",
+    "surname": "Ангелов",
+    "parentId": "root",
+    "gender": "m",
+    "birthYear": "1890",
+    "birthPlace": "Чикаго, САЩ",
+    "relation": {
+      "type": "husband",
+      "toId": "p015",
+      "toName": "Севда Иванова Стоянова"
+    }
+  },
+  {
+    "id": "p015",
+    "name": "Севда",
+    "patronymic": "Иванова",
+    "surname": "Стоянова",
+    "parentId": "root",
+    "gender": "f",
+    "birthYear": "1891",
+    "birthPlace": "с. Враняк, Врачанско",
+    "deathYear": "1955",
+    "note": "Преселил се в града."
+  },
+  {
+    "id": "p017",
+    "name": "Тодор",
+    "patronymic": "Иванов",
+    "surname": "Гошев",
+    "parentId": "root",
+    "gender": "m",
+    "birthYear": "1889",
+    "birthPlace": "гр. Варна",
+    "deathYear": "1948",
+    "note": "Ковач по занаят."
+  },
+  {
+    "id": "p019_sp",
+    "name": "Румяна",
+    "surname": "Николова",
+    "parentId": "p001",
+    "gender": "f",
+    "birthYear": "1919",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "wife",
+      "toId": "p018",
+      "toName": "Пенчо-Невена Кирилов Петров"
+    }
+  },
+  {
+    "id": "p018",
+    "name": "Пенчо-Невена",
+    "patronymic": "Кирилов",
+    "surname": "Петров",
+    "parentId": "p001",
+    "gender": "m",
+    "birthYear": "1919",
+    "birthPlace": "с. Борован",
+    "deathYear": "1991",
+    "note": "Преселил се в града."
+  },
+  {
+    "id": "p021_sp",
+    "name": "Христо",
+    "surname": "Ангелов",
+    "parentId": "p001",
+    "gender": "m",
+    "birthYear": "1913",
+    "birthPlace": "гр. Пловдив",
+    "relation": {
+      "type": "husband",
+      "toId": "p020",
+      "toName": "Стойка Кирилова Захариева"
+    }
+  },
+  {
+    "id": "p020",
+    "name": "Стойка",
+    "patronymic": "Кирилова",
+    "surname": "Захариева",
+    "parentId": "p001",
+    "gender": "f",
+    "birthYear": "1916",
+    "birthPlace": "Чикаго, САЩ",
+    "verified": false,
+    "deathYear": "1975"
+  },
+  {
+    "id": "p023_sp",
+    "name": "Иванка",
+    "surname": "Вранчева",
+    "parentId": "p003",
+    "gender": "f",
+    "birthYear": "1909",
+    "birthPlace": "Чикаго, САЩ",
+    "relation": {
+      "type": "wife",
+      "toId": "p022",
+      "toName": "Никола-Виолета Маринов Вранчев"
+    }
+  },
+  {
+    "id": "p022",
+    "name": "Никола-Виолета",
+    "patronymic": "Маринов",
+    "surname": "Вранчев",
+    "parentId": "p003",
+    "gender": "m",
+    "birthYear": "1912",
+    "birthPlace": "гр. Варна",
+    "childOrder": 0,
+    "deathYear": "1982"
+  },
+  {
+    "id": "p024",
+    "name": "Здравка",
+    "patronymic": "Маринова",
+    "surname": "Стоянова",
+    "parentId": "p003",
+    "gender": "f",
+    "birthYear": "1913",
+    "birthPlace": "с. Мало Пещене",
+    "deathYear": "1968"
+  },
+  {
+    "id": "p025",
+    "name": "Галина",
+    "patronymic": "Маринова",
+    "surname": "Маринова",
+    "parentId": "p003",
+    "gender": "f",
+    "birthYear": "1917",
+    "birthPlace": "гр. Варна",
+    "childOrder": 2,
+    "deathYear": "1988",
+    "note": "Емигрант."
+  },
+  {
+    "id": "p027_sp",
+    "name": "Таня",
+    "surname": "Захариева",
+    "parentId": "p005",
+    "gender": "f",
+    "birthYear": "1917",
+    "birthPlace": "Чикаго, САЩ",
+    "relation": {
+      "type": "wife",
+      "toId": "p026",
+      "toName": "Никола-Радка Маринов Брусарски"
+    }
+  },
+  {
+    "id": "p026",
+    "name": "Никола-Радка",
+    "patronymic": "Маринов",
+    "surname": "Брусарски",
+    "parentId": "p005",
+    "gender": "m",
+    "birthYear": "1917",
+    "birthPlace": "гр. Враца",
+    "childOrder": 0,
+    "deathYear": "1999",
+    "birthMonthDay": "06-15"
+  },
+  {
+    "id": "p029_sp",
+    "name": "Донка",
+    "surname": "Николова",
+    "parentId": "p005",
+    "gender": "f",
+    "birthYear": "1917",
+    "birthPlace": "гр. Пловдив",
+    "relation": {
+      "type": "wife",
+      "toId": "p028",
+      "toName": "Огнян Маринов Гошев"
+    }
+  },
+  {
+    "id": "p028",
+    "name": "Огнян",
+    "patronymic": "Маринов",
+    "surname": "Гошев",
+    "parentId": "p005",
+    "gender": "m",
+    "birthYear": "1919",
+    "birthPlace": "Чикаго, САЩ",
+    "deathYear": "1988",
+    "birthMonthDay": "05-07"
+  },
+  {
+    "id": "p031_sp",
+    "name": "Елена",
+    "surname": "Николова",
+    "parentId": "p008",
+    "gender": "f",
+    "birthYear": "1918",
+    "birthPlace": "с. Враняк, Врачанско",
+    "relation": {
+      "type": "wife",
+      "toId": "p030",
+      "toName": "Никола-Севда Димитъров Стоянов"
+    }
+  },
+  {
+    "id": "p030",
+    "name": "Никола-Севда",
+    "patronymic": "Димитъров",
+    "surname": "Стоянов",
+    "parentId": "p008",
+    "gender": "m",
+    "birthYear": "1919",
+    "birthPlace": "с. Мало Пещене",
+    "childOrder": 0,
+    "deathYear": "1982",
+    "birthMonthDay": "12-08",
+    "note": "Учител."
+  },
+  {
+    "id": "p032",
+    "name": "Иван",
+    "patronymic": "Димитъров",
+    "surname": "Вранчев",
+    "parentId": "p008",
+    "gender": "m",
+    "birthYear": "1913",
+    "birthPlace": "гр. Бяла Слатина",
+    "deathYear": "1996"
+  },
+  {
+    "id": "p033",
+    "name": "Георги-Ана",
+    "patronymic": "Николав",
+    "surname": "Вранчев",
+    "parentId": "p009",
+    "gender": "m",
+    "birthYear": "1914",
+    "birthPlace": "с. Борован",
+    "childOrder": 0,
+    "deathYear": "1974",
+    "birthMonthDay": "02-13"
+  },
+  {
+    "id": "p034",
+    "name": "Захари",
+    "patronymic": "Николав",
+    "surname": "Захариев",
+    "parentId": "p009",
+    "gender": "m",
+    "birthYear": "1916",
+    "birthPlace": "гр. Враца",
+    "deathYear": "1973"
+  },
+  {
+    "id": "p035",
+    "name": "Никола",
+    "patronymic": "Николав",
+    "surname": "Петров",
+    "parentId": "p009",
+    "gender": "m",
+    "birthYear": "1919",
+    "birthPlace": "гр. Монтана",
+    "childOrder": 2,
+    "deathYear": "1994",
+    "birthMonthDay": "07-11"
+  },
+  {
+    "id": "p036",
+    "name": "Величка-Здравка",
+    "patronymic": "Тодорова",
+    "surname": "Тодорова",
+    "parentId": "p017",
+    "gender": "f",
+    "birthYear": "1920",
+    "birthPlace": "гр. Враца",
+    "deathYear": "1983",
+    "birthMonthDay": "05-25"
+  },
+  {
+    "id": "p037",
+    "name": "Марин",
+    "patronymic": "Тодоров",
+    "surname": "Гошев",
+    "parentId": "p017",
+    "gender": "m",
+    "birthYear": "1915",
+    "birthPlace": "гр. Пловдив",
+    "childOrder": 1,
+    "deathYear": "1972",
+    "note": "Емигрант."
+  },
+  {
+    "id": "p039_sp",
+    "name": "Радка",
+    "surname": "Гошева",
+    "parentId": "p018",
+    "gender": "f",
+    "birthYear": "1944",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "wife",
+      "toId": "p038",
+      "toName": "Васил Пенчо-Невенав Петров"
+    }
+  },
+  {
+    "id": "p038",
+    "name": "Васил",
+    "patronymic": "Пенчо-Невенав",
+    "surname": "Петров",
+    "parentId": "p018",
+    "gender": "m",
+    "birthYear": "1942",
+    "birthPlace": "гр. Бяла Слатина",
+    "deathYear": "2023",
+    "note": "Преселил се в града."
+  },
+  {
+    "id": "p041_sp",
+    "name": "Радка",
+    "surname": "Тодорова",
+    "parentId": "p018",
+    "gender": "f",
+    "birthYear": "1946",
+    "birthPlace": "гр. Варна",
+    "relation": {
+      "type": "wife",
+      "toId": "p040",
+      "toName": "Иван Пенчо-Невенав Гошев"
+    }
+  },
+  {
+    "id": "p040",
+    "name": "Иван",
+    "patronymic": "Пенчо-Невенав",
+    "surname": "Гошев",
+    "parentId": "p018",
+    "gender": "m",
+    "birthYear": "1946",
+    "birthPlace": "с. Борован",
+    "childOrder": 1,
+    "deathYear": "2021",
+    "birthMonthDay": "01-12",
+    "note": "Ковач по занаят."
+  },
+  {
+    "id": "p043_sp",
+    "name": "Асен",
+    "surname": "Тодоров",
+    "parentId": "p018",
+    "gender": "m",
+    "birthYear": "1942",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "husband",
+      "toId": "p042",
+      "toName": "Здравка Пенчо-Невенава Маринова"
+    }
+  },
+  {
+    "id": "p042",
+    "name": "Здравка",
+    "patronymic": "Пенчо-Невенава",
+    "surname": "Маринова",
+    "parentId": "p018",
+    "gender": "f",
+    "birthYear": "1942",
+    "birthPlace": "гр. Монтана",
+    "childOrder": 2,
+    "deathYear": "1999",
+    "note": "По разказ на баба."
+  },
+  {
+    "id": "p045_sp",
+    "name": "Здравка",
+    "surname": "Николова",
+    "parentId": "p022",
+    "gender": "f",
+    "birthYear": "1941",
+    "birthPlace": "гр. Пловдив",
+    "relation": {
+      "type": "wife",
+      "toId": "p044",
+      "toName": "Ангел Никола-Виолетав Захариев"
+    }
+  },
+  {
+    "id": "p044",
+    "name": "Ангел",
+    "patronymic": "Никола-Виолетав",
+    "surname": "Захариев",
+    "parentId": "p022",
+    "gender": "m",
+    "birthYear": "1944",
+    "birthPlace": "гр. Варна",
+    "childOrder": 0,
+    "deathYear": "2011"
+  },
+  {
+    "id": "p046",
+    "name": "Петър",
+    "patronymic": "Никола-Виолетав",
+    "surname": "Вранчев",
+    "parentId": "p022",
+    "gender": "m",
+    "birthYear": "1944",
+    "birthPlace": "гр. София",
+    "childOrder": 1,
+    "deathYear": "2015"
+  },
+  {
+    "id": "p048_sp",
+    "name": "Стойка",
+    "surname": "Брусарска",
+    "parentId": "p022",
+    "gender": "f",
+    "birthYear": "1943",
+    "birthPlace": "Чикаго, САЩ",
+    "relation": {
+      "type": "wife",
+      "toId": "p047",
+      "toName": "Радослав Никола-Виолетав Тодоров"
+    }
+  },
+  {
+    "id": "p047",
+    "name": "Радослав",
+    "patronymic": "Никола-Виолетав",
+    "surname": "Тодоров",
+    "parentId": "p022",
+    "gender": "m",
+    "birthYear": "1944",
+    "birthPlace": "гр. Пловдив",
+    "deathYear": "2012",
+    "birthMonthDay": "05-14"
+  },
+  {
+    "id": "p050_sp",
+    "name": "Магдалена",
+    "surname": "Ангелова",
+    "parentId": "p026",
+    "gender": "f",
+    "birthYear": "1938",
+    "birthPlace": "гр. Бяла Слатина",
+    "relation": {
+      "type": "wife",
+      "toId": "p049",
+      "toName": "Димитър Никола-Радкав Гошев"
+    }
+  },
+  {
+    "id": "p049",
+    "name": "Димитър",
+    "patronymic": "Никола-Радкав",
+    "surname": "Гошев",
+    "parentId": "p026",
+    "gender": "m",
+    "birthYear": "1938",
+    "birthPlace": "Чикаго, САЩ",
+    "childOrder": 0,
+    "deathYear": "2016"
+  },
+  {
+    "id": "p052_sp",
+    "name": "Мария",
+    "surname": "Захариева",
+    "parentId": "p026",
+    "gender": "f",
+    "birthYear": "1939",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "wife",
+      "toId": "p051",
+      "toName": "Тодор Никола-Радкав Петров"
+    }
+  },
+  {
+    "id": "p051",
+    "name": "Тодор",
+    "patronymic": "Никола-Радкав",
+    "surname": "Петров",
+    "parentId": "p026",
+    "gender": "m",
+    "birthYear": "1942",
+    "birthPlace": "с. Враняк, Врачанско",
+    "childOrder": 1,
+    "deathYear": "2014",
+    "birthMonthDay": "10-17"
+  },
+  {
+    "id": "p054_sp",
+    "name": "Стойка",
+    "surname": "Гошева",
+    "parentId": "p028",
+    "gender": "f",
+    "birthYear": "1939",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "wife",
+      "toId": "p053",
+      "toName": "Ангел Огнянов Тодоров"
+    }
+  },
+  {
+    "id": "p053",
+    "name": "Ангел",
+    "patronymic": "Огнянов",
+    "surname": "Тодоров",
+    "parentId": "p028",
+    "gender": "m",
+    "birthYear": "1937",
+    "birthPlace": "гр. Пловдив",
+    "childOrder": 0,
+    "deathYear": "1993"
+  },
+  {
+    "id": "p055",
+    "name": "Захари",
+    "patronymic": "Огнянов",
+    "surname": "Брусарски",
+    "parentId": "p028",
+    "gender": "m",
+    "birthYear": "1939",
+    "birthPlace": "с. Враняк, Врачанско",
+    "childOrder": 1,
+    "deathYear": "2020"
+  },
+  {
+    "id": "p057_sp",
+    "name": "Милен",
+    "surname": "Захариев",
+    "parentId": "p030",
+    "gender": "m",
+    "birthYear": "1942",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "husband",
+      "toId": "p056",
+      "toName": "Стойка Никола-Севдава Петрова"
+    }
+  },
+  {
+    "id": "p056",
+    "name": "Стойка",
+    "patronymic": "Никола-Севдава",
+    "surname": "Петрова",
+    "parentId": "p030",
+    "gender": "f",
+    "birthYear": "1943",
+    "birthPlace": "гр. Варна",
+    "childOrder": 0,
+    "deathYear": "2021",
+    "birthMonthDay": "04-04"
+  },
+  {
+    "id": "p059_sp",
+    "name": "Таня",
+    "surname": "Стоянова",
+    "parentId": "p030",
+    "gender": "f",
+    "birthYear": "1943",
+    "birthPlace": "гр. Монтана",
+    "relation": {
+      "type": "wife",
+      "toId": "p058",
+      "toName": "Пенчо Никола-Севдав Тодоров"
+    }
+  },
+  {
+    "id": "p058",
+    "name": "Пенчо",
+    "patronymic": "Никола-Севдав",
+    "surname": "Тодоров",
+    "parentId": "p030",
+    "gender": "m",
+    "birthYear": "1943",
+    "birthPlace": "гр. Варна",
+    "deathYear": "2000",
+    "note": "Учител."
+  },
+  {
+    "id": "p061_sp",
+    "name": "Милен",
+    "surname": "Ангелов",
+    "parentId": "p032",
+    "gender": "m",
+    "birthYear": "1941",
+    "birthPlace": "гр. Пловдив",
+    "relation": {
+      "type": "husband",
+      "toId": "p060",
+      "toName": "Иванка Иванова Ангелова"
+    }
+  },
+  {
+    "id": "p060",
+    "name": "Иванка",
+    "patronymic": "Иванова",
+    "surname": "Ангелова",
+    "parentId": "p032",
+    "gender": "f",
+    "birthYear": "1943",
+    "birthPlace": "с. Враняк, Врачанско",
+    "deathYear": "2000"
+  },
+  {
+    "id": "p063_sp",
+    "name": "Захари",
+    "surname": "Стоянов",
+    "parentId": "p032",
+    "gender": "m",
+    "birthYear": "1942",
+    "birthPlace": "гр. Бяла Слатина",
+    "relation": {
+      "type": "husband",
+      "toId": "p062",
+      "toName": "Стойка Иванова Маринова"
+    }
+  },
+  {
+    "id": "p062",
+    "name": "Стойка",
+    "patronymic": "Иванова",
+    "surname": "Маринова",
+    "parentId": "p032",
+    "gender": "f",
+    "birthYear": "1944",
+    "birthPlace": "с. Мало Пещене",
+    "childOrder": 1,
+    "deathYear": "2009",
+    "birthMonthDay": "08-11"
+  },
+  {
+    "id": "p065_sp",
+    "name": "Елена",
+    "surname": "Гошева",
+    "parentId": "p032",
+    "gender": "f",
+    "birthYear": "1941",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "wife",
+      "toId": "p064",
+      "toName": "Борис Иванов Гошев"
+    }
+  },
+  {
+    "id": "p064",
+    "name": "Борис",
+    "patronymic": "Иванов",
+    "surname": "Гошев",
+    "parentId": "p032",
+    "gender": "m",
+    "birthYear": "1942",
+    "birthPlace": "с. Враняк, Врачанско",
+    "childOrder": 2,
+    "deathYear": "2018"
+  },
+  {
+    "id": "p066",
+    "name": "Иван",
+    "patronymic": "Георги-Анав",
+    "surname": "Маринов",
+    "parentId": "p033",
+    "gender": "m",
+    "birthYear": "1946",
+    "birthPlace": "гр. Враца",
+    "deathYear": "2007",
+    "birthMonthDay": "12-02"
+  },
+  {
+    "id": "p068_sp",
+    "name": "Иванка",
+    "surname": "Николова",
+    "parentId": "p033",
+    "gender": "f",
+    "birthYear": "1941",
+    "birthPlace": "гр. Враца",
+    "relation": {
+      "type": "wife",
+      "toId": "p067",
+      "toName": "Петър Георги-Анав Николов"
+    }
+  },
+  {
+    "id": "p067",
+    "name": "Петър",
+    "patronymic": "Георги-Анав",
+    "surname": "Николов",
+    "parentId": "p033",
+    "gender": "m",
+    "birthYear": "1943",
+    "birthPlace": "гр. Монтана",
+    "childOrder": 1,
+    "deathYear": "2012",
+    "birthMonthDay": "12-17"
+  },
+  {
+    "id": "p069",
+    "name": "Петър",
+    "patronymic": "Георги-Анав",
+    "surname": "Стоянов",
+    "parentId": "p033",
+    "gender": "m",
+    "birthYear": "1947",
+    "birthPlace": "гр. Враца",
+    "childOrder": 2,
+    "verified": false,
+    "deathYear": "2010",
+    "note": "По разказ на баба."
+  },
+  {
+    "id": "p071_sp",
+    "name": "Севда",
+    "surname": "Стоянова",
+    "parentId": "p034",
+    "gender": "f",
+    "birthYear": "1945",
+    "birthPlace": "Чикаго, САЩ",
+    "relation": {
+      "type": "wife",
+      "toId": "p070",
+      "toName": "Кирил Захарив Петров"
+    }
+  },
+  {
+    "id": "p070",
+    "name": "Кирил",
+    "patronymic": "Захарив",
+    "surname": "Петров",
+    "parentId": "p034",
+    "gender": "m",
+    "birthYear": "1944",
+    "birthPlace": "гр. София",
+    "deathYear": "2026"
+  },
+  {
+    "id": "p073_sp",
+    "name": "Стоян",
+    "surname": "Брусарски",
+    "parentId": "p034",
+    "gender": "m",
+    "birthYear": "1937",
+    "birthPlace": "с. Мало Пещене",
+    "relation": {
+      "type": "husband",
+      "toId": "p072",
+      "toName": "Здравка Захарива Маринова"
+    }
+  },
+  {
+    "id": "p072",
+    "name": "Здравка",
+    "patronymic": "Захарива",
+    "surname": "Маринова",
+    "parentId": "p034",
+    "gender": "f",
+    "birthYear": "1940",
+    "birthPlace": "гр. Пловдив",
+    "childOrder": 1,
+    "deathYear": "2013"
+  },
+  {
+    "id": "p075_sp",
+    "name": "Христо",
+    "surname": "Гошев",
+    "parentId": "p034",
+    "gender": "m",
+    "birthYear": "1940",
+    "birthPlace": "гр. Враца",
+    "relation": {
+      "type": "husband",
+      "toId": "p074",
+      "toName": "Елена Захарива Гошева"
+    }
+  },
+  {
+    "id": "p074",
+    "name": "Елена",
+    "patronymic": "Захарива",
+    "surname": "Гошева",
+    "parentId": "p034",
+    "gender": "f",
+    "birthYear": "1943",
+    "birthPlace": "гр. Бяла Слатина",
+    "deathYear": "2017"
+  },
+  {
+    "id": "p077_sp",
+    "name": "Тодор",
+    "surname": "Николов",
+    "parentId": "p035",
+    "gender": "m",
+    "birthYear": "1940",
+    "birthPlace": "с. Враняк, Врачанско",
+    "relation": {
+      "type": "husband",
+      "toId": "p076",
+      "toName": "Ана Николава Маринова"
+    }
+  },
+  {
+    "id": "p076",
+    "name": "Ана",
+    "patronymic": "Николава",
+    "surname": "Маринова",
+    "parentId": "p035",
+    "gender": "f",
+    "birthYear": "1941",
+    "birthPlace": "гр. Враца",
+    "deathYear": "2015",
+    "birthMonthDay": "09-27",
+    "note": "Преселил се в града."
+  },
+  {
+    "id": "p079_sp",
+    "name": "Севда",
+    "surname": "Захариева",
+    "parentId": "p035",
+    "gender": "f",
+    "birthYear": "1940",
+    "birthPlace": "гр. Пловдив",
+    "relation": {
+      "type": "wife",
+      "toId": "p078",
+      "toName": "Кирил Николав Тодоров"
+    }
+  },
+  {
+    "id": "p078",
+    "name": "Кирил",
+    "patronymic": "Николав",
+    "surname": "Тодоров",
+    "parentId": "p035",
+    "gender": "m",
+    "birthYear": "1938",
+    "birthPlace": "гр. Монтана",
+    "deathYear": "2009",
+    "birthMonthDay": "10-20",
+    "note": "Учител."
+  },
+  {
+    "id": "p081_sp",
+    "name": "Асен",
+    "surname": "Ангелов",
+    "parentId": "p037",
+    "gender": "m",
+    "birthYear": "1935",
+    "birthPlace": "Чикаго, САЩ",
+    "relation": {
+      "type": "husband",
+      "toId": "p080",
+      "toName": "Радка Маринова Захариева"
+    }
+  },
+  {
+    "id": "p080",
+    "name": "Радка",
+    "patronymic": "Маринова",
+    "surname": "Захариева",
+    "parentId": "p037",
+    "gender": "f",
+    "birthYear": "1938",
+    "birthPlace": "гр. Враца",
+    "deathYear": "2022",
+    "birthMonthDay": "06-21"
+  },
+  {
+    "id": "p083_sp",
+    "name": "Ангел",
+    "surname": "Ангелов",
+    "parentId": "p037",
+    "gender": "m",
+    "birthYear": "1944",
+    "birthPlace": "с. Враняк, Врачанско",
+    "relation": {
+      "type": "husband",
+      "toId": "p082",
+      "toName": "Величка Маринова Гошева"
+    }
+  },
+  {
+    "id": "p082",
+    "name": "Величка",
+    "patronymic": "Маринова",
+    "surname": "Гошева",
+    "parentId": "p037",
+    "gender": "f",
+    "birthYear": "1942",
+    "birthPlace": "гр. Бяла Слатина",
+    "childOrder": 1,
+    "deathYear": "2005"
+  },
+  {
+    "id": "p085_sp",
+    "name": "Мария",
+    "surname": "Брусарска",
+    "parentId": "p037",
+    "gender": "f",
+    "birthYear": "1941",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "wife",
+      "toId": "p084",
+      "toName": "Георги Маринов Тодоров"
+    }
+  },
+  {
+    "id": "p084",
+    "name": "Георги",
+    "patronymic": "Маринов",
+    "surname": "Тодоров",
+    "parentId": "p037",
+    "gender": "m",
+    "birthYear": "1941",
+    "birthPlace": "с. Мало Пещене",
+    "childOrder": 2,
+    "deathYear": "2020",
+    "note": "Емигрант."
+  },
+  {
+    "id": "p087_sp",
+    "name": "Румяна",
+    "surname": "Ангелова",
+    "parentId": "p037",
+    "gender": "f",
+    "birthYear": "1937",
+    "birthPlace": "с. Мало Пещене",
+    "relation": {
+      "type": "wife",
+      "toId": "p086",
+      "toName": "Стоян Маринов Николов"
+    }
+  },
+  {
+    "id": "p086",
+    "name": "Стоян",
+    "patronymic": "Маринов",
+    "surname": "Николов",
+    "parentId": "p037",
+    "gender": "m",
+    "birthYear": "1939",
+    "birthPlace": "гр. Варна",
+    "deathYear": "2014"
+  },
+  {
+    "id": "p088",
+    "name": "Йорданка",
+    "patronymic": "Василова",
+    "surname": "Гошева",
+    "parentId": "p038",
+    "gender": "f",
+    "birthYear": "1973",
+    "birthPlace": "с. Мало Пещене"
+  },
+  {
+    "id": "p090_sp",
+    "name": "Румяна",
+    "surname": "Брусарска",
+    "parentId": "p038",
+    "gender": "f",
+    "birthYear": "1965",
+    "birthPlace": "с. Враняк, Врачанско",
+    "relation": {
+      "type": "wife",
+      "toId": "p089",
+      "toName": "Васил Василов Николов"
+    }
+  },
+  {
+    "id": "p089",
+    "name": "Васил",
+    "patronymic": "Василов",
+    "surname": "Николов",
+    "parentId": "p038",
+    "gender": "m",
+    "birthYear": "1965",
+    "birthPlace": "гр. Монтана",
+    "birthMonthDay": "12-02"
+  },
+  {
+    "id": "p091",
+    "name": "Петър",
+    "patronymic": "Иванов",
+    "surname": "Захариев",
+    "parentId": "p040",
+    "gender": "m",
+    "birthYear": "1969",
+    "birthPlace": "гр. Враца"
+  },
+  {
+    "id": "p093_sp",
+    "name": "Йорданка",
+    "surname": "Петрова",
+    "parentId": "p040",
+    "gender": "f",
+    "birthYear": "1969",
+    "birthPlace": "с. Враняк, Врачанско",
+    "relation": {
+      "type": "wife",
+      "toId": "p092",
+      "toName": "Ангел Иванов Николов"
+    }
+  },
+  {
+    "id": "p092",
+    "name": "Ангел",
+    "patronymic": "Иванов",
+    "surname": "Николов",
+    "parentId": "p040",
+    "gender": "m",
+    "birthYear": "1972",
+    "birthPlace": "гр. София",
+    "deathYear": "2045"
+  },
+  {
+    "id": "p095_sp",
+    "name": "Георги",
+    "surname": "Гошев",
+    "parentId": "p044",
+    "gender": "m",
+    "birthYear": "1970",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "husband",
+      "toId": "p094",
+      "toName": "Цветана Ангелова Гошева"
+    }
+  },
+  {
+    "id": "p094",
+    "name": "Цветана",
+    "patronymic": "Ангелова",
+    "surname": "Гошева",
+    "parentId": "p044",
+    "gender": "f",
+    "birthYear": "1971",
+    "birthPlace": "гр. Варна",
+    "childOrder": 0,
+    "birthMonthDay": "06-02"
+  },
+  {
+    "id": "p097_sp",
+    "name": "Виолета",
+    "surname": "Петрова",
+    "parentId": "p046",
+    "gender": "f",
+    "birthYear": "1966",
+    "birthPlace": "гр. София",
+    "relation": {
+      "type": "wife",
+      "toId": "p096",
+      "toName": "Васил Петъров Вранчев"
+    }
+  },
+  {
+    "id": "p096",
+    "name": "Васил",
+    "patronymic": "Петъров",
+    "surname": "Вранчев",
+    "parentId": "p046",
+    "gender": "m",
+    "birthYear": "1965",
+    "birthPlace": "гр. Монтана",
+    "deathYear": "2033",
+    "birthMonthDay": "02-14"
+  },
+  {
+    "id": "p098",
+    "name": "Елена",
+    "patronymic": "Радославова",
+    "surname": "Ангелова",
+    "parentId": "p047",
+    "gender": "f",
+    "birthYear": "1974",
+    "birthPlace": "с. Борован"
+  },
+  {
+    "id": "p099",
+    "name": "Виолета",
+    "patronymic": "Димитърова",
+    "surname": "Николова",
+    "parentId": "p049",
+    "gender": "f",
+    "birthYear": "1965",
+    "birthPlace": "гр. Пловдив",
+    "birthMonthDay": "02-13"
+  },
+  {
+    "id": "p101_sp",
+    "name": "Магдалена",
+    "surname": "Захариева",
+    "parentId": "p051",
+    "gender": "f",
+    "birthYear": "1969",
+    "birthPlace": "гр. Бяла Слатина",
+    "relation": {
+      "type": "wife",
+      "toId": "p100",
+      "toName": "Марин Тодоров Стоянов"
+    }
+  },
+  {
+    "id": "p100",
+    "name": "Марин",
+    "patronymic": "Тодоров",
+    "surname": "Стоянов",
+    "parentId": "p051",
+    "gender": "m",
+    "birthYear": "1968",
+    "birthPlace": "Чикаго, САЩ",
+    "childOrder": 0
+  },
+  {
+    "id": "p103_sp",
+    "name": "Величка",
+    "surname": "Маринова",
+    "parentId": "p051",
+    "gender": "f",
+    "birthYear": "1965",
+    "birthPlace": "гр. Варна",
+    "relation": {
+      "type": "wife",
+      "toId": "p102",
+      "toName": "Любен Тодоров Брусарски"
+    }
+  },
+  {
+    "id": "p102",
+    "name": "Любен",
+    "patronymic": "Тодоров",
+    "surname": "Брусарски",
+    "parentId": "p051",
+    "gender": "m",
+    "birthYear": "1968",
+    "birthPlace": "с. Враняк, Врачанско",
+    "childOrder": 1,
+    "birthMonthDay": "02-04"
+  },
+  {
+    "id": "p105_sp",
+    "name": "Борис",
+    "surname": "Николов",
+    "parentId": "p053",
+    "gender": "m",
+    "birthYear": "1973",
+    "birthPlace": "гр. Варна",
+    "relation": {
+      "type": "husband",
+      "toId": "p104",
+      "toName": "Ана Ангелова Вранчева"
+    }
+  },
+  {
+    "id": "p104",
+    "name": "Ана",
+    "patronymic": "Ангелова",
+    "surname": "Вранчева",
+    "parentId": "p053",
+    "gender": "f",
+    "birthYear": "1973",
+    "birthPlace": "гр. Варна"
+  },
+  {
+    "id": "p106",
+    "name": "Радослав",
+    "patronymic": "Ангелов",
+    "surname": "Николов",
+    "parentId": "p053",
+    "gender": "m",
+    "birthYear": "1967",
+    "birthPlace": "с. Мало Пещене",
+    "birthMonthDay": "10-03"
+  },
+  {
+    "id": "p107",
+    "name": "Петър",
+    "patronymic": "Захарив",
+    "surname": "Брусарски",
+    "parentId": "p055",
+    "gender": "m",
+    "birthYear": "1966",
+    "birthPlace": "с. Мало Пещене",
+    "childOrder": 0
+  },
+  {
+    "id": "p109_sp",
+    "name": "Тодор",
+    "surname": "Ангелов",
+    "parentId": "p058",
+    "gender": "m",
+    "birthYear": "1973",
+    "birthPlace": "гр. Бяла Слатина",
+    "relation": {
+      "type": "husband",
+      "toId": "p108",
+      "toName": "Иванка Пенчова Ангелова"
+    }
+  },
+  {
+    "id": "p108",
+    "name": "Иванка",
+    "patronymic": "Пенчова",
+    "surname": "Ангелова",
+    "parentId": "p058",
+    "gender": "f",
+    "birthYear": "1973",
+    "birthPlace": "гр. Варна",
+    "childOrder": 0
+  },
+  {
+    "id": "p111_sp",
+    "name": "Цветана",
+    "surname": "Петрова",
+    "parentId": "p064",
+    "gender": "f",
+    "birthYear": "1974",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "wife",
+      "toId": "p110",
+      "toName": "Тодор Борисов Ангелов"
+    }
+  },
+  {
+    "id": "p110",
+    "name": "Тодор",
+    "patronymic": "Борисов",
+    "surname": "Ангелов",
+    "parentId": "p064",
+    "gender": "m",
+    "birthYear": "1973",
+    "birthPlace": "гр. Монтана",
+    "childOrder": 0
+  },
+  {
+    "id": "p113_sp",
+    "name": "Иван",
+    "surname": "Захариев",
+    "parentId": "p064",
+    "gender": "m",
+    "birthYear": "1969",
+    "birthPlace": "гр. Варна",
+    "relation": {
+      "type": "husband",
+      "toId": "p112",
+      "toName": "Йорданка Борисова Гошева"
+    }
+  },
+  {
+    "id": "p112",
+    "name": "Йорданка",
+    "patronymic": "Борисова",
+    "surname": "Гошева",
+    "parentId": "p064",
+    "gender": "f",
+    "birthYear": "1967",
+    "birthPlace": "гр. Пловдив",
+    "deathYear": "2024"
+  },
+  {
+    "id": "p115_sp",
+    "name": "Севда",
+    "surname": "Маринова",
+    "parentId": "p066",
+    "gender": "f",
+    "birthYear": "1972",
+    "birthPlace": "гр. Бяла Слатина",
+    "relation": {
+      "type": "wife",
+      "toId": "p114",
+      "toName": "Захари Иванов Петров"
+    }
+  },
+  {
+    "id": "p114",
+    "name": "Захари",
+    "patronymic": "Иванов",
+    "surname": "Петров",
+    "parentId": "p066",
+    "gender": "m",
+    "birthYear": "1972",
+    "birthPlace": "с. Борован",
+    "childOrder": 0
+  },
+  {
+    "id": "p116",
+    "name": "Асен",
+    "patronymic": "Иванов",
+    "surname": "Ангелов",
+    "parentId": "p066",
+    "gender": "m",
+    "birthYear": "1965",
+    "birthPlace": "с. Борован",
+    "childOrder": 1
+  },
+  {
+    "id": "p118_sp",
+    "name": "Мария",
+    "surname": "Захариева",
+    "parentId": "p067",
+    "gender": "f",
+    "birthYear": "1966",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "wife",
+      "toId": "p117",
+      "toName": "Васил Петъров Захариев"
+    }
+  },
+  {
+    "id": "p117",
+    "name": "Васил",
+    "patronymic": "Петъров",
+    "surname": "Захариев",
+    "parentId": "p067",
+    "gender": "m",
+    "birthYear": "1965",
+    "birthPlace": "Чикаго, САЩ"
+  },
+  {
+    "id": "p120_sp",
+    "name": "Асен",
+    "surname": "Стоянов",
+    "parentId": "p067",
+    "gender": "m",
+    "birthYear": "1968",
+    "birthPlace": "с. Враняк, Врачанско",
+    "relation": {
+      "type": "husband",
+      "toId": "p119",
+      "toName": "Донка Петърова Гошева"
+    }
+  },
+  {
+    "id": "p119",
+    "name": "Донка",
+    "patronymic": "Петърова",
+    "surname": "Гошева",
+    "parentId": "p067",
+    "gender": "f",
+    "birthYear": "1970",
+    "birthPlace": "с. Борован",
+    "childOrder": 1,
+    "deathYear": "2053"
+  },
+  {
+    "id": "p122_sp",
+    "name": "Никола",
+    "surname": "Ангелов",
+    "parentId": "p069",
+    "gender": "m",
+    "birthYear": "1964",
+    "birthPlace": "гр. София",
+    "relation": {
+      "type": "husband",
+      "toId": "p121",
+      "toName": "Лиляна Петърова Петрова"
+    }
+  },
+  {
+    "id": "p121",
+    "name": "Лиляна",
+    "patronymic": "Петърова",
+    "surname": "Петрова",
+    "parentId": "p069",
+    "gender": "f",
+    "birthYear": "1966",
+    "birthPlace": "гр. София",
+    "birthMonthDay": "06-08"
+  },
+  {
+    "id": "p123",
+    "name": "Йорданка",
+    "patronymic": "Петърова",
+    "surname": "Брусарска",
+    "parentId": "p069",
+    "gender": "f",
+    "birthYear": "1966?",
+    "birthPlace": "гр. Варна",
+    "childOrder": 1,
+    "birthMonthDay": "02-13"
+  },
+  {
+    "id": "p125_sp",
+    "name": "Петър",
+    "surname": "Петров",
+    "parentId": "p070",
+    "gender": "m",
+    "birthYear": "1967",
+    "birthPlace": "гр. Варна",
+    "relation": {
+      "type": "husband",
+      "toId": "p124",
+      "toName": "Галина Кирилова Вранчева"
+    }
+  },
+  {
+    "id": "p124",
+    "name": "Галина",
+    "patronymic": "Кирилова",
+    "surname": "Вранчева",
+    "parentId": "p070",
+    "gender": "f",
+    "birthYear": "1967",
+    "birthPlace": "гр. Пловдив",
+    "childOrder": 0,
+    "birthMonthDay": "12-14"
+  },
+  {
+    "id": "p127_sp",
+    "name": "Севда",
+    "surname": "Стоянова",
+    "parentId": "p078",
+    "gender": "f",
+    "birthYear": "1963",
+    "birthPlace": "с. Враняк, Врачанско",
+    "relation": {
+      "type": "wife",
+      "toId": "p126",
+      "toName": "Радослав Кирилов Захариев"
+    }
+  },
+  {
+    "id": "p126",
+    "name": "Радослав",
+    "patronymic": "Кирилов",
+    "surname": "Захариев",
+    "parentId": "p078",
+    "gender": "m",
+    "birthYear": "1964",
+    "birthPlace": "гр. Бяла Слатина"
+  },
+  {
+    "id": "p128",
+    "name": "Марин",
+    "patronymic": "Георгив",
+    "surname": "Брусарски",
+    "parentId": "p084",
+    "gender": "m",
+    "birthYear": "1966",
+    "birthPlace": "с. Борован",
+    "deathYear": "2025"
+  },
+  {
+    "id": "p129",
+    "name": "Магдалена",
+    "patronymic": "Георгива",
+    "surname": "Николова",
+    "parentId": "p084",
+    "gender": "f",
+    "birthYear": "1970",
+    "birthPlace": "с. Враняк, Врачанско",
+    "birthMonthDay": "01-26"
+  },
+  {
+    "id": "p131_sp",
+    "name": "Севда",
+    "surname": "Маринова",
+    "parentId": "p086",
+    "gender": "f",
+    "birthYear": "1975",
+    "birthPlace": "с. Мало Пещене",
+    "relation": {
+      "type": "wife",
+      "toId": "p130",
+      "toName": "Борис Стоянов Брусарски"
+    }
+  },
+  {
+    "id": "p130",
+    "name": "Борис",
+    "patronymic": "Стоянов",
+    "surname": "Брусарски",
+    "parentId": "p086",
+    "gender": "m",
+    "birthYear": "1974",
+    "birthPlace": "Чикаго, САЩ",
+    "deathYear": "2037"
+  },
+  {
+    "id": "p132",
+    "name": "Марин",
+    "patronymic": "Стоянов",
+    "surname": "Гошев",
+    "parentId": "p086",
+    "gender": "m",
+    "birthYear": "1966?",
+    "birthPlace": "Чикаго, САЩ",
+    "birthMonthDay": "09-21"
+  },
+  {
+    "id": "p134_sp",
+    "name": "Милен",
+    "surname": "Маринов",
+    "parentId": "p089",
+    "gender": "m",
+    "birthYear": "1998",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "husband",
+      "toId": "p133",
+      "toName": "Румяна Василова Брусарска"
+    }
+  },
+  {
+    "id": "p133",
+    "name": "Румяна",
+    "patronymic": "Василова",
+    "surname": "Брусарска",
+    "parentId": "p089",
+    "gender": "f",
+    "birthYear": "1999",
+    "birthPlace": "гр. Враца",
+    "childOrder": 0,
+    "deathYear": "2055"
+  },
+  {
+    "id": "p136_sp",
+    "name": "Христо",
+    "surname": "Брусарски",
+    "parentId": "p091",
+    "gender": "m",
+    "birthYear": "1998",
+    "birthPlace": "гр. Пловдив",
+    "relation": {
+      "type": "husband",
+      "toId": "p135",
+      "toName": "Невена Петърова Захариева"
+    }
+  },
+  {
+    "id": "p135",
+    "name": "Невена",
+    "patronymic": "Петърова",
+    "surname": "Захариева",
+    "parentId": "p091",
+    "gender": "f",
+    "birthYear": "2000",
+    "birthPlace": "с. Мало Пещене",
+    "childOrder": 0,
+    "birthMonthDay": "02-09"
+  },
+  {
+    "id": "p137",
+    "name": "Магдалена",
+    "patronymic": "Ангелова",
+    "surname": "Петрова",
+    "parentId": "p092",
+    "gender": "f",
+    "birthYear": "1993",
+    "birthPlace": "с. Мало Пещене"
+  },
+  {
+    "id": "p138",
+    "name": "Христо",
+    "patronymic": "Василов",
+    "surname": "Ангелов",
+    "parentId": "p096",
+    "gender": "m",
+    "birthYear": "2001",
+    "birthPlace": "гр. Монтана",
+    "childOrder": 0,
+    "birthMonthDay": "10-02"
+  },
+  {
+    "id": "p140_sp",
+    "name": "Галина",
+    "surname": "Ангелова",
+    "parentId": "p096",
+    "gender": "f",
+    "birthYear": "1989",
+    "birthPlace": "гр. Монтана",
+    "relation": {
+      "type": "wife",
+      "toId": "p139",
+      "toName": "Иван Василов Николов"
+    }
+  },
+  {
+    "id": "p139",
+    "name": "Иван",
+    "patronymic": "Василов",
+    "surname": "Николов",
+    "parentId": "p096",
+    "gender": "m",
+    "birthYear": "1990",
+    "birthPlace": "гр. Монтана",
+    "birthMonthDay": "01-09"
+  },
+  {
+    "id": "p142_sp",
+    "name": "Невена",
+    "surname": "Стоянова",
+    "parentId": "p100",
+    "gender": "f",
+    "birthYear": "2001",
+    "birthPlace": "гр. Варна",
+    "relation": {
+      "type": "wife",
+      "toId": "p141",
+      "toName": "Милен Маринов Николов"
+    }
+  },
+  {
+    "id": "p141",
+    "name": "Милен",
+    "patronymic": "Маринов",
+    "surname": "Николов",
+    "parentId": "p100",
+    "gender": "m",
+    "birthYear": "2000",
+    "birthPlace": "с. Враняк, Врачанско",
+    "deathYear": "2081",
+    "note": "Емигрант."
+  },
+  {
+    "id": "p144_sp",
+    "name": "Захари",
+    "surname": "Ангелов",
+    "parentId": "p100",
+    "gender": "m",
+    "birthYear": "1998",
+    "birthPlace": "с. Враняк, Врачанско",
+    "relation": {
+      "type": "husband",
+      "toId": "p143",
+      "toName": "Ана Маринова Ангелова"
+    }
+  },
+  {
+    "id": "p143",
+    "name": "Ана",
+    "patronymic": "Маринова",
+    "surname": "Ангелова",
+    "parentId": "p100",
+    "gender": "f",
+    "birthYear": "1997?",
+    "birthPlace": "гр. Бяла Слатина",
+    "childOrder": 1,
+    "deathYear": "2068",
+    "birthMonthDay": "06-10"
+  },
+  {
+    "id": "p146_sp",
+    "name": "Галина",
+    "surname": "Тодорова",
+    "parentId": "p102",
+    "gender": "f",
+    "birthYear": "2001",
+    "birthPlace": "с. Враняк, Врачанско",
+    "relation": {
+      "type": "wife",
+      "toId": "p145",
+      "toName": "Марин Любенов Николов"
+    }
+  },
+  {
+    "id": "p145",
+    "name": "Марин",
+    "patronymic": "Любенов",
+    "surname": "Николов",
+    "parentId": "p102",
+    "gender": "m",
+    "birthYear": "1999",
+    "birthPlace": "с. Борован",
+    "verified": false,
+    "birthMonthDay": "02-21"
+  },
+  {
+    "id": "p147",
+    "name": "Румяна",
+    "patronymic": "Любенова",
+    "surname": "Захариева",
+    "parentId": "p102",
+    "gender": "f",
+    "birthYear": "1991",
+    "birthPlace": "гр. Враца",
+    "deathYear": "2066"
+  },
+  {
+    "id": "p149_sp",
+    "name": "Таня",
+    "surname": "Петрова",
+    "parentId": "p106",
+    "gender": "f",
+    "birthYear": "1994",
+    "birthPlace": "гр. Варна",
+    "relation": {
+      "type": "wife",
+      "toId": "p148",
+      "toName": "Христо Радославов Гошев"
+    }
+  },
+  {
+    "id": "p148",
+    "name": "Христо",
+    "patronymic": "Радославов",
+    "surname": "Гошев",
+    "parentId": "p106",
+    "gender": "m",
+    "birthYear": "1992?",
+    "birthPlace": "с. Мало Пещене",
+    "note": "Емигрант."
+  },
+  {
+    "id": "p151_sp",
+    "name": "Кирил",
+    "surname": "Маринов",
+    "parentId": "p106",
+    "gender": "m",
+    "birthYear": "1991",
+    "birthPlace": "гр. Бяла Слатина",
+    "relation": {
+      "type": "husband",
+      "toId": "p150",
+      "toName": "Севда Радославова Захариева"
+    }
+  },
+  {
+    "id": "p150",
+    "name": "Севда",
+    "patronymic": "Радославова",
+    "surname": "Захариева",
+    "parentId": "p106",
+    "gender": "f",
+    "birthYear": "1991",
+    "birthPlace": "Чикаго, САЩ",
+    "childOrder": 1,
+    "deathYear": "2065",
+    "birthMonthDay": "08-04"
+  },
+  {
+    "id": "p153_sp",
+    "name": "Димитър",
+    "surname": "Брусарски",
+    "parentId": "p107",
+    "gender": "m",
+    "birthYear": "1997",
+    "birthPlace": "гр. Варна",
+    "relation": {
+      "type": "husband",
+      "toId": "p152",
+      "toName": "Цветана Петърова Петрова"
+    }
+  },
+  {
+    "id": "p152",
+    "name": "Цветана",
+    "patronymic": "Петърова",
+    "surname": "Петрова",
+    "parentId": "p107",
+    "gender": "f",
+    "birthYear": "1997",
+    "birthPlace": "гр. Варна",
+    "childOrder": 0,
+    "verified": false
+  },
+  {
+    "id": "p155_sp",
+    "name": "Димитър",
+    "surname": "Петров",
+    "parentId": "p110",
+    "gender": "m",
+    "birthYear": "1998",
+    "birthPlace": "с. Враняк, Врачанско",
+    "relation": {
+      "type": "husband",
+      "toId": "p154",
+      "toName": "Елена Тодорова Николова"
+    }
+  },
+  {
+    "id": "p154",
+    "name": "Елена",
+    "patronymic": "Тодорова",
+    "surname": "Николова",
+    "parentId": "p110",
+    "gender": "f",
+    "birthYear": "1999",
+    "birthPlace": "Чикаго, САЩ",
+    "childOrder": 0,
+    "note": "Учител."
+  },
+  {
+    "id": "p157_sp",
+    "name": "Стоян",
+    "surname": "Захариев",
+    "parentId": "p110",
+    "gender": "m",
+    "birthYear": "1996",
+    "birthPlace": "с. Мало Пещене",
+    "relation": {
+      "type": "husband",
+      "toId": "p156",
+      "toName": "Ана Тодорова Вранчева"
+    }
+  },
+  {
+    "id": "p156",
+    "name": "Ана",
+    "patronymic": "Тодорова",
+    "surname": "Вранчева",
+    "parentId": "p110",
+    "gender": "f",
+    "birthYear": "1994",
+    "birthPlace": "гр. Монтана",
+    "childOrder": 1
+  },
+  {
+    "id": "p159_sp",
+    "name": "Лиляна",
+    "surname": "Петрова",
+    "parentId": "p114",
+    "gender": "f",
+    "birthYear": "2000",
+    "birthPlace": "гр. Монтана",
+    "relation": {
+      "type": "wife",
+      "toId": "p158",
+      "toName": "Никола Захарив Вранчев"
+    }
+  },
+  {
+    "id": "p158",
+    "name": "Никола",
+    "patronymic": "Захарив",
+    "surname": "Вранчев",
+    "parentId": "p114",
+    "gender": "m",
+    "birthYear": "2000",
+    "birthPlace": "с. Борован",
+    "childOrder": 0
+  },
+  {
+    "id": "p161_sp",
+    "name": "Марин",
+    "surname": "Маринов",
+    "parentId": "p116",
+    "gender": "m",
+    "birthYear": "1994",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "husband",
+      "toId": "p160",
+      "toName": "Иванка Асенова Тодорова"
+    }
+  },
+  {
+    "id": "p160",
+    "name": "Иванка",
+    "patronymic": "Асенова",
+    "surname": "Тодорова",
+    "parentId": "p116",
+    "gender": "f",
+    "birthYear": "1993",
+    "birthPlace": "гр. Бяла Слатина",
+    "deathYear": "2049"
+  },
+  {
+    "id": "p163_sp",
+    "name": "Петър",
+    "surname": "Тодоров",
+    "parentId": "p116",
+    "gender": "m",
+    "birthYear": "1991",
+    "birthPlace": "с. Мало Пещене",
+    "relation": {
+      "type": "husband",
+      "toId": "p162",
+      "toName": "Стойка Асенова Тодорова"
+    }
+  },
+  {
+    "id": "p162",
+    "name": "Стойка",
+    "patronymic": "Асенова",
+    "surname": "Тодорова",
+    "parentId": "p116",
+    "gender": "f",
+    "birthYear": "1994",
+    "birthPlace": "гр. Бяла Слатина",
+    "childOrder": 1,
+    "deathYear": "2058"
+  },
+  {
+    "id": "p165_sp",
+    "name": "Елена",
+    "surname": "Маринова",
+    "parentId": "p117",
+    "gender": "f",
+    "birthYear": "2000",
+    "birthPlace": "гр. Монтана",
+    "relation": {
+      "type": "wife",
+      "toId": "p164",
+      "toName": "Васил Василов Гошев"
+    }
+  },
+  {
+    "id": "p164",
+    "name": "Васил",
+    "patronymic": "Василов",
+    "surname": "Гошев",
+    "parentId": "p117",
+    "gender": "m",
+    "birthYear": "2001",
+    "birthPlace": "гр. Монтана",
+    "deathYear": "2085"
+  },
+  {
+    "id": "p167_sp",
+    "name": "Цветана",
+    "surname": "Гошева",
+    "parentId": "p117",
+    "gender": "f",
+    "birthYear": "1993",
+    "birthPlace": "гр. Монтана",
+    "relation": {
+      "type": "wife",
+      "toId": "p166",
+      "toName": "Марин Василов Ангелов"
+    }
+  },
+  {
+    "id": "p166",
+    "name": "Марин",
+    "patronymic": "Василов",
+    "surname": "Ангелов",
+    "parentId": "p117",
+    "gender": "m",
+    "birthYear": "1996",
+    "birthPlace": "гр. Пловдив",
+    "deathYear": "2078"
+  },
+  {
+    "id": "p169_sp",
+    "name": "Димитър",
+    "surname": "Гошев",
+    "parentId": "p126",
+    "gender": "m",
+    "birthYear": "2000",
+    "birthPlace": "гр. Варна",
+    "relation": {
+      "type": "husband",
+      "toId": "p168",
+      "toName": "Севда Радославова Ангелова"
+    }
+  },
+  {
+    "id": "p168",
+    "name": "Севда",
+    "patronymic": "Радославова",
+    "surname": "Ангелова",
+    "parentId": "p126",
+    "gender": "f",
+    "birthYear": "1999",
+    "birthPlace": "с. Мало Пещене",
+    "childOrder": 0
+  },
+  {
+    "id": "p170",
+    "name": "Асен",
+    "patronymic": "Радославов",
+    "surname": "Николов",
+    "parentId": "p126",
+    "gender": "m",
+    "birthYear": "1999",
+    "birthPlace": "с. Борован",
+    "childOrder": 1
+  },
+  {
+    "id": "p172_sp",
+    "name": "Марин",
+    "surname": "Маринов",
+    "parentId": "p128",
+    "gender": "m",
+    "birthYear": "1988",
+    "birthPlace": "гр. Пловдив",
+    "relation": {
+      "type": "husband",
+      "toId": "p171",
+      "toName": "Йорданка Маринова Николова"
+    }
+  },
+  {
+    "id": "p171",
+    "name": "Йорданка",
+    "patronymic": "Маринова",
+    "surname": "Николова",
+    "parentId": "p128",
+    "gender": "f",
+    "birthYear": "1991",
+    "birthPlace": "с. Мало Пещене",
+    "childOrder": 0
+  },
+  {
+    "id": "p174_sp",
+    "name": "Радослав",
+    "surname": "Петров",
+    "parentId": "p130",
+    "gender": "m",
+    "birthYear": "1990",
+    "birthPlace": "с. Борован",
+    "relation": {
+      "type": "husband",
+      "toId": "p173",
+      "toName": "Иванка Борисова Маринова"
+    }
+  },
+  {
+    "id": "p173",
+    "name": "Иванка",
+    "patronymic": "Борисова",
+    "surname": "Маринова",
+    "parentId": "p130",
+    "gender": "f",
+    "birthYear": "1992",
+    "birthPlace": "с. Мало Пещене",
+    "deathYear": "2060"
+  },
+  {
+    "id": "p176_sp",
+    "name": "Стойка",
+    "surname": "Петрова",
+    "parentId": "p132",
+    "gender": "f",
+    "birthYear": "1988",
+    "birthPlace": "гр. Монтана",
+    "relation": {
+      "type": "wife",
+      "toId": "p175",
+      "toName": "Борис Маринов Захариев"
+    }
+  },
+  {
+    "id": "p175",
+    "name": "Борис",
+    "patronymic": "Маринов",
+    "surname": "Захариев",
+    "parentId": "p132",
+    "gender": "m",
+    "birthYear": "1991",
+    "birthPlace": "гр. Монтана",
+    "childOrder": 0,
+    "deathYear": "2073",
+    "note": "Учител."
+  },
+  {
+    "id": "p178_sp",
+    "name": "Невена",
+    "surname": "Маринова",
+    "parentId": "p132",
+    "gender": "f",
+    "birthYear": "2001",
+    "birthPlace": "гр. Враца",
+    "relation": {
+      "type": "wife",
+      "toId": "p177",
+      "toName": "Марин Маринов Тодоров"
+    }
+  },
+  {
+    "id": "p177",
+    "name": "Марин",
+    "patronymic": "Маринов",
+    "surname": "Тодоров",
+    "parentId": "p132",
+    "gender": "m",
+    "birthYear": "1999",
+    "birthPlace": "с. Мало Пещене",
+    "childOrder": 1
+  }
+]

@@ -16,6 +16,7 @@ import AddIcon from '@mui/icons-material/Add'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import LogoutIcon from '@mui/icons-material/Logout'
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 import { useAuth } from '../auth/AuthContext'
 import { useTrees } from '../data/useTrees'
 import type { Tree } from '../model/tree'
@@ -116,14 +117,14 @@ export function TreePicker() {
         )}
 
         {isAdmin && (
-          <Button
-            fullWidth
-            startIcon={<AddIcon />}
-            onClick={() => setCreating(true)}
-            sx={{ mt: 2 }}
-          >
-            {t('treesNew')}
-          </Button>
+          <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+            <Button fullWidth startIcon={<AddIcon />} onClick={() => setCreating(true)}>
+              {t('treesNew')}
+            </Button>
+            <Button fullWidth startIcon={<ManageAccountsIcon />} onClick={() => navigate('/admin')}>
+              {t('adminAccessTitle')}
+            </Button>
+          </Stack>
         )}
 
         <Divider sx={{ my: 2.5 }} />

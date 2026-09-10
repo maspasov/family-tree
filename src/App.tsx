@@ -33,6 +33,7 @@ import { ImportDialog } from './components/ImportDialog'
 import { LoginGate } from './components/LoginGate'
 import { TreePicker } from './components/TreePicker'
 import { CombinedView } from './components/CombinedView'
+import { AdminPanel } from './components/AdminPanel'
 
 type Editing = { kind: 'add'; parentId: string | null } | null
 
@@ -298,12 +299,10 @@ function TreeApp({ initialPersonId }: { initialPersonId?: string }) {
           onExportPng={() => chartRef.current?.exportPng()}
           onExportJson={() => downloadJson(people)}
           onImport={() => setShowImport(true)}
-          onAddRoot={() =>
-            setEditing({
-              kind: 'add',
-              parentId: selected ? selected.id : null,
-            })
-          }
+          // Toolbar "add person" is the generic entry point — always start with
+          // no relative pre-selected (step 1 picks it). "Add child" from a card
+          // still seeds the anchor via onAddChild below.
+          onAddRoot={() => setEditing({ kind: 'add', parentId: null })}
           onExportIcs={handleExportIcs}
         />
 
@@ -494,6 +493,9 @@ export default function App() {
         <TreeApp initialPersonId={initialPersonId} />
       </TreeProvider>
     )
+  } else if (segments[0] === 'admin') {
+    // `#/admin` — admin-only per-tree access management.
+    body = <AdminPanel />
   } else {
     body = <TreePicker />
   }

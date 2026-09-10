@@ -35,3 +35,11 @@ firebase-adminsdk-*.json
 *.njsproj
 *.sln
 *.sw?
+
+# e2e (Playwright)
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
+e2e/.auth
+e2e/.env.e2e
