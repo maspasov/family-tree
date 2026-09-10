@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test'
-import { openTree } from './helpers'
+import {
+  ROOT_NAME,
+  addPersonViaWizard,
+  deleteOpenPerson,
+  openPersonByName,
+  openTree,
+} from './helpers'
 
 /** Person panel, the add-person wizard, editing, and add/delete. */
 test.beforeEach(openTree)
@@ -82,4 +88,82 @@ test('add a child then delete it', async ({ page }) => {
   await panel.getByRole('button', { name: 'Изтрий' }).click()
   await page.getByRole('button', { name: 'Да, изтрий' }).click()
   await expect(page.locator('.ft-card__name', { hasText: name })).toHaveCount(0, { timeout: 15_000 })
+})
+
+test('add a spouse via the wizard — merges into the anchor card', async ({ page }) => {
+  const spouse = `Тест Съпруга ${Date.now().toString().slice(-5)}`
+  await addPersonViaWizard(page, { anchorName: ROOT_NAME, rel: 'spouse', name: spouse, gender: 'Жена' })
+
+  // a wife merges into her partner's card as a ⚭ line (no card of her own)
+  const anchorCard = page
+    .locator('.ft-card')
+    .filter({ has: page.locator('.ft-card__name', { hasText: ROOT_NAME }) })
+  await expect(anchorCard.locator('.ft-card__spouse')).toContainText(spouse, { timeout: 15_000 })
+
+  // clean up
+  await openPersonByName(page, spouse)
+  await deleteOpenPerson(page)
+  await expect(anchorCard.locator('.ft-card__spouse', { hasText: spouse })).toHaveCount(0, {
+    timeout: 15_000,
+  })
+})
+
+test('add a parent via the wizard — reparents the anchor', async ({ page }) => {
+  const sfx = Date.now().toString().slice(-5)
+  const child = `Тест Внук ${sfx}`
+  const parent = `Тест Прародител ${sfx}`
+
+  await addPersonViaWizard(page, { anchorName: ROOT_NAME, rel: 'child', name: child })
+  await addPersonViaWizard(page, { anchorName: child, rel: 'parent', name: parent })
+
+  // `child` now hangs under the newly added `parent`
+  await openPersonByName(page, child)
+  await expect(page.locator('.MuiDrawer-paper').getByText(parent)).toBeVisible({ timeout: 15_000 })
+
+  await deleteOpenPerson(page) // child first (no descendants)
+  await openPersonByName(page, parent)
+  await deleteOpenPerson(page)
+})
+
+test('edit a person — surname, birth year and gender all persist', async ({ page }) => {
+  const name = `Тест Редакция ${Date.now().toString().slice(-5)}`
+  await addPersonViaWizard(page, { anchorName: ROOT_NAME, rel: 'child', name })
+
+  const panel = page.locator('.MuiDrawer-paper')
+  await panel.getByRole('button', { name: 'Редакция' }).click()
+  await panel.getByLabel('Фамилия', { exact: true }).fill('Тестова-Проверка')
+  await panel.getByLabel('Година на раждане').fill('1950')
+  await panel.getByLabel('Пол', { exact: true }).click()
+  await page.getByRole('option', { name: 'Жена' }).click()
+  await panel.getByRole('button', { name: 'Запис', exact: true }).click()
+
+  await expect(panel).toContainText('Тестова-Проверка')
+  await expect(panel).toContainText('р. 1950')
+  await expect(page.locator('.ft-card--f', { hasText: name })).toBeVisible({ timeout: 15_000 })
+
+  await deleteOpenPerson(page)
+})
+
+test('move a person to a different parent', async ({ page }) => {
+  const sfx = Date.now().toString().slice(-5)
+  const p1 = `Тест Родител ${sfx}`
+  const p2 = `Тест Дете ${sfx}`
+  await addPersonViaWizard(page, { anchorName: ROOT_NAME, rel: 'child', name: p1 })
+  await addPersonViaWizard(page, { anchorName: ROOT_NAME, rel: 'child', name: p2 })
+
+  // p2 is a child of the root; move it under p1 via the edit form
+  const panel = page.locator('.MuiDrawer-paper') // open on p2 after the wizard
+  await panel.getByRole('button', { name: 'Редакция' }).click()
+  const relTo = panel.getByLabel('Спрямо кого')
+  await relTo.click()
+  await relTo.fill(p1)
+  await page.getByRole('option', { name: p1 }).click()
+  await panel.getByRole('button', { name: 'Запис', exact: true }).click()
+
+  // the "Роднина (родител)" fact now links to p1
+  await expect(panel.getByRole('button', { name: p1, exact: true })).toBeVisible({ timeout: 15_000 })
+
+  await deleteOpenPerson(page) // p2
+  await openPersonByName(page, p1)
+  await deleteOpenPerson(page)
 })

@@ -88,8 +88,9 @@ a second tree, but it never lives in the shared setup.
 | `sandbox.setup.ts` | creates + seeds the shared `e2e-<id>` tree, writes `.sandbox.json` |
 | `sandbox.teardown.ts` | deletes it (runs even if specs fail) |
 | `chart.spec.ts` | canvas, search, view switching, i18n, export |
-| `person.spec.ts` | person panel, add-person wizard, edit, add/delete |
+| `person.spec.ts` | person panel, add-person wizard, edit, add/move/delete |
 | `cross-tree.spec.ts` | cross-tree marriage link + combined view |
-| `admin.spec.ts` | Roles dialog + `#/admin` access panel |
-| `helpers.ts` | `openTree` / `createTree` / `importJson` / `deleteTree` / `linkToOtherTree` / `sandbox` |
+| `admin.spec.ts` | Roles dialog (incl. last-editor guard) + `#/admin` access panel |
+| `views.spec.ts` | deep link `#/…/p/<id>`, combined view, layout toggle, PNG/ICS export |
+| `helpers.ts` | `openTree` / `createTree` / `importJson` / `deleteTree` / `linkToOtherTree` / `sandbox` / `fixtureName` |
 | `gen-tree.mjs` · `test-tree.json` | deterministic fixture generator + its output |

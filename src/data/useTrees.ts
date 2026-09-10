@@ -107,10 +107,11 @@ export function useTrees(): TreesApi {
         return input.slug
       },
       async deleteTree(slug) {
-        // Firestore has no cascade — walk the subcollections and delete their
-        // docs, then the tree doc itself last (so a mid-way failure leaves the
-        // tree still listed and the delete simply re-runnable). Fine for
-        // family-sized data; a Cloud Function would be needed at large scale.
+        // Firestore has no cascade — gather every doc under the tree and delete
+        // them in batches (400 / commit), then the tree doc itself last (so a
+        // mid-way failure leaves the tree still listed and the delete simply
+        // re-runnable). Fine for family-sized data; a Cloud Function would be
+        // needed at large scale.
         const tp = treePaths(slug)
         const persons = await getDocs(collection(db, tp.persons))
         // Cross-tree marriage bridges are mirrored on a person in *another*
@@ -127,12 +128,24 @@ export function useTrees(): TreesApi {
           ) {
             farEnds.push({ treeId: link.treeId, personId: link.personId })
           }
-          const photos = await getDocs(collection(db, tp.personPhotos(p.id)))
-          await deleteRefs(photos.docs.map((d) => d.ref))
-          await deleteDoc(p.ref)
+        }
+        // Photos hang off a per-person subcollection, which Firestore can't
+        // bulk-query — fetch them a chunk of people at a time in parallel
+        // rather than one blocking round-trip per person.
+        const photoRefs: DocumentReference[] = []
+        for (let i = 0; i < persons.docs.length; i += 20) {
+          const snaps = await Promise.all(
+            persons.docs.slice(i, i + 20).map((p) => getDocs(collection(db, tp.personPhotos(p.id)))),
+          )
+          for (const snap of snaps) for (const d of snap.docs) photoRefs.push(d.ref)
         }
         const archive = await getDocs(collection(db, tp.archive))
-        await deleteRefs(archive.docs.map((d) => d.ref))
+        // One batched sweep of everything under the tree, then the tree doc.
+        await deleteRefs([
+          ...photoRefs,
+          ...archive.docs.map((d) => d.ref),
+          ...persons.docs.map((d) => d.ref),
+        ])
         await deleteDoc(doc(db, ...tp.doc))
         // Best-effort: drop the mirrored partnerLink on partners in other trees
         // so their card / combined view doesn't point at this now-dead tree.

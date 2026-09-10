@@ -6,6 +6,19 @@ export const TEST_TREE = JSON.parse(
   readFileSync(new URL('./test-tree.json', import.meta.url), 'utf8'),
 ) as Array<Record<string, unknown>>
 
+/** The root person's full name — the only exact-name match for search. */
+export const ROOT_NAME = (() => {
+  const r = TEST_TREE.find((p) => p.id === 'root') as Record<string, string>
+  return [r.name, r.patronymic, r.surname].filter(Boolean).join(' ')
+})()
+
+/** Full name of any fixture person by id (deep-link / search assertions). */
+export function fixtureName(id: string): string {
+  const p = TEST_TREE.find((r) => r.id === id) as Record<string, string> | undefined
+  if (!p) throw new Error(`no fixture person "${id}"`)
+  return [p.name, p.patronymic, p.surname].filter(Boolean).join(' ')
+}
+
 /** Tiny second tree — only exists so cross-tree marriage linking can be tested. */
 export const TREE_B = [
   { id: 'b-root', name: 'Стоян', surname: 'Гергов', parentId: null, gender: 'm', birthYear: '1930' },
@@ -77,6 +90,50 @@ export async function deleteTree(page: Page, slug: string) {
 
 /** Number of person cards currently in the chart DOM. */
 export const cardCount = (page: Page) => page.locator('.ft-card:not(.ft-card--synthetic)').count()
+
+type Rel = 'child' | 'spouse' | 'parent'
+const REL_TOGGLE: Record<Rel, RegExp> = {
+  child: /Дете на/,
+  spouse: /Съпруг или съпруга на/,
+  parent: /Родител на/,
+}
+
+/**
+ * Drive the 4-step add-person wizard (relationship → name → details → review).
+ * Leaves the app on the new person's panel.
+ */
+export async function addPersonViaWizard(
+  page: Page,
+  opts: { anchorName: string; rel: Rel; name: string; gender?: 'Мъж' | 'Жена' },
+) {
+  await page.getByRole('button', { name: 'Добави човек' }).click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByLabel('Изберете роднина, който вече е в дървото').fill(opts.anchorName)
+  await page.getByRole('option').first().click()
+  await dialog.getByRole('button', { name: REL_TOGGLE[opts.rel] }).click()
+  await dialog.getByRole('button', { name: 'Напред' }).click() // → name
+  await dialog.getByRole('textbox').first().fill(opts.name)
+  await dialog.getByRole('button', { name: 'Напред' }).click() // → details
+  if (opts.gender) await dialog.getByRole('button', { name: opts.gender, exact: true }).click()
+  await dialog.getByRole('button', { name: 'Напред' }).click() // → review
+  await dialog.getByRole('button', { name: 'Запис', exact: true }).click()
+  await expect(dialog).toBeHidden()
+}
+
+/** Open a person via the toolbar search (exact/unique name). */
+export async function openPersonByName(page: Page, name: string) {
+  const box = page.getByPlaceholder('Търсене на човек…')
+  await box.click()
+  await box.fill(name)
+  await page.getByRole('option').first().click()
+  await expect(page.locator('.MuiDrawer-paper')).toBeVisible()
+}
+
+/** Delete the person whose panel is currently open. */
+export async function deleteOpenPerson(page: Page) {
+  await page.locator('.MuiDrawer-paper').getByRole('button', { name: 'Изтрий' }).click()
+  await page.getByRole('button', { name: 'Да, изтрий' }).click()
+}
 
 /**
  * From an OPEN person panel, marry them to the first matching person of another
