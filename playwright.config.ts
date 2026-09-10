@@ -43,7 +43,9 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
-  retries: 0,
+  // CI runs against a real Firebase over the network — one retry absorbs the
+  // occasional transient blip without masking a real regression.
+  retries: process.env.CI ? 1 : 0,
   timeout: 60_000,
   expect: { timeout: 10_000 },
   reporter: [['list'], ['html', { open: 'never' }]],

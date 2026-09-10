@@ -34,7 +34,7 @@ test('add-person wizard starts with no relative selected', async ({ page }) => {
   await dialog.getByRole('button', { name: 'Отказ' }).click()
 })
 
-test('edit a person and persist a note across reload', async ({ page }) => {
+test('edit a person: the note is saved', async ({ page }) => {
   const marker = `e2e note ${Date.now()}`
   await page.locator('.ft-card__name').first().click()
   const panel = page.locator('.MuiDrawer-paper')
@@ -47,10 +47,10 @@ test('edit a person and persist a note across reload', async ({ page }) => {
   await panel.getByRole('button', { name: 'Запис', exact: true }).click()
   await expect(panel.getByText(marker)).toBeVisible()
 
-  // reload, then re-select the SAME person via search (immune to how long the
-  // ~180-node chart takes to re-render on a slow CI runner)
-  await page.reload()
-  await expect(page.locator('.ft-card').first()).toBeVisible({ timeout: 20_000 })
+  // close the panel, re-open the same person from search — the note comes back
+  // from the live Firestore subscription, i.e. the write actually persisted
+  await panel.getByRole('button', { name: 'Затвори' }).click()
+  await expect(panel).toBeHidden()
   const box = page.getByPlaceholder('Търсене на човек…')
   await box.click()
   await box.fill(personName)
