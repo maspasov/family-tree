@@ -23,7 +23,8 @@ setup('authenticate', async ({ page }) => {
   await expect(
     page
       .getByRole('button', { name: /Ново дърво|New tree/ })
-      .or(page.getByText(/Родословни дървета|Family trees/)),
+      .or(page.getByText(/Родословни дървета|Family trees/))
+      .first(),
   ).toBeVisible({ timeout: 40_000 })
 
   mkdirSync('e2e/.auth', { recursive: true })
