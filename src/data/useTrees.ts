@@ -2,12 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
   onSnapshot,
   serverTimestamp,
   setDoc,
+  updateDoc,
   writeBatch,
   type DocumentReference,
 } from 'firebase/firestore'
@@ -109,7 +111,20 @@ export function useTrees(): TreesApi {
         // family-sized data; a Cloud Function would be needed at large scale.
         const tp = treePaths(slug)
         const persons = await getDocs(collection(db, tp.persons))
+        // Cross-tree marriage bridges are mirrored on a person in *another*
+        // tree; collect those far ends so the now-orphaned half can be cleared
+        // after — otherwise their card / combined view points at a dead tree.
+        const farEnds: Array<{ treeId: string; personId: string }> = []
         for (const p of persons.docs) {
+          const link = p.data().partnerLink
+          if (
+            link &&
+            typeof link.treeId === 'string' &&
+            typeof link.personId === 'string' &&
+            link.treeId !== slug
+          ) {
+            farEnds.push({ treeId: link.treeId, personId: link.personId })
+          }
           const photos = await getDocs(collection(db, tp.personPhotos(p.id)))
           await deleteRefs(photos.docs.map((d) => d.ref))
           await deleteDoc(p.ref)
@@ -117,6 +132,18 @@ export function useTrees(): TreesApi {
         const archive = await getDocs(collection(db, tp.archive))
         await deleteRefs(archive.docs.map((d) => d.ref))
         await deleteDoc(doc(db, ...tp.doc))
+        // Best-effort: drop the mirrored partnerLink on partners in other trees.
+        // A far end that's itself already gone just no-ops.
+        for (const far of farEnds) {
+          try {
+            await updateDoc(doc(db, treePaths(far.treeId).persons, far.personId), {
+              partnerLink: deleteField(),
+              updatedAt: serverTimestamp(),
+            })
+          } catch {
+            /* partner or its tree already gone — nothing to clean */
+          }
+        }
       },
     }
   }, [all, loading, error, user, isAdmin])

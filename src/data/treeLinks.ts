@@ -4,6 +4,7 @@ import {
   doc,
   getDocs,
   serverTimestamp,
+  updateDoc,
   writeBatch,
 } from 'firebase/firestore'
 import { db, treePaths } from '../lib/firebase'
@@ -57,14 +58,22 @@ export async function linkPartners(a: PartnerEnd, b: PartnerEnd): Promise<void> 
   await batch.commit()
 }
 
-/** Clear the bridge from both ends. */
+/**
+ * Clear the bridge from both ends. Best-effort, NOT atomic (unlike
+ * `linkPartners`): removing a link is only ever cleanup, so a far end that has
+ * since vanished — its whole tree was deleted — must not block clearing the
+ * near end. `a` is the end the user is acting on, so let its failure surface;
+ * swallow the far end's.
+ */
 export async function unlinkPartners(
   a: Pick<PartnerEnd, 'treeId' | 'personId'>,
   b: Pick<PartnerEnd, 'treeId' | 'personId'>,
 ): Promise<void> {
-  const batch = writeBatch(db)
-  const audit = { updatedAt: serverTimestamp(), partnerLink: deleteField() }
-  batch.update(doc(db, treePaths(a.treeId).persons, a.personId), audit)
-  batch.update(doc(db, treePaths(b.treeId).persons, b.personId), audit)
-  await batch.commit()
+  const clear = { updatedAt: serverTimestamp(), partnerLink: deleteField() }
+  await updateDoc(doc(db, treePaths(a.treeId).persons, a.personId), clear)
+  try {
+    await updateDoc(doc(db, treePaths(b.treeId).persons, b.personId), clear)
+  } catch {
+    /* far end already gone (deleted tree/person) — nothing to unlink there */
+  }
 }

@@ -48,7 +48,16 @@ export function CombinedView({ slug }: { slug: string }) {
         const out = new Map<string, Person[]>()
         while (queue.length) {
           const s = queue.shift()!
-          const ppl = await fetchTreePeople(s)
+          let ppl: Person[]
+          try {
+            ppl = await fetchTreePeople(s)
+          } catch (e) {
+            // A linked tree that's since been deleted (or we lost access to)
+            // must not sink the whole combined view — skip it. The root tree
+            // failing is a real error, so rethrow that one.
+            if (s === slug) throw e
+            continue
+          }
           out.set(s, ppl)
           for (const p of ppl) {
             const other = p.partnerLink?.treeId
