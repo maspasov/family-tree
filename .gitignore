@@ -43,3 +43,4 @@ firebase-adminsdk-*.json
 /playwright/.cache
 e2e/.auth
 e2e/.env.e2e
+e2e/.sandbox.json

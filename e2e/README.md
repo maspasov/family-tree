@@ -73,12 +73,23 @@ yarn e2e:gen      # node e2e/gen-tree.mjs > e2e/test-tree.json
 GENS=7 yarn e2e:gen   # deeper / larger
 ```
 
-## Files
+## Layout
+
+Playwright projects run in order: **auth** → **sandbox** → **chromium** (the
+specs) → **cleanup**. **One** throwaway tree is created by the sandbox project
+and its slug written to `e2e/.sandbox.json` (gitignored); every spec reads it
+at runtime via `helpers.sandbox()`. `cross-tree.spec.ts` creates + deletes its
+own tiny partner tree (`e2e-p-<id>`) in a `beforeAll`/`afterAll` — linking needs
+a second tree, but it never lives in the shared setup.
 
 | file | purpose |
 |---|---|
-| `auth.setup.ts` | waits for the bot sign-in, saves `state.json` |
-| `helpers.ts` | `createTree` / `importJson` / `deleteTree` / `forceBg` |
-| `features.spec.ts` | the feature assertions |
-| `gen-tree.mjs` | deterministic fixture generator |
-| `test-tree.json` | committed fixture (import-JSON shape) |
+| `auth.setup.ts` | bot sign-in → saves `.auth/state.json` |
+| `sandbox.setup.ts` | creates + seeds the shared `e2e-<id>` tree, writes `.sandbox.json` |
+| `sandbox.teardown.ts` | deletes it (runs even if specs fail) |
+| `chart.spec.ts` | canvas, search, view switching, i18n, export |
+| `person.spec.ts` | person panel, add-person wizard, edit, add/delete |
+| `cross-tree.spec.ts` | cross-tree marriage link + combined view |
+| `admin.spec.ts` | Roles dialog + `#/admin` access panel |
+| `helpers.ts` | `openTree` / `createTree` / `importJson` / `deleteTree` / `linkToOtherTree` / `sandbox` |
+| `gen-tree.mjs` · `test-tree.json` | deterministic fixture generator + its output |

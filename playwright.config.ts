@@ -11,8 +11,11 @@ import { readFileSync, existsSync } from 'node:fs'
  *   2. one-time:  put VITE_E2E_EMAIL / VITE_E2E_PASSWORD in e2e/.env.e2e (gitignored)
  *   3.            yarn e2e
  *
- * The suite creates a throwaway `e2e-<id>` tree, seeds it via the app's JSON
- * import, asserts features, then deletes the tree.
+ * Projects run in order: `auth` (bot sign-in) → `sandbox` (creates ONE shared
+ * `e2e-<id>` tree, seeds it, writes e2e/.sandbox.json) → `chromium` (the
+ * *.spec.ts files) → `cleanup` (deletes it). Spec files read the slug at
+ * runtime via helpers.sandbox(). The cross-tree spec makes + deletes its own
+ * throwaway partner tree in a beforeAll/afterAll.
  */
 
 // load e2e/.env.e2e into process.env (no dotenv dependency)
@@ -54,11 +57,23 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   projects: [
-    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    { name: 'auth', testMatch: /auth\.setup\.ts/ },
+    {
+      name: 'sandbox',
+      testMatch: /sandbox\.setup\.ts/,
+      dependencies: ['auth'],
+      teardown: 'cleanup',
+      use: { ...devices['Desktop Chrome'], storageState: 'e2e/.auth/state.json' },
+    },
+    {
+      name: 'cleanup',
+      testMatch: /sandbox\.teardown\.ts/,
+      use: { ...devices['Desktop Chrome'], storageState: 'e2e/.auth/state.json' },
+    },
     {
       name: 'chromium',
       testMatch: /\.spec\.ts$/,
-      dependencies: ['setup'],
+      dependencies: ['sandbox'],
       use: { ...devices['Desktop Chrome'], storageState: 'e2e/.auth/state.json' },
     },
   ],

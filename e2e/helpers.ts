@@ -6,15 +6,31 @@ export const TEST_TREE = JSON.parse(
   readFileSync(new URL('./test-tree.json', import.meta.url), 'utf8'),
 ) as Array<Record<string, unknown>>
 
-const STATE = 'e2e/.auth/state.json'
+/** Tiny second tree — only exists so cross-tree marriage linking can be tested. */
+export const TREE_B = [
+  { id: 'b-root', name: 'Стоян', surname: 'Гергов', parentId: null, gender: 'm', birthYear: '1930' },
+  { id: 'b-kid', name: 'Мария', surname: 'Гергова', parentId: 'b-root', gender: 'f', birthYear: '1958' },
+]
 
 /**
- * A signed-in page for the `beforeAll` / `afterAll` hooks (which run outside the
- * `page` fixture, so they don't inherit `use.locale`). `bg-BG` makes the app
- * boot Bulgarian, matching the selectors.
+ * The one shared sandbox tree's slug, written by e2e/sandbox.setup.ts and
+ * removed by e2e/sandbox.teardown.ts. Read it at *runtime* only (inside a
+ * test/hook) — it does not exist while Playwright is collecting tests.
  */
+export const SANDBOX_FILE = 'e2e/.sandbox.json'
+export function sandbox(): { slug: string } {
+  return JSON.parse(readFileSync(SANDBOX_FILE, 'utf8'))
+}
+
+/** A signed-in, Bulgarian-locale page for `beforeAll`/`afterAll` (no `page` fixture there). */
 export function newBgPage(browser: Browser): Promise<Page> {
-  return browser.newPage({ storageState: STATE, locale: 'bg-BG' })
+  return browser.newPage({ storageState: 'e2e/.auth/state.json', locale: 'bg-BG' })
+}
+
+/** beforeEach for the spec files: open the big sandbox tree and wait for it. */
+export async function openTree({ page }: { page: Page }) {
+  await page.goto(`/#/t/${sandbox().slug}`)
+  await expect(page.locator('.ft-card').first()).toBeVisible({ timeout: 20_000 })
 }
 
 /** Admin-only: create an empty tree and land on it. */
