@@ -95,6 +95,8 @@ jobs:
 
       - name: Clean up any leftover e2e-* trees
         if: always()
+        # best-effort sweep — a hiccup here must never block the deploy
+        continue-on-error: true
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
