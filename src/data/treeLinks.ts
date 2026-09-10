@@ -59,21 +59,36 @@ export async function linkPartners(a: PartnerEnd, b: PartnerEnd): Promise<void> 
 }
 
 /**
+ * Best-effort: drop the mirrored `partnerLink` on one person. Used both when a
+ * user unlinks a live pair and when a whole tree is deleted out from under a
+ * partner (see `useTrees.deleteTree`). A target that's already gone — its tree
+ * or the person itself was deleted — just no-ops instead of throwing.
+ */
+export async function clearPartnerLink(treeId: string, personId: string): Promise<void> {
+  try {
+    await updateDoc(doc(db, treePaths(treeId).persons, personId), {
+      partnerLink: deleteField(),
+      updatedAt: serverTimestamp(),
+    })
+  } catch {
+    /* person or its tree already gone — nothing to unlink there */
+  }
+}
+
+/**
  * Clear the bridge from both ends. Best-effort, NOT atomic (unlike
  * `linkPartners`): removing a link is only ever cleanup, so a far end that has
  * since vanished — its whole tree was deleted — must not block clearing the
  * near end. `a` is the end the user is acting on, so let its failure surface;
- * swallow the far end's.
+ * the far end's is swallowed by `clearPartnerLink`.
  */
 export async function unlinkPartners(
   a: Pick<PartnerEnd, 'treeId' | 'personId'>,
   b: Pick<PartnerEnd, 'treeId' | 'personId'>,
 ): Promise<void> {
-  const clear = { updatedAt: serverTimestamp(), partnerLink: deleteField() }
-  await updateDoc(doc(db, treePaths(a.treeId).persons, a.personId), clear)
-  try {
-    await updateDoc(doc(db, treePaths(b.treeId).persons, b.personId), clear)
-  } catch {
-    /* far end already gone (deleted tree/person) — nothing to unlink there */
-  }
+  await updateDoc(doc(db, treePaths(a.treeId).persons, a.personId), {
+    partnerLink: deleteField(),
+    updatedAt: serverTimestamp(),
+  })
+  await clearPartnerLink(b.treeId, b.personId)
 }

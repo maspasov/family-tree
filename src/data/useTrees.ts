@@ -2,19 +2,18 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   collection,
   deleteDoc,
-  deleteField,
   doc,
   getDoc,
   getDocs,
   onSnapshot,
   serverTimestamp,
   setDoc,
-  updateDoc,
   writeBatch,
   type DocumentReference,
 } from 'firebase/firestore'
 import { db, firebaseConfigured, paths, treePaths } from '../lib/firebase'
 import { treeFromDoc, type Tree } from '../model/tree'
+import { clearPartnerLink } from './treeLinks'
 import { useAuth } from '../auth/AuthContext'
 
 export interface CreateTreeInput {
@@ -132,17 +131,10 @@ export function useTrees(): TreesApi {
         const archive = await getDocs(collection(db, tp.archive))
         await deleteRefs(archive.docs.map((d) => d.ref))
         await deleteDoc(doc(db, ...tp.doc))
-        // Best-effort: drop the mirrored partnerLink on partners in other trees.
-        // A far end that's itself already gone just no-ops.
+        // Best-effort: drop the mirrored partnerLink on partners in other trees
+        // so their card / combined view doesn't point at this now-dead tree.
         for (const far of farEnds) {
-          try {
-            await updateDoc(doc(db, treePaths(far.treeId).persons, far.personId), {
-              partnerLink: deleteField(),
-              updatedAt: serverTimestamp(),
-            })
-          } catch {
-            /* partner or its tree already gone — nothing to clean */
-          }
+          await clearPartnerLink(far.treeId, far.personId)
         }
       },
     }

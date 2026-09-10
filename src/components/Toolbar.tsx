@@ -31,6 +31,7 @@ import LinkIcon from '@mui/icons-material/Link'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import DataObjectIcon from '@mui/icons-material/DataObject'
 import ImageIcon from '@mui/icons-material/Image'
 import LanguageIcon from '@mui/icons-material/Language'
@@ -55,6 +56,7 @@ import { useTree } from '../tree/TreeContext'
 import { navigate } from '../lib/hashRoute'
 import { useColorMode } from '../theme/ColorModeContext'
 import { RolesDialog } from './RolesDialog'
+import { DeleteTreeDialog } from './DeleteTreeDialog'
 import type { ChartLayout } from './FamilyChart'
 
 export type ViewMode = 'tree' | 'map' | 'calendar' | 'archive'
@@ -79,7 +81,7 @@ interface Props {
 }
 
 export function Toolbar(props: Props) {
-  const { user, signIn, signOutUser } = useAuth()
+  const { user, isAdmin, signIn, signOutUser } = useAuth()
   const { treeId, tree, isEditor, isViewerOnly } = useTree()
   const { mode, toggle } = useColorMode()
   const { locale, setLocale } = useLocale()
@@ -91,6 +93,7 @@ export function Toolbar(props: Props) {
   const [langAnchor, setLangAnchor] = useState<HTMLElement | null>(null)
   const [linkedAnchor, setLinkedAnchor] = useState<HTMLElement | null>(null)
   const [showRoles, setShowRoles] = useState(false)
+  const [showDeleteTree, setShowDeleteTree] = useState(false)
 
   // Other trees this one is connected to via a cross-tree marriage link.
   const linkedTrees = useMemo(() => {
@@ -375,6 +378,24 @@ export function Toolbar(props: Props) {
           </Tooltip>
         )}
         {showRoles && <RolesDialog onClose={() => setShowRoles(false)} />}
+
+        {isAdmin && tree && (
+          <Tooltip title={t('deleteTree')}>
+            <IconButton
+              onClick={() => setShowDeleteTree(true)}
+              sx={{ '&:hover': { color: 'error.main' } }}
+            >
+              <DeleteOutlineIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+        {showDeleteTree && tree && (
+          <DeleteTreeDialog
+            tree={tree}
+            onClose={() => setShowDeleteTree(false)}
+            onDeleted={() => navigate('/')}
+          />
+        )}
         <Menu anchorEl={langAnchor} open={Boolean(langAnchor)} onClose={() => setLangAnchor(null)}>
           {(Object.keys(LOCALE_NAMES) as Locale[]).map((l) => (
             <MenuItem
