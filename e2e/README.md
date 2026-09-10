@@ -48,6 +48,24 @@ yarn e2e --headed
 running one). The `setup` project signs in and snapshots the session to
 `e2e/.auth/state.json`; every spec reuses it.
 
+## CI (deploy pipeline)
+
+`.github/workflows/deploy.yml` runs the suite as the **`e2e` job**, and `deploy`
+only runs if it passes. It signs in the bot user (email/password, no OAuth),
+creates + deletes its own `e2e-*` trees, and a final `if: always()` step sweeps
+any leftover `e2e-*` trees if a run is cancelled.
+
+Add these **repository secrets**:
+
+| secret | value |
+|---|---|
+| `VITE_E2E_EMAIL` / `VITE_E2E_PASSWORD` | the bot user's credentials |
+| `FIREBASE_SERVICE_ACCOUNT` | full service-account key **JSON** (one line) — used only by the cleanup step |
+| `VITE_FIREBASE_*` | already present for the build job |
+
+EmailJS secrets are deliberately **not** passed to the e2e job, so CI runs never
+send real notification e-mails.
+
 ## Regenerate the fixture
 
 ```

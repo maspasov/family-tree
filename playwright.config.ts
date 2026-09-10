@@ -25,7 +25,15 @@ if (existsSync(ENV_FILE)) {
 }
 
 const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:5173'
-const { VITE_E2E_EMAIL, VITE_E2E_PASSWORD } = process.env
+
+// Forward every VITE_* var that is actually set (Firebase config + the e2e
+// login) to the dev server Playwright spawns. Only non-empty ones, so a bare
+// `VITE_FIREBASE_*=''` never shadows a local .env.local.
+const viteEnv = Object.fromEntries(
+  Object.entries(process.env).filter(
+    (e): e is [string, string] => e[0].startsWith('VITE_') && Boolean(e[1]),
+  ),
+)
 
 export default defineConfig({
   testDir: './e2e',
@@ -55,10 +63,7 @@ export default defineConfig({
     command: 'yarn dev --port 5173 --strictPort',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-    env: {
-      VITE_E2E_EMAIL: VITE_E2E_EMAIL || '',
-      VITE_E2E_PASSWORD: VITE_E2E_PASSWORD || '',
-    },
+    timeout: 180_000, // cold CI runner: Vite optimizeDeps on a big dep tree
+    env: viteEnv,
   },
 })

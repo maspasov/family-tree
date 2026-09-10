@@ -26,9 +26,8 @@ jobs:
           node-version: 22
           cache: yarn
 
-      # The e2e suite (Playwright) is intentionally NOT part of the deploy:
-      # it needs a real Google/email login and can't run headless in CI. Skip
-      # the Playwright browser download so `yarn install` stays fast here.
+      # The build doesn't need Playwright's browser — skip the download here
+      # (the e2e job below installs it).
       - run: yarn install --frozen-lockfile
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
@@ -66,8 +65,56 @@ jobs:
         with:
           path: dist
 
+  e2e:
+    runs-on: ubuntu-latest
+    # EmailJS secrets are deliberately NOT passed here so the suite never sends
+    # real notification e-mails from CI.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn playwright install --with-deps chromium
+
+      - name: Run e2e
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_E2E_EMAIL: ${{ secrets.VITE_E2E_EMAIL }}
+          VITE_E2E_PASSWORD: ${{ secrets.VITE_E2E_PASSWORD }}
+        run: yarn e2e
+
+      - name: Clean up any leftover e2e-* trees
+        if: always()
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+            GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" node scripts/cleanup-e2e-trees.mjs
+          else
+            echo "FIREBASE_SERVICE_ACCOUNT secret not set — skipping cleanup."
+          fi
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
   deploy:
-    needs: build
+    needs: [build, e2e]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
